@@ -26,7 +26,11 @@ var ui = {
         $(dr1).fadeOut(160, function () { $(dr2).fadeIn(160); });
     },
     sw2: function (d1, d2, fadetime) {
-        $(d1).fadeOut(140, function () { $(d2).fadeIn(140); });
+        if (fadetime) {
+            $(d1).fadeOut(fadetime, function () { $(d2).fadeIn(fadetime); });
+        } else {
+            $(d1).fadeOut(140, function () { $(d2).fadeIn(140); });
+        }
     },
     hide: function (dr1, anim) {
         if (dr1) {

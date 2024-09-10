@@ -657,13 +657,13 @@ p {
     left: 50%;
     top: 50%;
     padding: 12px;
-    border-radius: var(--rad2);
+    border-radius: var(--rad1);
     background-color: var(--ui2);
     border: 1px solid var(--ui3);
     transform: translate(-50%, -50%);
     box-shadow: rgba(0, 0, 0, 0.3) 0px 0px 75px 15px;
     z-index: 10;
-    width: 200px;
+    width: 240px;
 }
 
 .tbmenu {
@@ -681,7 +681,14 @@ p {
     left: 5px;
     z-index: 4;
     animation: tb2 0.28s;
+    resize: both;
+    overflow: auto;
 }
+
+.tbmenu::-webkit-scrollbar {
+    display: none;
+}
+
 
 @keyframes tb2 {
     0% {bottom: 90px; opacity: 0%;}
@@ -725,4 +732,8 @@ p {
     max-height: 75%;
     vertical-align: middle;
     border: none !important;
+}
+
+.warn {
+    color: #911;
 }
