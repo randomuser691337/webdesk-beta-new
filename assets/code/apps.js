@@ -123,10 +123,19 @@ var app = {
             sum.id = "setupdone";
         }
     },
+    imgview: {
+        runs: false,
+        name: 'Image Viewer',
+        init: async function (contents) {
+            const win = tk.mbw('Image Viewer', '300px', 'auto', true, undefined, undefined);
+            const img = tk.c('img', win.main, 'embed');
+            img.src = contents;
+        }
+    },
     files: {
         runs: true,
         name: 'Files',
-        init: async function () {
+        init: async function (oppath) {
             const win = tk.mbw(`Files`, '340px', 'auto', true, undefined, undefined);
             const breadcrumbs = tk.c('div', win.main);
             const items = tk.c('div', win.main);
@@ -150,20 +159,36 @@ var app = {
                     if (thing.type === "folder") {
                         tk.cb('flist width', "Folder: " + thing.name, () => navto(thing.path + "/"), items);
                     } else {
-                        tk.cb('flist width', "File: " + thing.name, async function () {
+                        const selfdestruct = tk.cb('flist width', "File: " + thing.name, async function () {
                             const yeah = await fs.read(thing.path);
                             const menu = tk.c('div', document.body, 'cm');
                             tk.p(thing.path, 'bold', menu);
-                            tk.cb('b1 b2', 'Open with...', function () {
+                            if (thing.path.includes('/system')) {
+                                tk.p('This is a system file, modifying it will likely cause damage.', 'warn', menu);
+                            }
+                            tk.cb('b1 b2', 'Open with', function () {
                                 ui.dest(menu);
                                 const menu2 = tk.c('div', document.body, 'cm');
                                 tk.cb('b1 b2', 'Image Viewer', function () {
-
+                                    app.imgview.init(yeah);
                                 }, menu2);
                                 tk.cb('b1 b2', 'Text Editor', function () {
 
                                 }, menu2);
                                 tk.cb('b1 b2', 'console.log', function () {
+                                    console.log(yeah);
+                                }, menu2);
+                                tk.cb('b1 b2', 'Cancel', function () {
+                                    ui.dest(menu2);
+                                }, menu2);
+                            }, menu);
+                            tk.cb('b1 b2', 'Rename', function () {
+                                ui.dest(menu);
+                                const menu2 = tk.c('div', document.body, 'cm');
+                                tk.cb('b1 b2', 'Image Viewer', function () {
+                                    app.imgview.init(yeah);
+                                }, menu2);
+                                tk.cb('b1 b2', 'Rename', function () {
 
                                 }, menu2);
                                 tk.cb('b1 b2', 'Cancel', function () {
@@ -172,19 +197,23 @@ var app = {
                             }, menu);
                             tk.cb('b1 b2', 'Delete file', function () {
                                 fs.del(thing.path);
+                                ui.dest(selfdestruct);
+                                ui.dest(menu);
                             }, menu);
-                            tk.cb('b1 b2', 'Open with...', function () {
-
-                            }, menu);
-                            tk.cb('b1 b2', 'Open with...', function () {
-
+                            tk.cb('b1', 'Cancel', function () {
+                                ui.dest(menu);
                             }, menu);
                         }, items);
                     }
                 });
             }
 
-            navto('/');
+            if (oppath) {
+                navto('/');
+                console.log(`<!> Don't specify a custom path in Files, there's a silly issue rn`);
+            } else {
+                navto('/');
+            }
         }
     },
     about: {
@@ -208,7 +237,7 @@ var app = {
                 try {
                     const response = await fetch(url);
                     if (!response.ok) {
-                        throw new Error(`Network response was not ok: ${response.statusText}`);
+                        wm.wal(`<p>Couldn't load apps, check your internet or try again later. If it's not back up within an hour, DM macos.amfi on Discord.</p>`);
                     }
                     const scriptContent = await response.text();
                     const script = document.createElement('script');
@@ -248,7 +277,7 @@ var app = {
                             } else {
                                 const ok = await execute(`https://appmarket.meower.xyz${app.path}`);
                                 await fs.write('/system/apps.json', [{ name: app.name, id: Date.now(), exec: ok }]);
-                                wm.notif(`Installed: `, newen.name);
+                                wm.notif(`Installed: `, app.name);
                             }
                         });
                     });
@@ -344,14 +373,14 @@ var app = {
             function addtab() {
                 const tab = tk.c('embed', win.main, 'browsertab');
                 tab.src = "https://meower.xyz";
-                ui.sw2(currentTab, tab);
+                ui.sw2(currentTab, tab, 100);
                 currentTab = tab;
                 let lastUrl = "";
                 const urls = [];
                 thing = [...urls];
 
                 const tabBtn = tk.cb('b4 browserpad', '', function () {
-                    ui.sw2(currentTab, tab);
+                    ui.sw2(currentTab, tab, 100);
                     currentTab = tab;
                     currentBtn = tabTitle;
                     thing = [...urls];
