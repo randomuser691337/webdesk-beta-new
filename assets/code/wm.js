@@ -19,11 +19,16 @@ var wm = {
             btn.addEventListener('click', btn1);
         }
     },
-
-    open: function el(name, ele) {
-
+    snack: function (txt) {
+        const div = tk.c('div', document.body, 'snack');
+        div.innerText = txt;
+        setTimeout(() => {
+            ui.dest(div, 300);
+        }, 4000);
+        div.addEventListener('click', function () {
+            ui.dest(div, 140);
+        });
     },
-
     center: function (element) {
         const screenWidth = window.innerWidth;
         const screenHeight = window.innerHeight;
@@ -86,6 +91,7 @@ var wm = {
         if (mode) {
             const open = tk.cb('b4', 'Open', function () {
                 open.addEventListener('click', mode);
+                ui.dest(div, 120);
             }, div);
         }
         const txt = tk.c('span', div, 'bold');

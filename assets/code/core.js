@@ -45,7 +45,7 @@ var wd = {
             }
             return;
         }
-    
+
         $('.d').not('.dragged').on('mousedown touchstart', function (event) {
             var $window = $(this).closest('.window');
             if (!$window.hasClass('max')) {
@@ -58,7 +58,7 @@ var wd = {
                 $window.css('z-index', highestZIndex + 1);
                 $('.window').removeClass('winf');
                 $window.addClass('winf');
-    
+
                 if (event.type === 'mousedown') {
                     offsetX = event.clientX - $window.offset().left;
                     offsetY = event.clientY - $window.offset().top;
@@ -67,7 +67,7 @@ var wd = {
                     offsetX = touch.clientX - $window.offset().left;
                     offsetY = touch.clientY - $window.offset().top;
                 }
-    
+
                 $(document).on('mousemove touchmove', function (event) {
                     var newX, newY;
                     if (event.type === 'mousemove') {
@@ -80,22 +80,22 @@ var wd = {
                         newY = touch.clientY - offsetY;
                         $window.addClass('dragging');
                     }
-    
+
                     $window.offset({ top: newY, left: newX });
                 });
-    
+
                 $(document).on('mouseup touchend', function () {
                     $(document).off('mousemove touchmove');
                     $window.removeClass('dragging');
                 });
-    
+
                 document.body.addEventListener('touchmove', function (event) {
                     event.preventDefault();
                 }, { passive: false });
-    
+
             }
         });
-    },    
+    },
     desktop: function (name, deskid, waitopt) {
         ui.dest(tk.g('setuparea'));
         function startmenu() {
@@ -188,7 +188,7 @@ var wd = {
     timec: function (id) {
         const timeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
         const date = new Date(id);
-    
+
         const options = {
             year: 'numeric',
             month: 'short',
@@ -198,23 +198,23 @@ var wd = {
             hour12: true,
             timeZone: timeZone
         };
-    
+
         const formatter = new Intl.DateTimeFormat('en-US', options);
         const formattedParts = formatter.formatToParts(date);
-    
+
         const month = formattedParts.find(part => part.type === 'month').value;
         const day = formattedParts.find(part => part.type === 'day').value;
         const year = formattedParts.find(part => part.type === 'year').value;
         const hour = formattedParts.find(part => part.type === 'hour').value;
         const minute = formattedParts.find(part => part.type === 'minute').value;
         const ampm = formattedParts.find(part => part.type === 'dayPeriod').value;
-    
+
         return `${month} ${day}, ${year}, ${hour}:${minute}${ampm}`;
     },
     timecs: function (id) {
         const timeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
         const date = new Date(id);
-    
+
         const options = {
             year: 'numeric',
             month: 'short',
@@ -224,17 +224,17 @@ var wd = {
             hour12: true,
             timeZone: timeZone
         };
-    
+
         const formatter = new Intl.DateTimeFormat('en-US', options);
         const formattedParts = formatter.formatToParts(date);
-    
+
         const month = formattedParts.find(part => part.type === 'month').value;
         const day = formattedParts.find(part => part.type === 'day').value;
         const year = formattedParts.find(part => part.type === 'year').value;
         const hour = formattedParts.find(part => part.type === 'hour').value;
         const minute = formattedParts.find(part => part.type === 'minute').value;
         const ampm = formattedParts.find(part => part.type === 'dayPeriod').value;
-    
+
         return `${hour}:${minute}${ampm}`;
     },
     reorg: function (element) {
@@ -242,17 +242,33 @@ var wd = {
         buttons.sort((a, b) => a.textContent.localeCompare(b.textContent));
         element.innerHTML = '';
         let currentLetter = '';
-    
+
         buttons.forEach(button => {
             const firstLetter = button.textContent.charAt(0).toUpperCase();
             if (firstLetter !== currentLetter) {
                 currentLetter = firstLetter;
             }
-    
+
             element.appendChild(button);
         });
+    },
+    fakedown: async function (obj) {
+        if (Array.isArray(obj)) {
+            for (const item of obj) {
+                await wd.fakedown(item);
+            }
+        } else if (typeof obj === 'object' && obj !== null) {
+            for (const key of Object.keys(obj)) {
+                if (key === 'ver') {
+                    obj[key] = 1.0;
+                } else {
+                    await wd.fakedown(obj[key]);
+                }
+            }
+        }
+        console.log(JSON.stringify(obj, null, 4));
+        await fs.write('/system/apps.json', JSON.stringify(obj, null, 4));
     }
-    
 }
 
 setInterval(wd.clock, 1000);

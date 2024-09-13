@@ -12,7 +12,7 @@
 </head>
 <script>
     var abt = {
-        lastmod: "Sep 10, 2024",
+        lastmod: "Sep 13, 2024",
         ver: "0.1.0",
     }
 
@@ -27,6 +27,7 @@
         nvol: 1.0,
         installer: undefined,
         peer: undefined,
+        currentf: undefined,
     }
 
     var el = {
@@ -96,8 +97,22 @@
         const data = await fs.read('/system/apps.json');
         if (data) {
             const apps = JSON.parse(data);
-            apps.forEach(code => {
-                eval(code.exec);
+
+            const response = await fetch('https://appmarket.meower.xyz/refresh');
+            const onlineApps = await response.json();
+            apps.forEach(inapp => {
+                const onlineApp = onlineApps.find(app => app.name === inapp.name);
+
+                if (onlineApp.ver === inapp.ver) {
+                    eval(inapp.exec);
+                    console.log(`<i> ${inapp.name} is up to date (${inapp.ver} = ${onlineApp.ver})`);
+                } else {
+                    const remove = apps.filter(item => item.id !== inapp.id);
+                    const removed = JSON.stringify(remove);
+                    fs.write('/system/apps.json', removed);
+                    app.appmark.create(onlineApp.path, onlineApp, true);
+                    console.log(`<!> ${inapp.name} was updated (${inapp.ver} --> ${onlineApp.ver})`);
+                }
             });
         }
 
