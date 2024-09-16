@@ -27,14 +27,67 @@ var ptp = {
                 }
             });
 
-            sys.peer.on('connection', (conn) => {
-                conn.on('data', (data) => {
-                    handleData(conn, data);
+            sys.peer.on('connection', (dataConnection) => {
+                dataConnection.on('data', (data) => {
+                    try {
+                        const parsedData = JSON.parse(data);
+                        if (parsedData.type === 'request') {
+                            console.log('Received request:', parsedData.message);
+                            const response = {
+                                response: sys.name
+                            };
+
+                            dataConnection.send(JSON.stringify(response));
+                        }
+                    } catch (err) {
+                        console.error('Failed to parse data:', err);
+                    }
+                });
+
+                dataConnection.on('error', (err) => {
+                    console.error('Data connection error:', err);
+                });
+
+                dataConnection.on('close', () => {
+                    console.log('<i> Data connection closed');
                 });
             });
 
             sys.peer.on('call', (call) => {
-                console.log('Who the fuck')
+                const showyourself = sys.peer.connect(call.peer);
+                showyourself.on('open', () => {
+                    showyourself.send(JSON.stringify({ type: 'request' }));
+                });
+
+                showyourself.on('data', (data) => {
+                    try {
+                        const parsedData = JSON.parse(data);
+
+                        if (parsedData.response) {
+                            wm.notif(`Call from ${parsedData.response}`, 'Answer?', function () {
+                                navigator.mediaDevices.getUserMedia({ audio: true }).then((stream) => {
+                                    call.answer(stream);
+                                    call.on('stream', (remoteStream) => {
+                                        app.webcall.answer(remoteStream, call, parsedData.response);
+                                    });
+                                }).catch((err) => {
+                                    wm.notif('WebCall Error', 'Microphone access is denied, calling/answering might fail.');
+                                    console.log(`<!> ${err}`);
+                                });
+                            });
+                        }
+                    } catch (err) {
+                        console.error('Failed to parse data:', err);
+                    }
+                });
+
+                showyourself.on('error', (err) => {
+                    wm.notif('WebCall Error', err);
+                });
+
+                showyourself.on('close', () => {
+                    console.log('Data connection closed');
+                });
             });
         }
 
@@ -42,39 +95,14 @@ var ptp = {
     },
 }
 
-function hrs(stream) {
-    createAudioElement();
-    audioElement.srcObject = stream;
-    audioElement.play();
-}
-
-
-async function calldesk(remotePeerId) {
-    try {
-        custf(remotePeerId, 'WebCallName-WebKey', user);
-        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-        localStream = stream;
-        const call = peer.call(remotePeerId, localStream);
-        call.on('stream', (remoteStream) => {
-            hrs(remoteStream);
-        });
-        call.on('close', () => {
-            removeAudioElement();
-            endcall();
-        });
-        currentCall = call;
-    } catch (err) {
-        fesw('caller3', 'caller1');
-        endcall();
-        console.log('<!> Failed to get local stream', err);
-        snack(`Couldn't call. Try reloading both WebDesks.`);
-    }
-}
-
 function handleData(conn, data) {
     if (sys.webdrop === true) {
         console.log('<i> Thing recieved!')
         if (data.name === "MigrationPackDeskFuck") {
+            if (sys.setupd === false) {
+                ui.sw('setupqs', 'setuprs'); restorefsold(data.file);
+            }
+        } else if (data.name === "MigrationPackDeskFuck++") {
             if (sys.setupd === false) {
                 ui.sw('setupqs', 'setuprs'); restorefsold(data.file);
             }
@@ -85,12 +113,8 @@ function handleData(conn, data) {
         } else if (data.name === "DeclineCall-WebKey") {
             fesw('caller3', 'caller1');
             snack('Your call was declined.');
-        } else if (data.name === "WebCallName-WebKey") {
-            masschange('callname', data.file);
-            callid = data.id;
-            addcall(data.file, callid);
-            console.log('<i> bounced names');
-            setInterval(function () { masschange('callname', data.file); }, 300);
+        } else if (data === "Name and FUCKING address please") {
+            conn.send(sys.user);
         } else {
             recb = data.file;
             recn = data.name;
@@ -101,6 +125,51 @@ function handleData(conn, data) {
         }
     } else {
         custf(data.id, 'DesktoDeskMsg-WebKey', `${deskid} isn't accepting WebDrops right now.`);
+    }
+}
+
+async function compressfs() {
+    return new Promise(async (resolve, reject) => {
+        try {
+            const zip = new JSZip();
+            const transaction = db.transaction(['files'], 'readonly');
+            const objectStore = transaction.objectStore('files');
+            const request = objectStore.getAll();
+            request.onsuccess = function (event) {
+                const files = event.target.result;
+                files.forEach(file => {
+                    zip.file(file.path, file.value);
+                });
+                resolve(zip.generateAsync({ type: "blob" }));
+            };
+            request.onerror = function (event) {
+                reject(event.target.errorCode);
+            };
+        } catch (error) {
+            reject(error);
+        }
+    });
+}
+
+async function restorefs(zipBlob) {
+    console.log('<i> Restore Stage 1: Prepare zip');
+    try {
+        ui.sw('quickstartwdsetup', 'quickstartwdgoing');
+        const zip = await JSZip.loadAsync(zipBlob);
+        const fileCount = Object.keys(zip.files).length;
+        let filesDone = 0;
+        console.log(`<i> Restore Stage 2: Open zip and extract ${fileCount} files to FS`);
+        await Promise.all(Object.keys(zip.files).map(async filename => {
+            console.log(`<i> Restoring file: ${filename}`);
+            const file = zip.files[filename];
+            const value = await file.async("string");
+            fs.write(filename, value);
+            filesDone++;
+            ui.masschange('restpg', `Restoring ${filesDone}/${fileCount}: ${filename}`);
+        }));
+        ui.sw('quickstartwdgoing', 'setupdone');
+    } catch (error) {
+        console.error('Error during restoration:', error);
     }
 }
 

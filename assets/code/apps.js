@@ -123,6 +123,51 @@ var app = {
             sum.id = "setupdone";
         }
     },
+    migrate: {
+        runs: false,
+        init: function (yeah) {
+            const main = tk.c('div', document.getElementById('setuparea'), 'setupbox');
+            // create setup menubar
+            const bar = tk.c('div', main, 'setupbar');
+            const tnav = tk.c('div', bar, 'tnav');
+            const title = tk.c('div', bar, 'title');
+            tk.cb('b4', 'Do Nothing', undefined, tnav);
+            tk.cb('b4 time', 'what', undefined, title);
+            // first menu
+            const first = tk.c('div', main, 'setb');
+            tk.img('./assets/img/setup/restore.svg', 'setupi', first);
+            tk.p('Migration Assistant', 'h2', first);
+            tk.p(`Please wait, preparing to send files. You'll be taken to the next screen when complete.`, undefined, first);
+            tk.cb('b1', `Cancel Migration`, function () {
+                ui.show(document.getElementById('death'), 400);
+                setTimeout(window.location.reload, 390);
+            }, first);
+            // migrate menu
+            if (yeah === "down") {
+                const transfer = tk.c('div', main, 'setb hide');
+                tk.img('./assets/img/setup/quick.png', 'setupi', transfer);
+                tk.p('All done!', 'h2', transfer);
+                tk.p('Click "Download" to download your backup, then click "Done" to exit.', undefined, transfer);
+                tk.cb('b1', 'Download', () => ui.sw2(transfer, warn), transfer);tk.cb('b1', 'No thanks', () => ui.sw2(transfer, warn), transfer);
+                transfer.id = "quickstartwdsetup";
+            } else {
+                const transfer = tk.c('div', main, 'setb hide');
+                tk.img('./assets/img/setup/quick.png', 'setupi', transfer);
+                tk.p('Quick Start', 'h2', transfer);
+                tk.p('To copy your data, open Backup -> Migrate on the other WebDesk, and enter the code below. This works for the old beta too.', undefined, transfer);
+                tk.p('--------', 'h2 deskid', transfer);
+                tk.cb('b1', 'No thanks', () => ui.sw2(transfer, warn), transfer);
+                transfer.id = "quickstartwdsetup";
+            }
+            // summary
+            const sum = tk.c('div', main, 'setb hide');
+            tk.img('./assets/img/setup/check.svg', 'setupi', sum);
+            tk.p('All done!', 'h2', sum);
+            tk.p('Make sure to check Settings for more options.', undefined, sum);
+            tk.cb('b1 rb', 'Erase & restart', function () { fs.erase('reboot'); }, sum); tk.cb('b1', 'Finish setup', function () { wd.reboot(); }, sum);
+            sum.id = "setupdone";
+        }
+    },
     imgview: {
         runs: false,
         name: 'Iris',
@@ -176,7 +221,7 @@ var app = {
                 win.main.addEventListener('dragover', (e) => {
                     e.preventDefault();
                 });
-            
+
                 win.main.addEventListener('drop', async (e) => {
                     e.preventDefault();
                     const text = e.dataTransfer.getData('text/plain');
@@ -186,7 +231,7 @@ var app = {
                     navto(fuck);
                     console.log(`Niggle chiggles`);
                 });
-               
+
                 const thing = await fs.ls(path);
                 thing.items.forEach(function (thing) {
                     if (thing.type === "folder") {
@@ -221,17 +266,17 @@ var app = {
                                     ui.dest(menu2);
                                 }, menu2);
                             }, menu);
-                            tk.cb('b1 b2', 'Rename', function () {
+                            tk.cb('b1 b2', 'Rename/Move', function () {
                                 ui.dest(menu);
                                 const menu2 = tk.c('div', document.body, 'cm');
                                 const inp = tk.c('input', menu2, 'i1');
-                                inp.placeholder = "Enter new name"
-                                tk.cb('b1 b2', 'Rename', function () {
-                                    const lastSlashIndex = thing.path.lastIndexOf('/');
-                                    const path = thing.path.substring(0, lastSlashIndex);
-                                    fs.write(path + inp.value, yeah);
+                                inp.placeholder = "Enter new path";
+                                inp.value = thing.path;
+                                tk.cb('b1 b2', 'Rename/Move', function () {
+                                    fs.write(inp.value, yeah);
                                     fs.del(thing.path, yeah);
                                     navto(path);
+                                    ui.dest(menu2);
                                 }, menu2);
                                 tk.cb('b1', 'Cancel', function () {
                                     ui.dest(menu2);
@@ -270,6 +315,25 @@ var app = {
             tk.p(`WebDesk`, 'h2', win.main);
             tk.p(`Version: ${abt.ver}`, undefined, win.main);
             tk.p(`Latest update: ${abt.lastmod}`, undefined, win.main);
+        }
+    },
+    backup: {
+        runs: true,
+        name: 'Backup/Migrate',
+        init: async function () {
+            const win = tk.mbw('Backup/Migrate', '300px', 'auto', true, undefined, undefined);
+            tk.p(`Welcome!`, 'h2', win.main);
+            tk.p(`What would you like to do? <span class="bold">Your apps will close, and unsaved data will be lost.</span>`, undefined, win.main);
+            tk.cb('b1 b2', 'Download WebDesk Backup', function () {
+                fs.write('/system/migval', 'down');
+                ui.show(document.getElementById('death'), 400);
+                setTimeout(window.location.reload, 390);
+            });
+            tk.cb('b1 b2', 'Copy To Another WebDesk', function () {
+                fs.write('/system/migval', 'down');
+                ui.show(document.getElementById('death'), 400);
+                setTimeout(window.location.reload, 390);
+            });
         }
     },
     appmark: {
@@ -344,6 +408,7 @@ var app = {
             await loadapps();
         },
     },
+
     ach: {
         runs: true,
         name: 'Achievements',
@@ -490,13 +555,102 @@ var app = {
             wd.win();
         }
     },
-    /* caller: {
+    webcall: {
         runs: true,
         name: 'WebCall',
         init: async function () {
-            const win = tk.mbw('WebCall', '300px', 'auto', true, undefined, undefined);
-            tk.p(`Enter the DeskID of the person you're trying to call`, undefined, win.main);
+            const win = tk.mbw('WebCall', '260px', 'auto', true, undefined, undefined);
+            const callStatus = tk.p(`Enter DeskID of person to call`, undefined, win.main);
+            const input = tk.c('input', win.main, 'i1');
+            input.placeholder = "DeskID here";
 
+            function go() {
+                let oncall = false;
+                navigator.mediaDevices.getUserMedia({ audio: true }).then((stream) => {
+                    remotePeerId = input.value;
+                    const call = sys.peer.call(remotePeerId, stream);
+                    callStatus.textContent = 'Waiting for answer...';
+                    const showyourself = sys.peer.connect(call.peer);
+                    showyourself.on('open', () => {
+                        showyourself.send(JSON.stringify({ type: 'request' }));
+                    });
+
+                    showyourself.on('data', (data) => {
+                        try {
+                            const parsedData = JSON.parse(data);
+                            if (parsedData.response) {
+                                setTimeout(() => {
+                                    if (!oncall) {
+                                        callStatus.textContent = `Other person didn't answer`;
+                                        call.close();
+                                    }
+                                }, 28000);
+
+                                call.on('stream', (remoteStream) => {
+                                    oncall = true;
+                                    ui.dest(win.tbn, 100);
+                                    ui.dest(win.win, 100);
+                                    app.webcall.answer(remoteStream, call, parsedData.response);
+                                });
+
+                                call.on('error', (err) => {
+                                    callStatus.textContent = 'Call failed: ' + err.message;
+                                });
+                            }
+                        } catch (err) {
+                            console.error('Failed to parse data:', err);
+                        }
+                    });
+                }).catch((err) => {
+                    console.error(`<!> ${err}`);
+                });
+            }
+
+            tk.cb('b1', 'Call', function () {
+                go();
+            }, win.main);
+        },
+        answer: async function (remoteStream, call, name) {
+            const win = tk.mbw('WebCall', '250px', 'auto', true, undefined, undefined);
+            const stat = tk.ps(`WebCall - ${name}`, undefined, win.main);
+            const audioElement = tk.c('audio', win.main, 'hide');
+            audioElement.srcObject = remoteStream;
+            audioElement.autoplay = true;
+            audioElement.controls = true;
+            let isMuted = false;
+            const remoteAudioTrack = remoteStream.getAudioTracks()[0];
+            const muteButton = tk.cb('b1', 'Mute', function () {
+                if (isMuted) {
+                    remoteAudioTrack.enabled = true;
+                    muteButton.textContent = 'Mute';
+                } else {
+                    remoteAudioTrack.enabled = false;
+                    muteButton.textContent = 'Unmute';
+                }
+                isMuted = !isMuted;
+            }, win.main);
+
+            function crashout() {
+                call.close();
+                ui.dest(win.tbn, 100);
+                ui.dest(win.win, 100);
+            }
+
+            audioElement.onended = () => {
+                stat.textContent = 'Call ended.';
+                crashout();
+            };
+
+            remoteStream.oninactive = () => {
+                stat.textContent = 'Call ended.';
+                crashout();
+            };
+
+            tk.cb('b1', 'End', () => crashout(), win.main);
+
+            win.closebtn.addEventListener('click', function () {
+                crashout();
+            });
         }
-    }, */
+    }
 };

@@ -184,6 +184,15 @@ var tk = {
         div.appendChild(fuck);
         return fuck;
     },
+    ps: function (contents, classn, div) {
+        const fuck = document.createElement('p');
+        fuck.innerText = contents;
+        if (classn) {
+            fuck.classList = classn;
+        }
+        div.appendChild(fuck);
+        return fuck;
+    },
     img: function (src, classn, div) {
         const fuck = document.createElement('img');
         fuck.src = src;

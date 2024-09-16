@@ -12,7 +12,7 @@
 </head>
 <script>
     var abt = {
-        lastmod: "Sep 13, 2024",
+        lastmod: "Sep 15, 2024",
         ver: "0.1.0",
     }
 
@@ -44,6 +44,9 @@
     <div id="setuparea">
     </div>
     <div id="notif"></div>
+    <div id="death"
+        style="z-index: 9999; position: fixed; left: 0px; right: 0px; bottom: 0px; top: 0px; background-color: #000; display: none;">
+    </div>
 </body>
 
 </html>
@@ -61,16 +64,16 @@
 <script>
     async function boot() {
         const sd = await fs.read('/user/info/name');
+        const migcheck = await fs.read('/system/migval');
         if (sd) {
-            const name = await fs.read('/user/info/name');
             const deskid = await fs.read('/system/deskid');
             const darkpref = await fs.read('/user/info/lightdarkpref');
             const lightdark = await fs.read('/user/info/lightdark');
             const color = await fs.read('/user/info/color');
-            await wd.desktop(name, deskid, 'wait');
+            await wd.desktop(sd, deskid, 'wait');
             await ptp.go(deskid);
             sys.setupd = true;
-
+            sys.name = sd;
             if (darkpref === "auto") {
                 sys.autodarkacc = true;
             } else {
@@ -86,34 +89,41 @@
                 wd.light();
             }
             ui.crtheme(color);
+            const data = await fs.read('/system/apps.json');
+            if (data) {
+                const apps = JSON.parse(data);
+
+                const response = await fetch('https://appmarket.meower.xyz/refresh');
+                const onlineApps = await response.json();
+                apps.forEach(inapp => {
+                    const onlineApp = onlineApps.find(app => app.name === inapp.name);
+
+                    if (onlineApp.ver === inapp.ver) {
+                        eval(inapp.exec);
+                        console.log(`<i> ${inapp.name} is up to date (${inapp.ver} = ${onlineApp.ver})`);
+                    } else {
+                        const remove = apps.filter(item => item.id !== inapp.id);
+                        const removed = JSON.stringify(remove);
+                        fs.write('/system/apps.json', removed);
+                        app.appmark.create(onlineApp.path, onlineApp, true);
+                        console.log(`<!> ${inapp.name} was updated (${inapp.ver} --> ${onlineApp.ver})`);
+                    }
+                });
+            }
+        } else if (migcheck === "yes") {
+            await fs.del('/system/migval');
+            const deskid = await fs.read('/system/deskid');
+            await ptp.go(deskid);
+            app.migrate.init();
+        } else if (migcheck === "down") {
+            await fs.del('/system/migval');
+            app.migrate.init('down');
         } else {
             const id = gen(8);
             await ptp.go(id);
             await fs.write('/system/deskid', id);
             app.setup.init();
             sys.setupd = false;
-        }
-
-        const data = await fs.read('/system/apps.json');
-        if (data) {
-            const apps = JSON.parse(data);
-
-            const response = await fetch('https://appmarket.meower.xyz/refresh');
-            const onlineApps = await response.json();
-            apps.forEach(inapp => {
-                const onlineApp = onlineApps.find(app => app.name === inapp.name);
-
-                if (onlineApp.ver === inapp.ver) {
-                    eval(inapp.exec);
-                    console.log(`<i> ${inapp.name} is up to date (${inapp.ver} = ${onlineApp.ver})`);
-                } else {
-                    const remove = apps.filter(item => item.id !== inapp.id);
-                    const removed = JSON.stringify(remove);
-                    fs.write('/system/apps.json', removed);
-                    app.appmark.create(onlineApp.path, onlineApp, true);
-                    console.log(`<!> ${inapp.name} was updated (${inapp.ver} --> ${onlineApp.ver})`);
-                }
-            });
         }
 
         const dropZone = document.body;

@@ -89,10 +89,10 @@ var wm = {
             ui.dest(div, 120);
         }, div);
         if (mode) {
-            const open = tk.cb('b4', 'Open', function () {
-                open.addEventListener('click', mode);
-                ui.dest(div, 120);
-            }, div);
+            const open = tk.cb('b4', 'Open', undefined, div);
+            open.addEventListener('click', mode);
+            open.addEventListener('click', function () { ui.dest(div, 120); });
+
         }
         const txt = tk.c('span', div, 'bold');
         txt.innerText = ` - ${wd.timecs(Date.now())}`
