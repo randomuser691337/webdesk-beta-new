@@ -235,11 +235,8 @@ var tk = {
         windowDiv.classList.add('window');
         windowDiv.style.width = wid;
         windowDiv.style.height = hei;
-        var titlebarDiv = document.createElement('div');
-        titlebarDiv.classList.add('d');
-        titlebarDiv.classList.add('tb');
-        var winbtns = document.createElement('div');
-        winbtns.classList.add('tnav');
+        var titlebarDiv = tk.c('div', undefined, 'd tb');
+        var winbtns = tk.c('div', undefined, 'tnav');
         var closeButton = document.createElement('div');
         closeButton.classList.add('winb');
         const tbn = tk.cb('b1', title, function () {
@@ -284,7 +281,7 @@ var tk = {
         contentDiv.classList.add('content');
         windowDiv.appendChild(contentDiv);
         document.body.appendChild(windowDiv);
-        wd.win(); $(windowDiv).fadeIn(130); ui.center(windowDiv);
+        wd.win(); ui.center(windowDiv);
         return { win: windowDiv, main: contentDiv, tbn, title: titlebarDiv, closebtn: closeButton };
     }
 }

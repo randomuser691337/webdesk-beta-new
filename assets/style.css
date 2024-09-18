@@ -8,15 +8,17 @@
     --ui1: rgb(255, 255, 255, 0.6);
     --ui2: #ffffff;
     --ui3: #dddddd;
+    --bc: rgb(200, 200, 200, 0.6);
     --font: #000;
     --bl1: 12px;
     --bl2: 8px;
     --rad1: 15px;
-    --rad2: 10px;
+    --rad2: 11px;
     --rad3: 7px;
     --fz1: 15px;
     --fz2: 12px;
     --inv: 0;
+    --wina: 0px;
 }
 
 #background {
@@ -150,7 +152,7 @@ p {
     left: 50%;
     top: 50%;
     padding: 6px;
-    border: 1px solid var(--ui3);
+    border: 1px solid var(--bc);
     background-color: var(--ui1);
     border-radius: var(--rad1);
     max-width: 85% !important;
@@ -167,22 +169,27 @@ p {
     padding-bottom: 25px;
 }
 
+@keyframes winanim {
+    0% { transform: scale(0.7); opacity: 0%; }
+    100% { transform: scale(1); opacity: 100%; }
+}
+
 .window {
     position: absolute;
     border-radius: var(--rad1);
     box-shadow: rgba(0, 0, 0, 0.3) 0px 0px 150px 30px;
-    border: 1px solid var(--ui3);
+    border: 1px solid var(--bc);
     max-width: 85vw;
     max-height: 90vh;
     width: auto;
     height: auto;
     z-index: 5;
     background-color: var(--ui1);
-    display: none;
     overflow: auto !important;
     -webkit-backdrop-filter: blur(var(--bl1));
     backdrop-filter: blur(var(--bl1));
     resize: both;
+    animation: winanim 0.25s;
 }
 
 .content {
@@ -202,7 +209,7 @@ p {
     user-select: none;
     border-top-left-radius: 13px;
     border-top-right-radius: 13px;
-    border-bottom: 1px solid var(--ui3);
+    border-bottom: 1px solid var(--bc);
     transition: 0.05s;
 }
 
@@ -251,7 +258,7 @@ p {
 
 .setupbar {
     width: 100%;
-    border: 1px solid var(--ui2);
+    border: 1px solid var(--bc);
     box-sizing: border-box;
     display: flex;
     align-items: center;
@@ -297,6 +304,8 @@ p {
 .b2 {
     width: 100%;
     box-sizing: border-box;
+    margin-left: 0px !important;
+    margin-right: 0px !important;
 }
 
 .b1 {
@@ -319,6 +328,28 @@ p {
 .b1:active {
     transform: scale(0.88);
     background-color: rgba(var(--acc), 0.30);
+}
+
+.b3 {
+    padding: 2px 6px;
+    border-radius: 8px;
+    background-color: rgba(var(--accent), 0.25);
+    font-size: var(--fz1);
+    border: 1px solid transparent;
+    cursor: pointer;
+    transition: all 0.05s ease-in-out;
+    margin: 1px;
+}
+
+.b3:hover {
+    border: 1px solid rgba(var(--accent), 0.35);
+}
+
+.b3:active {
+    background-color: rgba(var(--accent), 0.35);
+    border-color: rgba(var(--accent), 0.8);
+    transform: scale(0.90);
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2);
 }
 
 .b4 {
@@ -585,7 +616,7 @@ p {
     width: 100%;
     box-sizing: border-box;
     background-color: var(--ui1);
-    border: 1px solid var(--ui3);
+    border: 1px solid var(--bc);
     padding: 8px;
     border-radius: var(--rad1);
     margin-bottom: 5px;
@@ -637,12 +668,11 @@ p {
     display: flex;
     align-items: center;
     justify-content: flex-start;
-    left: 5px;
-    bottom: 5px;
-    right: 5px;
-    border-radius: var(--rad1);
+    left: 4px;
+    bottom: 4px;
+    right: 4px;
     padding: 4px;
-    border: 1px solid var(--ui2);
+    border-radius: var(--rad1);
     background-color: var(--ui1);
     box-shadow: rgba(0, 0, 0, 0.3) 0px 0px 75px 15px;
     animation: tb 1.0s cubic-bezier(0.25, 1, 0.5, 1) forwards;
@@ -651,6 +681,7 @@ p {
     z-index: 3;
     overflow-x: auto;
     white-space: nowrap;
+    border: 1px solid var(--bc);
 }
 
 
@@ -664,7 +695,7 @@ p {
     }
 
     100% {
-        bottom: 4px;
+        bottom: 3px;
     }
 }
 
@@ -675,7 +706,7 @@ p {
     padding: 12px;
     border-radius: var(--rad1);
     background-color: var(--ui2);
-    border: 1px solid var(--ui3);
+    border: 1px solid var(--bc);
     transform: translate(-50%, -50%);
     box-shadow: rgba(0, 0, 0, 0.3) 0px 0px 75px 15px;
     z-index: 10;
@@ -685,16 +716,16 @@ p {
 .tbmenu {
     position: fixed;
     border-radius: var(--rad1);
-    border: 1px solid var(--ui2);
+    border: 1px solid var(--bc);
     background-color: var(--ui1);
     box-shadow: rgba(0, 0, 0, 0.15) 0px 0px 75px 15px;
     backdrop-filter: blur(var(--bl2));
     -webkit-backdrop-filter: blur(var(--bl2));
-    padding: 10px;
+    padding: 7px;
     max-width: 80%;
     max-width: 360px;
     max-height: 80%;
-    left: 5px;
+    left: 4px;
     z-index: 4;
     animation: tb2 0.28s;
     resize: both;

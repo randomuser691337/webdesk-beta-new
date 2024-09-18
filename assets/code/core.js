@@ -101,14 +101,16 @@ var wd = {
         function startmenu() {
             if (el.sm == undefined) {
                 el.sm = tk.c('div', document.body, 'tbmenu');
-                el.sm.style.width = "220px"
+                el.sm.style.width = "280px"
                 const btm = el.taskbar.getBoundingClientRect();
-                el.sm.style.bottom = btm.height + btm.x + 4 + "px";
+                el.sm.style.bottom = btm.height + btm.x + 3 + "px";
                 tk.p(`Hello, ${name}!`, 'h2', el.sm);
+                tk.p(`Your DeskID is ${sys.deskid}`, undefined, el.sm);
+                const ok = tk.c('div', el.sm, undefined);
                 for (var key in app) {
                     if (app.hasOwnProperty(key)) {
                         if (app[key].hasOwnProperty("runs") && app[key].runs === true) {
-                            const btn = tk.cb('b1 b2', app[key].name, app[key].init.bind(app[key]), el.sm);
+                            const btn = tk.cb('b3', app[key].name, app[key].init.bind(app[key]), ok);
                             btn.addEventListener('click', function () {
                                 ui.dest(el.sm, 150);
                                 el.sm = undefined;
@@ -117,7 +119,7 @@ var wd = {
                         }
                     }
                 }
-                wd.reorg(el.sm);
+                wd.reorg(ok);
             } else {
                 ui.dest(el.sm, 150);
                 el.sm = undefined;
@@ -161,6 +163,7 @@ var wd = {
         ui.cv('ui1', 'rgb(40, 40, 40, 0.6)');
         ui.cv('ui2', '#1b1b1b');
         ui.cv('ui3', '#2b2b2b');
+        ui.cv('bc', 'rgb(36, 36, 36, 0.5)');
         ui.cv('font', '#fff');
         fs.write('/user/info/lightdark', 'dark');
     },
@@ -168,6 +171,7 @@ var wd = {
         ui.cv('ui1', 'rgb(255, 255, 255, 0.6)');
         ui.cv('ui2', '#ffffff');
         ui.cv('ui3', '#dddddd');
+        ui.cv('bc', 'rgb(200, 200, 200, 0.6)');
         ui.cv('font', '#000');
         fs.del('/user/info/lightdark');
     },
@@ -175,6 +179,7 @@ var wd = {
         ui.cv('ui1', 'rgb(255, 255, 255, 0)');
         ui.cv('ui2', 'rgba(var(--accent), 0.1)');
         ui.cv('ui3', 'rgba(var(--accent) 0.2)');
+        ui.cv('bc', 'rgb(255, 255, 255, 0)');
         ui.cv('font', '#000');
         fs.write('/user/info/lightdark', 'clear');
     },
@@ -182,6 +187,7 @@ var wd = {
         ui.cv('ui1', 'rgb(255, 255, 255, 0)');
         ui.cv('ui2', 'rgba(var(--accent), 0.1)');
         ui.cv('ui3', 'rgba(var(--accent) 0.2)');
+        ui.cv('bc', 'rgb(255, 255, 255, 0)');
         ui.cv('font', '#fff');
         fs.write('/user/info/lightdark', 'clear2');
     },
