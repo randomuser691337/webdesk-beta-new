@@ -106,7 +106,7 @@ var wd = {
                 el.sm.style.bottom = btm.height + btm.x + 3 + "px";
                 tk.p(`Hello, ${name}!`, 'h2', el.sm);
                 tk.p(`Your DeskID is ${sys.deskid}`, undefined, el.sm);
-                const ok = tk.c('div', el.sm, undefined);
+                const ok = tk.c('div', el.sm, 'embed nest');
                 for (var key in app) {
                     if (app.hasOwnProperty(key)) {
                         if (app[key].hasOwnProperty("runs") && app[key].runs === true) {
@@ -184,10 +184,7 @@ var wd = {
         fs.write('/user/info/lightdark', 'clear');
     },
     clearm2: function () {
-        ui.cv('ui1', 'rgb(255, 255, 255, 0)');
-        ui.cv('ui2', 'rgba(var(--accent), 0.1)');
-        ui.cv('ui3', 'rgba(var(--accent) 0.2)');
-        ui.cv('bc', 'rgb(255, 255, 255, 0)');
+        wd.clearm();
         ui.cv('font', '#fff');
         fs.write('/user/info/lightdark', 'clear2');
     },

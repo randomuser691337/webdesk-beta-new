@@ -781,6 +781,12 @@ p {
     border: none !important;
 }
 
+.nest {
+    background-color: var(--ui2);
+    resize: none !important;
+    padding: 6px;
+}
+
 .warn {
     color: #911;
 }
