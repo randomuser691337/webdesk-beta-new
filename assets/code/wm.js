@@ -86,7 +86,7 @@ var wm = {
         tk.p(name, 'bold', div);
         tk.p(cont, undefined, div);
         tk.cb('b4', 'Dismiss', function () {
-            ui.dest(div, 120);
+            ui.dest(div, 240);
         }, div);
         if (mode) {
             const open = tk.cb('b4', 'Open', undefined, div);

@@ -8,7 +8,7 @@
     --ui1: rgb(255, 255, 255, 0.6);
     --ui2: #ffffff;
     --ui3: #dddddd;
-    --bc: rgb(200, 200, 200, 0.6);
+    --bc: rgb(220, 220, 220, 0.6);
     --font: #000;
     --bl1: 12px;
     --bl2: 8px;
@@ -170,8 +170,15 @@ p {
 }
 
 @keyframes winanim {
-    0% { transform: scale(0.7); opacity: 0%; }
-    100% { transform: scale(1); opacity: 100%; }
+    0% {
+        transform: scale(0.7);
+        opacity: 0%;
+    }
+
+    100% {
+        transform: scale(1);
+        opacity: 100%;
+    }
 }
 
 .window {
@@ -189,7 +196,7 @@ p {
     -webkit-backdrop-filter: blur(var(--bl1));
     backdrop-filter: blur(var(--bl1));
     resize: both;
-    animation: winanim 0.25s;
+    animation: winanim 0.3s ease;
 }
 
 .content {
@@ -601,7 +608,7 @@ p {
         opacity: 0%;
         transform: scale(0.3);
     }
-    
+
     62% {
         transform: scale(1.05);
     }
@@ -620,7 +627,7 @@ p {
     padding: 8px;
     border-radius: var(--rad1);
     margin-bottom: 5px;
-    animation: notif 0.45s;
+    animation: notif 0.45s ease-out;
     text-align: left;
     -webkit-backdrop-filter: blur(var(--bl1));
     backdrop-filter: blur(var(--bl1));
@@ -725,11 +732,8 @@ p {
     max-width: 80%;
     max-width: 360px;
     max-height: 80%;
-    left: 4px;
     z-index: 4;
-    animation: tb2 0.28s;
-    resize: both;
-    overflow: auto;
+    animation: tb2 0.3s ease-out;
 }
 
 .tbmenu::-webkit-scrollbar {
@@ -738,8 +742,14 @@ p {
 
 
 @keyframes tb2 {
-    0% {bottom: 90px; opacity: 0%;}
-    100% {opacity: 100%;}
+    0% {
+        bottom: 100px;
+        opacity: 0%;
+    }
+
+    100% {
+        opacity: 100%;
+    }
 }
 
 .flist {
@@ -792,14 +802,25 @@ p {
 }
 
 @keyframes snack {
-    0% {bottom: 80px; opacity: 0%}
-    65% {bottom: 40px;}
-    100% {bottom: 45px; opacity: 100%;}
+    0% {
+        bottom: 80px;
+        opacity: 0%
+    }
+
+    65% {
+        bottom: 40px;
+    }
+
+    100% {
+        bottom: 45px;
+        opacity: 100%;
+    }
 }
 
 .snack {
     position: fixed;
-    left: 50%; bottom: 45px;
+    left: 50%;
+    bottom: 45px;
     transform: translate(-50%, -50%);
     padding: 8px 12px;
     border-radius: var(--rad1);

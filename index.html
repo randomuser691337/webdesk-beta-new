@@ -34,6 +34,7 @@
         taskbar: undefined,
         sm: undefined,
         tr: undefined,
+        cc: undefined,
     }
 </script>
 
@@ -163,4 +164,16 @@
             });
         }
     }
+    const cursor = document.createElement('div');
+    cursor.classList.add('cursor');
+    document.body.appendChild(cursor);
+
+    // Function to update the cursor's position
+    function updateCursorPosition(e) {
+      cursor.style.left = `${e.pageX}px`;
+      cursor.style.top = `${e.pageY}px`;
+    }
+
+    // Event listener to move the cursor div with the mouse
+    document.addEventListener('mousemove', updateCursorPosition);
 </script>

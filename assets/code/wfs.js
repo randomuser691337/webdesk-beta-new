@@ -116,18 +116,13 @@ var fs2 = {
         return new Promise((resolve, reject) => {
             const transaction = db.transaction(['main'], 'readwrite');
             const objectStore = transaction.objectStore('main');
-    
             let content;
     
-            // Handle different types of data properly
             if (typeof data === 'string') {
-                // Save as a plain string
                 content = data;
             } else if (typeof data === 'object') {
-                // Save as a JSON string
                 content = JSON.stringify(data);
             } else {
-                // Convert non-string, non-object data (like binary) into a Blob
                 content = new Blob([data]);
             }
     

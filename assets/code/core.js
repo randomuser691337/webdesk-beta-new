@@ -101,7 +101,8 @@ var wd = {
         function startmenu() {
             if (el.sm == undefined) {
                 el.sm = tk.c('div', document.body, 'tbmenu');
-                el.sm.style.width = "280px"
+                el.sm.style.width = "200px";
+                el.sm.style.left = "4px";
                 const btm = el.taskbar.getBoundingClientRect();
                 el.sm.style.bottom = btm.height + btm.x + 3 + "px";
                 tk.p(`Hello, ${name}!`, 'h2', el.sm);
@@ -110,7 +111,7 @@ var wd = {
                 for (var key in app) {
                     if (app.hasOwnProperty(key)) {
                         if (app[key].hasOwnProperty("runs") && app[key].runs === true) {
-                            const btn = tk.cb('b3', app[key].name, app[key].init.bind(app[key]), ok);
+                            const btn = tk.cb('b3 b2', app[key].name, app[key].init.bind(app[key]), ok);
                             btn.addEventListener('click', function () {
                                 ui.dest(el.sm, 150);
                                 el.sm = undefined;
@@ -125,13 +126,32 @@ var wd = {
                 el.sm = undefined;
             }
         }
+        function controlcenter() {
+            if (el.sm == undefined) {
+                el.sm = tk.c('div', document.body, 'tbmenu');
+                el.sm.style.width = "200px";
+                el.sm.style.right = "4px";
+                const btm = el.taskbar.getBoundingClientRect();
+                el.sm.style.bottom = btm.height + btm.x + 3 + "px";
+                tk.p(`Controls`, 'h2', el.sm);
+                tk.p(`Your DeskID is ${sys.deskid}`, undefined, el.sm);
+                const ok = tk.c('div', el.sm, 'embed nest');
+                tk.cb('b3 b2', 'Settings', function () {
+                    app.settings.init();
+                    controlcenter();
+                }, ok);
+            } else {
+                ui.dest(el.sm, 150);
+                el.sm = undefined;
+            }
+        }
         function desktopgo() {
             el.taskbar = tk.c('div', document.body, 'taskbar');
             const lefttb = tk.c('div', el.taskbar, 'tnav');
             const titletb = tk.c('div', el.taskbar, 'title');
             const start = tk.cb('b1', 'Apps', () => startmenu(), lefttb);
             el.tr = tk.c('div', lefttb);
-            tk.cb('b1 time', '--:--', () => wm.notif(`In progress`, `Control Center`), titletb);
+            tk.cb('b1 time', '--:--', () => controlcenter(), titletb);
         }
         if (waitopt === "wait") {
             setTimeout(function () { desktopgo(); }, 400);
