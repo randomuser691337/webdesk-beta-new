@@ -87,10 +87,10 @@ var fs2 = {
             const transaction = db.transaction(['main'], 'readonly');
             const objectStore = transaction.objectStore('main');
             const request = objectStore.get(path);
-    
+
             request.onsuccess = function (event) {
                 const item = event.target.result;
-    
+
                 if (item && item.data) {
                     if (typeof item.data === 'string') {
                         resolve(item.data); // Return as plain string
@@ -106,18 +106,18 @@ var fs2 = {
                     resolve(null);
                 }
             };
-    
+
             request.onerror = function (event) {
                 reject(event.target.error);
             };
         });
-    },    
+    },
     write: function (path, data) {
         return new Promise((resolve, reject) => {
             const transaction = db.transaction(['main'], 'readwrite');
             const objectStore = transaction.objectStore('main');
             let content;
-    
+
             if (typeof data === 'string') {
                 content = data;
             } else if (typeof data === 'object') {
@@ -125,10 +125,10 @@ var fs2 = {
             } else {
                 content = new Blob([data]);
             }
-    
+
             const item = { path: path, data: content };
             const request = objectStore.put(item);
-    
+
             request.onsuccess = function () {
                 resolve();
             };
@@ -136,7 +136,7 @@ var fs2 = {
                 reject(event.target.error);
             };
         });
-    },      
+    },
     del: function (path) {
         return new Promise((resolve, reject) => {
             const transaction = db.transaction(['main'], 'readwrite');
@@ -200,24 +200,19 @@ var fs2 = {
             const transaction = db.transaction(['main'], 'readonly');
             const objectStore = transaction.objectStore('main');
             const fileContentsPromises = [];
-    
+
             objectStore.openCursor().onsuccess = function (event) {
                 const cursor = event.target.result;
                 if (cursor) {
                     const key = cursor.key;
-                    const relativePath = key.split('/').pop();
-    
-                    if (!relativePath.includes('.png')) {
-                        const request = objectStore.get(key);
-                        request.onsuccess = function (event) {
-                            const item = event.target.result;
-                            if (item && item.data) {
-                                const decoded = new TextDecoder().decode(item.data);
-                                fileContentsPromises.push(relativePath + ": " + decoded);
-                            } else {
-                                fileContentsPromises.push(null);
-                            }
-                        };
+                    const request = objectStore.get(key);
+                    request.onsuccess = function (event) {
+                        const item = event.target.result;
+                        if (item) {
+                            fileContentsPromises.push(cursor.key);
+                        } else {
+                            fileContentsPromises.push(null);
+                        }
                         request.onerror = function (event) {
                             reject(event.target.error);
                         };
@@ -229,10 +224,10 @@ var fs2 = {
                     };
                 }
             };
-    
+
             objectStore.openCursor().onerror = function (event) {
                 reject(event.target.error);
             };
         });
-    }    
+    }
 };

@@ -12,7 +12,7 @@
 </head>
 <script>
     var abt = {
-        lastmod: "Sep 22, 2024",
+        lastmod: "Sep 25, 2024",
         ver: "0.1.0",
     }
 
@@ -46,7 +46,7 @@
     </div>
     <div id="notif"></div>
     <div id="death"
-        style="z-index: 9999; position: fixed; left: 0px; right: 0px; bottom: 0px; top: 0px; background-color: #000; display: none;">
+        style="z-index: 9999; position: fixed; left: 0px; right: 0px; bottom: 0px; top: 0px; background-color: #000;">
     </div>
 </body>
 
@@ -64,9 +64,9 @@
 <script src="./assets/code/apps.js"></script>
 <script>
     async function boot() {
-        const sd = await fs.read('/user/info/name');
         const migcheck = await fs.read('/system/migval');
-        if (sd) {
+        const sd = await fs.read('/user/info/name');
+        if (sd && !migcheck) {
             const deskid = await fs.read('/system/deskid');
             const darkpref = await fs.read('/user/info/lightdarkpref');
             const lightdark = await fs.read('/user/info/lightdark');
@@ -111,12 +111,11 @@
                     }
                 });
             }
-        } else if (migcheck === "yes") {
-            await fs.del('/system/migval');
-            const deskid = await fs.read('/system/deskid');
-            await ptp.go(deskid);
-            app.migrate.init();
         } else if (migcheck === "down") {
+            const id = gen(8);
+            await ptp.go(id);
+            ui.crtheme('#010101', true);
+            wd.dark();
             await fs.del('/system/migval');
             app.migrate.init('down');
         } else {
@@ -126,6 +125,8 @@
             app.setup.init();
             sys.setupd = false;
         }
+
+        ui.hide(document.getElementById('death'), 200);
 
         const dropZone = document.body;
         ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
@@ -151,29 +152,17 @@
             let filesArray = [...files];
             filesArray.forEach(file => {
                 const reader = new FileReader();
-                reader.onload = function (e) {
+                reader.onload = async function (e) {
                     const contents = e.target.result;
-                    fs.write(`/user/files/${file.name}`, contents);
+                    await fs.write(`/user/files/${file.name}`, contents);
                 };
 
-                if (file.type.startsWith('image')) {
-                    reader.readAsDataURL(file);
-                } else {
-                    reader.readAsArrayBuffer(file);
-                }
+                reader.readAsDataURL(file);
             });
         }
     }
-    const cursor = document.createElement('div');
-    cursor.classList.add('cursor');
-    document.body.appendChild(cursor);
 
-    // Function to update the cursor's position
-    function updateCursorPosition(e) {
-      cursor.style.left = `${e.pageX}px`;
-      cursor.style.top = `${e.pageY}px`;
+    function reboot() {
+        window.location.reload();
     }
-
-    // Event listener to move the cursor div with the mouse
-    document.addEventListener('mousemove', updateCursorPosition);
 </script>

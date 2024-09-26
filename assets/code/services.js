@@ -40,7 +40,7 @@ var ptp = {
                             dataConnection.send(JSON.stringify(response));
                         }
                     } catch (err) {
-                        console.error('Failed to parse data:', err);
+                        handleData(dataConnection, data);
                     }
                 });
 
@@ -104,7 +104,7 @@ function handleData(conn, data) {
             }
         } else if (data.name === "MigrationPackDeskFuck++") {
             if (sys.setupd === false) {
-                ui.sw('setupqs', 'setuprs'); restorefsold(data.file);
+                ui.sw('setupqs', 'setuprs'); restorefs(data.file);
             }
         } else if (data.name === "YesImAlive-WebKey") {
             wm.notif(`${data.uname} accepted your WebDrop.`, 'WebDesk Services');
@@ -132,19 +132,13 @@ async function compressfs() {
     return new Promise(async (resolve, reject) => {
         try {
             const zip = new JSZip();
-            const transaction = db.transaction(['files'], 'readonly');
-            const objectStore = transaction.objectStore('files');
-            const request = objectStore.getAll();
-            request.onsuccess = function (event) {
-                const files = event.target.result;
-                files.forEach(file => {
-                    zip.file(file.path, file.value);
-                });
-                resolve(zip.generateAsync({ type: "blob" }));
-            };
-            request.onerror = function (event) {
-                reject(event.target.errorCode);
-            };
+            const files = await fs.getall();
+            const filePromises = files.map(async (file) => {
+                const wait = await fs.read(file);
+                zip.file(file, wait);
+            });
+            await Promise.all(filePromises);
+            resolve(zip.generateAsync({ type: "blob" }));
         } catch (error) {
             reject(error);
         }
@@ -152,7 +146,7 @@ async function compressfs() {
 }
 
 async function restorefs(zipBlob) {
-    console.log('<i> Restore Stage 1: Prepare zip');
+    console.log('<i> NEW Super Restore U Stage 1: Prepare zip');
     try {
         ui.sw('quickstartwdsetup', 'quickstartwdgoing');
         const zip = await JSZip.loadAsync(zipBlob);
@@ -160,12 +154,18 @@ async function restorefs(zipBlob) {
         let filesDone = 0;
         console.log(`<i> Restore Stage 2: Open zip and extract ${fileCount} files to FS`);
         await Promise.all(Object.keys(zip.files).map(async filename => {
-            console.log(`<i> Restoring file: ${filename}`);
-            const file = zip.files[filename];
-            const value = await file.async("string");
-            fs.write(filename, value);
-            filesDone++;
-            ui.masschange('restpg', `Restoring ${filesDone}/${fileCount}: ${filename}`);
+            if (filename.includes('/system/deskid')) {
+                ui.masschange('restpg', `Skipped ${filesDone}/${fileCount}: ${filename}: WebDesk-specific`);
+                console.log('<!> Skipped a file: ' + filename);
+                filesDone++;
+            } else {
+                console.log(`<i> Restoring file: ${filename}`);
+                const file = zip.files[filename];
+                const value = await file.async("string");
+                await fs.write(filename, value);
+                filesDone++;
+                ui.masschange('restpg', `Restoring ${filesDone}/${fileCount}: ${filename}`);
+            }
         }));
         ui.sw('quickstartwdgoing', 'setupdone');
     } catch (error) {
@@ -225,28 +225,32 @@ function sendf(id) {
     }
 }
 
-function custf(id, fname2, fblob2) {
-    const dataToSend = {
-        name: fname2,
-        file: fblob2,
-        uname: user,
-        id: sys.deskid
-    };
+async function custf(id, fname2, fblob2) {
+    return new Promise((resolve, reject) => {
+        const dataToSend = {
+            name: fname2,
+            file: fblob2,
+            uname: sys.name,
+            id: sys.deskid
+        };
 
-    try {
-        const conn = peer.connect(id);
+        try {
+            const conn = sys.peer.connect(id);
 
-        conn.on('open', () => {
-            conn.send(dataToSend);
-            writejson(id);
-        });
+            conn.on('open', () => {
+                conn.send(dataToSend);
+                resolve(true);
+            });
 
-        conn.on('error', (err) => {
-            console.error('Connection error:', err);
-            snack('An error occurred while sending your file.', 2500);
-        });
-    } catch (error) {
-        console.error('Error while sending file:', error);
-        snack('An error occurred while sending your file.', 2500);
-    }
+            conn.on('error', (err) => {
+                console.error('Connection error:', err);
+                wm.snack('An error occurred while sending your file.', 2500);
+                reject(new Error('Connection error while sending the file')); 
+            });
+        } catch (error) {
+            console.error('Error while sending file:', error);
+            wm.snack('An error occurred while sending your file.', 2500);
+            reject(new Error('Error while sending the file'));
+        }
+    });
 }

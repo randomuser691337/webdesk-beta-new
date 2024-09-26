@@ -7,17 +7,21 @@ var ui = {
         ui.cv('bg1', background1); ui.cv('bg2', background2); ui.cv('sh1', shade1); ui.cv('sh2', shade2);
         ui.cv('accent', accent);
     },
-    crtheme: async function (hex) {
+    crtheme: async function (hex, opt) {
         const a = ui.hextool(hex, 20)
-        ui.theme(ui.hextool(hex, 10), a, ui.hextool(hex, 30), ui.hextool(hex, 40), ui.hextorgb(hex));
-        await fs.write('/user/info/color', hex);
-        if (sys.autodarkacc === true) {
-            const silly = ui.hexdark(a);
-            if (silly === true) {
-                wd.dark();
-            } else {
-                wd.light();
+        ui.theme(ui.hextool(hex, 15), a, ui.hextool(hex, 30), ui.hextool(hex, 45), ui.hextorgb(hex));
+        if (!opt === true) {
+            await fs.write('/user/info/color', hex);
+            if (sys.autodarkacc === true) {
+                const silly = ui.hexdark(a);
+                if (silly === true) {
+                    wd.dark();
+                } else {
+                    wd.light();
+                }
             }
+        } else {
+            console.log(`<i> Not setting theme, opt is set to true! (crtheme)`);
         }
     },
     sw: function (d1, d2) {
@@ -155,6 +159,17 @@ var ui = {
         let g = (bigint >> 8) & 255;
         let b = bigint & 255;
         return `${r}, ${g}, ${b}`;
+    },
+    download: function (filename, data) {
+        const blob = new Blob([data], { type: 'text/plain' });
+        const link = document.createElement('a');
+        const url = URL.createObjectURL(blob);
+        link.href = url;
+        link.download = filename;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        URL.revokeObjectURL(url);
     }
 }
 

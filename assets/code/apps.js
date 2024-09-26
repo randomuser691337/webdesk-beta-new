@@ -83,7 +83,7 @@ var app = {
             const transfer = tk.c('div', main, 'setb hide');
             tk.img('./assets/img/setup/quick.png', 'setupi', transfer);
             tk.p('Quick Start', 'h2', transfer);
-            tk.p('To copy your data, open Backup -> Migrate on the other WebDesk, and enter the code below. This works for the old beta too.', undefined, transfer);
+            tk.p('To copy your data, open Data Assistant on the other WebDesk, hit "Migrate", and enter this code:', undefined, transfer);
             tk.p('--------', 'h2 deskid', transfer);
             tk.cb('b1', 'No thanks', () => ui.sw2(transfer, warn), transfer);
             transfer.id = "quickstartwdsetup";
@@ -100,7 +100,7 @@ var app = {
             tk.img('./assets/img/noround.png', 'setupi', warn);
             tk.p(`WebDesk Online services`, 'h2', warn);
             tk.p('WebDesk makes an ID called a DeskID for you. Others can use this ID to send you files or call you.', undefined, warn);
-            tk.p('To recieve calls and files from others, WebDesk needs to be open. When not in use, WebDesk uses less resources', undefined, warn);
+            tk.p('To recieve calls and files from others, WebDesk needs to be open. When not in use, WebDesk uses less resources.', undefined, warn);
             tk.cb('b1', `What's my DeskID?`, function () {
                 const box = wm.cm();
                 tk.p(`Your DeskID is <span class="med">${sys.deskid}</span>. You'll need to finish setup to use it.`, undefined, box);
@@ -131,41 +131,51 @@ var app = {
             const bar = tk.c('div', main, 'setupbar');
             const tnav = tk.c('div', bar, 'tnav');
             const title = tk.c('div', bar, 'title');
-            tk.cb('b4', 'Do Nothing', undefined, tnav);
+            var backup = undefined;
+            tk.cb('b4', 'Force Exit', () => wm.wal(`<p>If WebDesk is stuck, use this to leave.</p><p>Note: If you have lots of files or a slow connection, it's normal for things to take a while.</p>`, () => reboot(), 'Force Exit'), tnav);
             tk.cb('b4 time', 'what', undefined, title);
             // first menu
             const first = tk.c('div', main, 'setb');
             tk.img('./assets/img/setup/restore.svg', 'setupi', first);
-            tk.p('Migration Assistant', 'h2', first);
-            tk.p(`Please wait, preparing to send files. You'll be taken to the next screen when complete.`, undefined, first);
+            tk.p('Preparing', 'h2', first);
+            tk.p(`We're getting your data ready for moving. This could take milliseconds or hours, depending on the amount of data you have.`, undefined, first);
             tk.cb('b1', `Cancel Migration`, function () {
                 ui.show(document.getElementById('death'), 400);
                 setTimeout(window.location.reload, 390);
             }, first);
             // migrate menu
-            if (yeah === "down") {
-                const transfer = tk.c('div', main, 'setb hide');
-                tk.img('./assets/img/setup/quick.png', 'setupi', transfer);
-                tk.p('All done!', 'h2', transfer);
-                tk.p('Click "Download" to download your backup, then click "Done" to exit.', undefined, transfer);
-                tk.cb('b1', 'Download', () => ui.sw2(transfer, warn), transfer);tk.cb('b1', 'No thanks', () => ui.sw2(transfer, warn), transfer);
-                transfer.id = "quickstartwdsetup";
-            } else {
-                const transfer = tk.c('div', main, 'setb hide');
-                tk.img('./assets/img/setup/quick.png', 'setupi', transfer);
-                tk.p('Quick Start', 'h2', transfer);
-                tk.p('To copy your data, open Backup -> Migrate on the other WebDesk, and enter the code below. This works for the old beta too.', undefined, transfer);
-                tk.p('--------', 'h2 deskid', transfer);
-                tk.cb('b1', 'No thanks', () => ui.sw2(transfer, warn), transfer);
-                transfer.id = "quickstartwdsetup";
-            }
+            const transfer = tk.c('div', main, 'setb hide');
+            tk.img('./assets/img/setup/quick.png', 'setupi', transfer);
+            tk.p('Migration Assistant', 'h2', transfer);
+            const stats = tk.p(`Only enter your own code. If you use someone else's, you might be giving your data to a scammer.`, 'bold', transfer);
+            const inp = tk.c('input', transfer, 'i1');
+            inp.placeholder = "Enter the code shown on the other WebDesk";
+            tk.cb('b1', 'Done, copy data!', async function () {
+                stats.innerText = `We're working on copying your data, please wait...`;
+                custf(inp.value, 'MigrationPackDeskFuck++', backup).then((blob) => {
+                    ui.sw2(transfer, sum);
+                }).catch((error) => {
+                    wm.wal(`<p>Data Assistant couldn't communicate with the other WebDesk</p>`, () => reboot(), 'Reboot Now', 'noclose');
+                });
+            }, transfer);
+            transfer.id = "quickstartwdsetup";
             // summary
             const sum = tk.c('div', main, 'setb hide');
             tk.img('./assets/img/setup/check.svg', 'setupi', sum);
             tk.p('All done!', 'h2', sum);
-            tk.p('Make sure to check Settings for more options.', undefined, sum);
-            tk.cb('b1 rb', 'Erase & restart', function () { fs.erase('reboot'); }, sum); tk.cb('b1', 'Finish setup', function () { wd.reboot(); }, sum);
+            tk.p(`Data has been moved to the other WebDesk. Hit "Finish" to go back to WebDesk.`, undefined, sum);
+            tk.cb('b1', 'Finish', function () { wd.reboot(); }, sum);
             sum.id = "setupdone";
+            compressfs()
+                .then((blob) => {
+                    backup = blob;
+                    console.log('<i> Ready! Continuing...');
+                    ui.sw2(first, transfer);
+                })
+                .catch((error) => {
+                    wm.wal('<p>Data Assistant encountered an error</p>', () => reboot(), 'Reboot Now', 'noclose');
+                });
+
         }
     },
     imgview: {
@@ -319,21 +329,21 @@ var app = {
     },
     backup: {
         runs: true,
-        name: 'Backup/Migrate',
+        name: 'Data Assistant',
         init: async function () {
-            const win = tk.mbw('Backup/Migrate', '300px', 'auto', true, undefined, undefined);
+            const win = tk.mbw('Data Assistant', '300px', 'auto', true, undefined, undefined);
             tk.p(`Welcome!`, 'h2', win.main);
             tk.p(`What would you like to do? <span class="bold">Your apps will close, and unsaved data will be lost.</span>`, undefined, win.main);
-            tk.cb('b1 b2', 'Download WebDesk Backup', function () {
-                fs.write('/system/migval', 'down');
+            tk.cb('b1 b2', 'Download WebDesk Backup', async function () {
+                await fs.write('/system/migval', 'down');
                 ui.show(document.getElementById('death'), 400);
-                setTimeout(window.location.reload, 390);
-            });
-            tk.cb('b1 b2', 'Copy To Another WebDesk', function () {
-                fs.write('/system/migval', 'down');
+                setTimeout(reboot, 390);
+            }, win.main);
+            tk.cb('b1 b2', 'Migrate', async function () {
+                await fs.write('/system/migval', 'down');
                 ui.show(document.getElementById('death'), 400);
-                setTimeout(window.location.reload, 390);
-            });
+                setTimeout(reboot, 390);
+            }, win.main);
         }
     },
     appmark: {
