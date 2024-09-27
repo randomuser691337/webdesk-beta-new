@@ -183,7 +183,7 @@ var wd = {
         ui.cv('ui1', 'rgb(40, 40, 40, 0.6)');
         ui.cv('ui2', '#1b1b1b');
         ui.cv('ui3', '#2b2b2b');
-        ui.cv('bc', 'rgb(36, 36, 36, 0.5)');
+        ui.cv('bc', 'rgb(44, 44, 44, 0.5)');
         ui.cv('font', '#fff');
         fs.write('/user/info/lightdark', 'dark');
     },

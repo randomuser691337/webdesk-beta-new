@@ -152,10 +152,15 @@ var app = {
             inp.placeholder = "Enter the code shown on the other WebDesk";
             tk.cb('b1', 'Done, copy data!', async function () {
                 stats.innerText = `We're working on copying your data, please wait...`;
-                custf(inp.value, 'MigrationPackDeskFuck++', backup).then((blob) => {
-                    ui.sw2(transfer, sum);
+                custf(inp.value, 'MigrationPackDeskFuck++', backup).then((result) => {
+                    if (result === true) {
+                        ui.sw2(transfer, sum);
+                    } else {
+                        wm.wal(`<p>Data Assistant couldn't communicate with the other WebDesk</p>`, () => reboot(), 'Reboot Now');
+                        console.log(`<!> Data Assistant Error: ${result}`);
+                    }
                 }).catch((error) => {
-                    wm.wal(`<p>Data Assistant couldn't communicate with the other WebDesk</p>`, () => reboot(), 'Reboot Now', 'noclose');
+                    wm.wal(`<p>Data Assistant encountered an error</p>`, () => reboot(), 'Reboot Now');
                 });
             }, transfer);
             transfer.id = "quickstartwdsetup";
@@ -332,13 +337,7 @@ var app = {
         name: 'Data Assistant',
         init: async function () {
             const win = tk.mbw('Data Assistant', '300px', 'auto', true, undefined, undefined);
-            tk.p(`Welcome!`, 'h2', win.main);
-            tk.p(`What would you like to do? <span class="bold">Your apps will close, and unsaved data will be lost.</span>`, undefined, win.main);
-            tk.cb('b1 b2', 'Download WebDesk Backup', async function () {
-                await fs.write('/system/migval', 'down');
-                ui.show(document.getElementById('death'), 400);
-                setTimeout(reboot, 390);
-            }, win.main);
+            tk.p(`Your apps will close, and unsaved data will be lost.`, undefined, win.main);
             tk.cb('b1 b2', 'Migrate', async function () {
                 await fs.write('/system/migval', 'down');
                 ui.show(document.getElementById('death'), 400);
