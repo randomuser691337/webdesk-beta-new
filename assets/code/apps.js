@@ -13,7 +13,7 @@ var app = {
             tk.cb('b1 b2', 'Appearance', () => ui.sw2(mainPane, appearPane), mainPane);
             // General pane
             tk.p('General', undefined, generalPane);
-            tk.cb('b1 b2 red', 'Erase This WebDesk', () => wm.wal(`<p>Warning: Erasing this WebDesk will destroy all data stored on it, and you'll need to do setup again.</p>`, () => fs.erase('reboot'), 'Erase'), generalPane);
+            tk.cb('b1 b2 red', 'Erase This WebDesk', () => app.eraseassist.init(), generalPane);
             tk.cb('b1 b2 red', 'Remove All App Market Apps', () => wm.wal(`<p>Warning: Removing all App Market apps will cause a reboot and delete them, but their data will remain.</p>`, function () {
                 fs.del('/system/apps.json');
                 setTimeout(function () { window.location.reload() }, 250);
@@ -63,6 +63,13 @@ var app = {
             }, appearPane); tk.cb('b1', 'Back', () => ui.sw2(appearPane, mainPane), appearPane);
         }
     },
+    eraseassist: {
+        runs: false,
+        init: function () {
+            ui.play('./assets/other/error.ogg');
+            wm.wal(`<p>Warning: Erasing this WebDesk will destroy all data stored on it, this cannot be undone!</p>`, () => fs.erase('reboot'), 'Erase');
+        }
+    },
     setup: {
         runs: false,
         init: function () {
@@ -109,11 +116,17 @@ var app = {
             // user menu
             const user = tk.c('div', main, 'setb hide');
             tk.img('./assets/img/setup/user.svg', 'setupi', user);
-            tk.p('User & Permissions', 'h2', user);
-            tk.p(`Set up a user for WebDesk to store all your things in, and also set up WebDesk's permissions. Data is stored on your device only.`, undefined, user);
+            tk.p('Create a User', 'h2', user);
+            tk.p(`Data is stored on your device only. You can optionally give your city's name for unit detection, weather info, etc.`, undefined, user);
             const input = tk.c('input', user, 'i1');
-            input.placeholder = "Enter a name to use with WebDesk/it's services";
-            tk.cb('b1', 'Done!', function () { wd.finishsetup(input.value, user, sum) }, user);
+            input.placeholder = "Enter a name to use with WebDesk";
+            const loc = tk.c('input', user, 'i1');
+            loc.placeholder = "The city you're in (not required)";
+            tk.cb('b1', 'Done!', function () {
+                wd.finishsetup(input.value, user, sum); if (loc.value !== "") {
+                    fs.write('/user/info/city', loc.value);
+                }
+            }, user);
             // summary
             const sum = tk.c('div', main, 'setb hide');
             tk.img('./assets/img/setup/check.svg', 'setupi', sum);
@@ -168,8 +181,8 @@ var app = {
             const sum = tk.c('div', main, 'setb hide');
             tk.img('./assets/img/setup/check.svg', 'setupi', sum);
             tk.p('All done!', 'h2', sum);
-            tk.p(`Data has been moved to the other WebDesk. Hit "Finish" to go back to WebDesk.`, undefined, sum);
-            tk.cb('b1', 'Finish', function () { wd.reboot(); }, sum);
+            tk.p(`Data has been moved to the other WebDesk. Hit "Finish" to go back to WebDesk, or you can erase this one if you're not going to use it.`, undefined, sum);
+            tk.cb('b1', 'Erase This WebDesk', function () { app.eraseassist.init(); }, sum); tk.cb('b1', 'Finish', function () { wd.reboot(); }, sum);
             sum.id = "setupdone";
             compressfs()
                 .then((blob) => {
@@ -180,16 +193,27 @@ var app = {
                 .catch((error) => {
                     wm.wal('<p>Data Assistant encountered an error</p>', () => reboot(), 'Reboot Now', 'noclose');
                 });
-
         }
     },
     imgview: {
         runs: false,
         name: 'Iris',
         init: async function (contents) {
-            const win = tk.mbw('Iris Media Viewer', '300px', 'auto', true, undefined, undefined);
-            const img = tk.c('img', win.main, 'embed');
-            img.src = contents;
+            const win = tk.mbw('Iris Media Viewer', '550px', 'auto', true, undefined, undefined);
+            if (contents.includes('data:image')) {
+                const img = tk.c('img', win.main, 'embed');
+                img.src = contents;
+            } else if (contents.includes('data:video')) {
+                const img = tk.c('video', win.main, 'embed');
+                const src = tk.c('source', img);
+                src.src = contents;
+                img.controls = true;
+            } else if (contents.includes('data:audio')) {
+                const img = tk.c('audio', win.main);
+                const src = tk.c('source', img);
+                src.src = contents;
+                img.controls = true;
+            }
         }
     },
     textedit: {
@@ -252,6 +276,9 @@ var app = {
                     if (thing.type === "folder") {
                         const selfdestruct = tk.cb('flist width', "Folder: " + thing.name, () => navto(thing.path + "/"), items);
                     } else {
+                        if (thing.name == "") {
+                            return;
+                        }
                         const selfdestruct = tk.cb('flist width', "File: " + thing.name, async function () {
                             const yeah = await fs.read(thing.path);
                             const menu = tk.c('div', document.body, 'cm');
@@ -262,6 +289,15 @@ var app = {
                             if (thing.path.includes('/user/info/name')) {
                                 tk.p('Deleting this file will erase your data on next restart.', 'warn', menu);
                             }
+                            tk.cb('b1 b2', 'Open', async function () {
+                                ui.dest(menu);
+                                const yeah = await fs.read(thing.path);
+                                if (yeah.includes('data:video') || yeah.includes('data:image') || yeah.includes('data:audio')) {
+                                    app.imgview.init(yeah);
+                                } else {
+                                    app.textedit.init(yeah, thing.path);
+                                }
+                            }, menu);
                             tk.cb('b1 b2', 'Open with', function () {
                                 ui.dest(menu);
                                 const menu2 = tk.c('div', document.body, 'cm');
@@ -326,10 +362,24 @@ var app = {
         runs: true,
         name: 'About',
         init: async function () {
-            const win = tk.mbw('About', '300px', 'auto', true, undefined, undefined);
-            tk.p(`WebDesk`, 'h2', win.main);
-            tk.p(`Version: ${abt.ver}`, undefined, win.main);
-            tk.p(`Latest update: ${abt.lastmod}`, undefined, win.main);
+            const win = tk.mbw('About', undefined, 'auto', true, undefined, undefined);
+            tk.css('./assets/lib/abt.css');
+            const main = tk.c('div', win.main, 'abtcont');
+            const side = tk.c('div', main, 'abtlogo');
+            const info = tk.c('div', main, 'abtinfo');
+            const logo = tk.img('./assets/img/favicon.png', 'abtimg', side);
+            tk.p('WebDesk', 'h2', info);
+            tk.p(`Updated: ${abt.lastmod}`, undefined, info);
+            tk.p(`DeskID: ${sys.deskid}`, undefined, info);
+            tk.p(`Version: ${abt.ver}`, undefined, info);
+            /* fs.space().then(result => {
+                console.log(result);
+                const prog1 = tk.c('div', info, 'progress-bar');
+                const prog2 = tk.c('div', prog1, 'progress');
+                prog2.style.width = result.usedprct + "%";
+            }).catch(err => {
+                console.error(err);
+            }); */
         }
     },
     backup: {

@@ -174,7 +174,7 @@ var wd = {
         }
     },
     finishsetup: function (name, div1, div2) {
-        ui.sw2(div1, div2); ui.masschange('name', name); fs.write('/user/info/name', name);
+        ui.sw2(div1, div2); ui.masschange('name', name); fs.write('/user/info/name', name); fs.write('/system/info/setuptime', Date.now()); fs.write('/system/info/setupver', abt.ver);
     },
     reboot: function () {
         window.location.reload();

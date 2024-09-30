@@ -8,7 +8,7 @@ var ui = {
         ui.cv('accent', accent);
     },
     crtheme: async function (hex, opt) {
-        const a = ui.hextool(hex, 20)
+        const a = ui.hextool(hex, 25);
         ui.theme(ui.hextool(hex, 20), a, ui.hextool(hex, 35), ui.hextool(hex, 50), ui.hextorgb(hex));
         if (!opt === true) {
             await fs.write('/user/info/color', hex);
@@ -40,6 +40,8 @@ var ui = {
         if (dr1) {
             if (anim) {
                 $(dr1).fadeOut(anim);
+            } else if (anim === 0) {
+                $(dr1).hide();
             } else {
                 $(dr1).fadeOut(210);
             }
@@ -54,6 +56,8 @@ var ui = {
         if (dr1) {
             if (anim) {
                 $(dr1).fadeIn(anim);
+            } else if (anim === 0) {
+                $(dr1).show();
             } else {
                 $(dr1).fadeIn(210);
             }
@@ -72,6 +76,8 @@ var ui = {
         if (dr1) {
             if (anim) {
                 $(dr1).fadeOut(anim, function () { dr1.remove(); });
+            } else if (anim === 0) {
+                dr1.remove();
             } else {
                 $(dr1).fadeOut(170, function () { dr1.remove(); });
             }
@@ -150,7 +156,7 @@ var ui = {
         let b = bigint & 255;
 
         let luminance = 0.2126 * r + 0.7152 * g + 0.0722 * b;
-        return luminance < 128;
+        return luminance < 140;
     },
     hextorgb: function (hex) {
         hex = hex.replace(/^#/, '');

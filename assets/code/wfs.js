@@ -69,6 +69,13 @@ function idbop(operation, params, opt, requestId) {
                 console.error('Error fetching files:', error);
             });
             break;
+        case 'space':
+            fs2.space().then(files => {
+                self.postMessage({ type: 'result', data: files, requestId });
+            }).catch(error => {
+                console.error('Error fetching files:', error);
+            });
+            break;
         case 'ls':
             fs2.folder(params).then(result => {
                 self.postMessage({ type: 'result', data: result, requestId });
@@ -93,12 +100,11 @@ var fs2 = {
 
                 if (item && item.data) {
                     if (typeof item.data === 'string') {
-                        resolve(item.data); // Return as plain string
+                        resolve(item.data);
                     } else {
-                        // Handle other types like Blob (if stored)
                         const reader = new FileReader();
                         reader.onload = function () {
-                            resolve(reader.result); // Return as text
+                            resolve(reader.result);
                         };
                         reader.readAsText(item.data);
                     }
@@ -229,5 +235,5 @@ var fs2 = {
                 reject(event.target.error);
             };
         });
-    }
+    },
 };
