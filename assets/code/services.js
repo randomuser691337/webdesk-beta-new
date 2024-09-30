@@ -15,6 +15,9 @@ var ptp = {
 
             sys.peer.on('error', async (err) => {
                 console.log(`<!> whoops: ${err}`);
+                if (err.includes('Cannot connect to new Peer after disconnecting from server')) {
+                    wm.notif('Reboot WebDesk', `Your connection was interrupted, so your DeskID is broken. Reboot WebDesk to fix this.`);
+                }
                 if (!sys.deskid && retryc < 3) {
                     console.log('<!> DeskID failed to register, trying again...');
                     retryc++;
@@ -106,6 +109,12 @@ function handleData(conn, data) {
             if (sys.setupd === false) {
                 ui.sw('setupqs', 'setuprs'); restorefs(data.file);
             }
+        } else if (data.name === "MigrationFile") {
+            if (sys.setupd === false) {
+                ui.sw('setupqs', 'setuprs');
+                fs.write(data.filename, data.file);
+                console.log(`<i> Restored ${data.filename}`);
+            }
         } else if (data.name === "YesImAlive-WebKey") {
             wm.notif(`${data.uname} accepted your WebDrop.`, 'WebDesk Services');
         } else if (data.name === "DesktoDeskMsg-WebKey") {
@@ -144,6 +153,40 @@ async function compressfs() {
         }
     });
 }
+
+async function migrationgo(deskid) {
+    return new Promise(async (resolve, reject) => {
+        try {
+            const files = await fs.getall();
+            const conn = sys.peer.connect(deskid);
+
+            conn.on('open', async function () {
+                try {
+                    const fileContents = await Promise.all(files.map(file => fs.read(file)));
+                    fileContents.forEach((content, index) => {
+                        conn.send({
+                            name: 'MigrationFile',
+                            file: content,
+                            filename: files[index],
+                        });
+                    });
+                    resolve(true);
+                } catch (fileReadError) {
+                    wm.notif('File read error during migration', 'An issue occurred while reading files for migration.');
+                    reject(fileReadError);
+                }
+            });
+
+            conn.on('error', (err) => {
+                wm.notif('An error occurred in migration', 'If this is spamming, then the other WebDesk probably has an issue.');
+                reject(err);
+            });
+        } catch (error) {
+            reject(error);
+        }
+    });
+}
+
 
 async function restorefs(zipBlob) {
     console.log('<i> NEW Super Restore U Stage 1: Prepare zip');
@@ -245,7 +288,7 @@ async function custf(id, fname2, fblob2) {
             conn.on('error', (err) => {
                 console.error('Connection error:', err);
                 wm.snack('An error occurred while sending your file.', 2500);
-                reject(new Error('Connection error while sending the file')); 
+                reject(new Error('Connection error while sending the file'));
             });
         } catch (error) {
             console.error('Error while sending file:', error);
