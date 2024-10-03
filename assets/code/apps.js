@@ -70,6 +70,26 @@ var app = {
             wm.wal(`<p>Warning: Erasing this WebDesk will destroy all data stored on it, this cannot be undone!</p>`, () => fs.erase('reboot'), 'Erase');
         }
     },
+    echodesk: {
+        runs: false,
+        init: function () {
+            const main = tk.c('div', document.getElementById('setuparea'), 'setupbox');
+            // create setup menubar
+            const bar = tk.c('div', main, 'setupbar');
+            const tnav = tk.c('div', bar, 'tnav');
+            const title = tk.c('div', bar, 'title');
+            tk.cb('b4', 'Force Exit', () => wm.wal(`<p>If WebDesk is stuck, use this to leave.</p><p>Note: If you have lots of files or a slow connection, it's normal for things to take a while.</p>`, () => reboot(), 'Force Exit'), tnav);
+            tk.cb('b4 time', 'what', undefined, title);
+            // first menu
+            const first = tk.c('div', main, 'setb');
+            tk.img('./assets/img/setup/first.svg', 'setupi', first);
+            tk.p('In EchoDesk Mode', 'h2', first);
+            tk.p(`Use the ID below to start your WebDesk on another WebDesk. Be aware, the other person will have full access to your files.`, undefined, first);
+            tk.p('--------', 'h2 deskid', first);
+            tk.cb('b1', `Exit EchoDesk`, () => wd.reboot(), first);
+            sys.setupd = "echo";
+        }
+    },
     setup: {
         runs: false,
         init: function () {
@@ -99,7 +119,7 @@ var app = {
             tk.img('./assets/img/setup/restore.svg', 'setupi', copy);
             tk.p('Restoring from other WebDesk', 'h2', copy);
             tk.p('This might take a while depending on settings and file size.', undefined, copy);
-            tk.p('Starting...', 'restpg', copy);
+            el.migstat = tk.p('Starting...', 'restpg', copy);
             tk.cb('b1', 'Cancel', function () { fs.erase('reboot'); }, copy);
             copy.id = "quickstartwdgoing";
             // warn menu
@@ -132,7 +152,7 @@ var app = {
             tk.img('./assets/img/setup/check.svg', 'setupi', sum);
             tk.p('All done!', 'h2', sum);
             tk.p('Make sure to check Settings for more options.', undefined, sum);
-            tk.cb('b1 rb', 'Erase & restart', function () { fs.erase('reboot'); }, sum); tk.cb('b1', 'Finish setup', function () { wd.reboot(); }, sum);
+            tk.cb('b1 rb', 'Erase & restart', function () { fs.erase('reboot'); }, sum); tk.cb('b1', 'Finish', function () { wd.reboot(); }, sum);
             sum.id = "setupdone";
         }
     },
@@ -147,34 +167,36 @@ var app = {
             var backup = undefined;
             tk.cb('b4', 'Force Exit', () => wm.wal(`<p>If WebDesk is stuck, use this to leave.</p><p>Note: If you have lots of files or a slow connection, it's normal for things to take a while.</p>`, () => reboot(), 'Force Exit'), tnav);
             tk.cb('b4 time', 'what', undefined, title);
-            // first menu
-            const first = tk.c('div', main, 'setb');
-            tk.img('./assets/img/setup/restore.svg', 'setupi', first);
-            tk.p('Preparing', 'h2', first);
-            tk.p(`We're getting your data ready for moving. This could take milliseconds or hours, depending on the amount of data you have.`, undefined, first);
-            tk.cb('b1', `Cancel Migration`, function () {
-                ui.show(document.getElementById('death'), 400);
-                setTimeout(window.location.reload, 390);
-            }, first);
             // migrate menu
-            const transfer = tk.c('div', main, 'setb hide');
+            const transfer = tk.c('div', main, 'setb');
             tk.img('./assets/img/setup/quick.png', 'setupi', transfer);
             tk.p('Migration Assistant', 'h2', transfer);
             const stats = tk.p(`Only enter your own code. If you use someone else's, you might be giving your data to a scammer.`, 'bold', transfer);
             const inp = tk.c('input', transfer, 'i1');
             inp.placeholder = "Enter the code shown on the other WebDesk";
+            tk.cb('b1', `Cancel Migration`, function () {
+                ui.show(document.getElementById('death'), 400);
+                setTimeout(wd.reboot, 390);
+            }, transfer);
             tk.cb('b1', 'Done, copy data!', async function () {
-                stats.innerText = `We're working on copying your data, please wait...`;
-                custf(inp.value, 'MigrationPackDeskFuck++', backup).then((result) => {
+                stats.innerText = `Connecting to other WebDesk...`;
+                migrationgo(inp.value, stats).then((result) => {
                     if (result === true) {
                         ui.sw2(transfer, sum);
                     } else {
-                        wm.wal(`<p>Data Assistant couldn't communicate with the other WebDesk</p>`, () => reboot(), 'Reboot Now');
+                        wm.wal(`<p>Data Assistant couldn't communicate with the other WebDesk</p>`, () => wd.reboot(), 'Reboot Now');
                         console.log(`<!> Data Assistant Error: ${result}`);
                     }
                 }).catch((error) => {
                     wm.wal(`<p>Data Assistant encountered an error</p>`, () => reboot(), 'Reboot Now');
+                    console.log('<!> ' + error);
                 });
+
+                setTimeout(function () {
+                    if (stats.innerText === `Connecting to other WebDesk...`); {
+                        wm.wal(`<p>Couldn't connect to other WebDesk, try these things to fix it:</p><li>Check your Internet connection</li><li>Disable your VPN temporarily, then reload both WebDesks</li><li>Reload the other WebDesk first, then this one second</li>`);
+                    }
+                }, 9000);
             }, transfer);
             transfer.id = "quickstartwdsetup";
             // summary
@@ -184,15 +206,6 @@ var app = {
             tk.p(`Data has been moved to the other WebDesk. Hit "Finish" to go back to WebDesk, or you can erase this one if you're not going to use it.`, undefined, sum);
             tk.cb('b1', 'Erase This WebDesk', function () { app.eraseassist.init(); }, sum); tk.cb('b1', 'Finish', function () { wd.reboot(); }, sum);
             sum.id = "setupdone";
-            compressfs()
-                .then((blob) => {
-                    backup = blob;
-                    console.log('<i> Ready! Continuing...');
-                    ui.sw2(first, transfer);
-                })
-                .catch((error) => {
-                    wm.wal('<p>Data Assistant encountered an error</p>', () => reboot(), 'Reboot Now', 'noclose');
-                });
         }
     },
     imgview: {
@@ -231,6 +244,7 @@ var app = {
                 await fs.write(path, ok.value);
                 wm.snack('Saved');
             }, win.main);
+            win.win.style.resize = "horizontal";
         }
     },
     files: {
@@ -395,6 +409,30 @@ var app = {
             }, win.main);
         }
     },
+    echoclient: {
+        runs: true,
+        name: 'EchoDesk',
+        init: async function () {
+            const win = tk.mbw('EchoDesk', '300px', 'auto', true, undefined, undefined);
+            tk.p(`If you're connecting: Enter the EchoDesk ID and hit "Connect". The other WebDesk will appear as a window.`, undefined, win.main);
+            tk.p(`If you're the host: Click "Enter EchoDesk Mode". Your apps will close, unsaved data will be lost.`, undefined, win.main);
+            tk.cb('b1 b2', 'Enter EchoDesk mode', async function () {
+                await fs.write('/system/migval', 'echo');
+                ui.show(document.getElementById('death'), 400);
+                setTimeout(reboot, 390);
+            }, win.main);
+            tk.p(`Connecting`, undefined, win.main);
+            const input = tk.c('input', win.main, 'i1');
+            input.placeholder = "Enter EchoDesk ID";
+            tk.cb('b1 b2', 'Connect', async function () {
+                /* const the = tk.mbw('EchoDesk Viewer', '100%', '100%', undefined, undefined, undefined);
+                const frame = tk.c('embed', the.main, 'embed');
+                frame.style.height = "90%";
+                frame.src = "./echodesk.html?deskid=" + input.value; */
+                app.browser.init("./echodesk.html?deskid=" + input.value);
+            }, win.main);
+        }
+    },
     appmark: {
         runs: true,
         name: 'App Market',
@@ -531,7 +569,7 @@ var app = {
     browser: {
         runs: true,
         name: 'Browser',
-        init: async function () {
+        init: async function (path) {
             tk.css('./assets/lib/browse.css');
             const win = tk.mbw('Browser', '80vw', '82vh', true);
             ui.dest(win.title, 0);
@@ -548,9 +586,13 @@ var app = {
             let currentName = tk.c('div', win.main, 'hide');
             win.main.classList = "browsercont";
 
-            function addtab() {
+            function addtab(ok) {
                 const tab = tk.c('embed', win.main, 'browsertab');
-                tab.src = "https://meower.xyz";
+                if (ok) {
+                    tab.src = ok;
+                } else {
+                    tab.src = "https://meower.xyz";
+                }
                 ui.sw2(currentTab, tab, 100);
                 currentTab = tab;
                 let lastUrl = "";
@@ -564,7 +606,11 @@ var app = {
                     thing = [...urls];
                 }, btnnest);
                 const tabTitle = tk.c('span', tabBtn);
-                tabTitle.innerText = "meower.xyz";
+                if (ok) {
+                    tabTitle.innerText = ok;
+                } else {
+                    tabTitle.innerText = "meower.xyz";
+                }
                 currentName = tabTitle;
                 currentBtn = tabTitle;
 
@@ -610,7 +656,13 @@ var app = {
                 }
             }, okiedokie);
 
-            setTimeout(function () { addtab(); }, 250);
+            setTimeout(function () {
+                if (path) {
+                    addtab(path);
+                } else {
+                    addtab();
+                }
+            }, 250);
             wd.win();
         }
     },

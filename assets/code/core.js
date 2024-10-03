@@ -104,7 +104,7 @@ var wd = {
                 el.sm.style.width = "200px";
                 el.sm.style.left = "4px";
                 const btm = el.taskbar.getBoundingClientRect();
-                el.sm.style.bottom = btm.height + btm.x + 3 + "px";
+                el.sm.style.bottom = btm.height + btm.x + 4 + "px";
                 tk.p(`Hello, ${name}!`, 'h2', el.sm);
                 tk.p(`Your DeskID is ${sys.deskid}`, undefined, el.sm);
                 const ok = tk.c('div', el.sm, 'embed nest');
@@ -132,12 +132,16 @@ var wd = {
                 el.sm.style.width = "200px";
                 el.sm.style.right = "4px";
                 const btm = el.taskbar.getBoundingClientRect();
-                el.sm.style.bottom = btm.height + btm.x + 3 + "px";
+                el.sm.style.bottom = btm.height + btm.x + 4 + "px";
                 tk.p(`Controls`, 'h2', el.sm);
                 tk.p(`Your DeskID is ${sys.deskid}`, undefined, el.sm);
                 const ok = tk.c('div', el.sm, 'embed nest');
                 tk.cb('b3 b2', 'Settings', function () {
                     app.settings.init();
+                    controlcenter();
+                }, ok);
+                tk.cb('b3 b2', 'Toggle Fullscreen', function () {
+                    wd.fullscreen();
                     controlcenter();
                 }, ok);
             } else {
@@ -291,6 +295,20 @@ var wd = {
         }
         console.log(JSON.stringify(obj, null, 4));
         await fs.write('/system/apps.json', JSON.stringify(obj, null, 4));
+    },
+    newid: async function () {
+        const sigma = gen(8);
+        await fs.write('/system/deskid', sigma);
+        return sigma;
+    },
+    fullscreen: async function () {
+        if (document.fullscreenElement) {
+            sys.full = false;
+            document.exitFullscreen();
+        } else {
+            sys.full = true;
+            document.documentElement.requestFullscreen();
+        }
     }
 }
 
