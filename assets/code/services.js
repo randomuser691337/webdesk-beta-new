@@ -5,7 +5,7 @@ var ptp = {
         let retryc = 0;
 
         async function attemptConnection() {
-            sys.peer = new Peer(id);
+            sys.peer = new Peer(id, [{debug: 3}]);
 
             sys.peer.on('open', (peerId) => {
                 ui.masschange('deskid', peerId);
@@ -18,9 +18,7 @@ var ptp = {
 
             sys.peer.on('error', async (err) => {
                 console.log(`<!> whoops: ${err}`);
-                if (err.includes('Cannot connect to new Peer after disconnecting from server')) {
-                    wm.notif('Reboot WebDesk', `Your connection was interrupted, so your DeskID is broken. Reboot WebDesk to fix this.`);
-                }
+                wm.notif('Reboot WebDesk', `Your connection was interrupted, so your DeskID is broken. Reboot WebDesk to fix this.`);
                 if (!sys.deskid && retryc < 3) {
                     console.log('<!> DeskID failed to register, trying again...');
                     retryc++;
@@ -34,7 +32,7 @@ var ptp = {
             });
 
             sys.peer.on('connection', (dataConnection) => {
-                console.log('<i> hi vro')
+                console.log('<i> hi vro');
                 dataConnection.on('data', (data) => {
                     try {
                         const parsedData = JSON.parse(data);

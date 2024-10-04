@@ -684,13 +684,13 @@ p {
 
 @keyframes tb {
     0% {
-        bottom: -120px;
+        bottom: -130px;
         left: 20px;
         right: 20px;
         border-radius: var(--rad1);
     }
 
-    70% {
+    60% {
         bottom: 16px;
         left: 20px;
         right: 20px;

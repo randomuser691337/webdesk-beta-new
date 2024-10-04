@@ -5,7 +5,6 @@ async function gosend(act, path, name, file) {
         };
 
         try {
-            console.log(sys.echoid);
             const conn = sys.peer.connect(sys.echoid);
             conn.on('open', () => {
                 conn.send(dataToSend);
