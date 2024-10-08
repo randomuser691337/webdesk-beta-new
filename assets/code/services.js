@@ -3,9 +3,10 @@ var globcall;
 var ptp = {
     go: async function (id) {
         let retryc = 0;
+        var fucker = false;
 
         async function attemptConnection() {
-            sys.peer = new Peer(id, [{debug: 3}]);
+            sys.peer = new Peer(id, [{ debug: 3 }]);
 
             sys.peer.on('open', (peerId) => {
                 ui.masschange('deskid', peerId);
@@ -14,20 +15,35 @@ var ptp = {
                 if (sys.echoid !== undefined) {
                     boot();
                 }
+                if (fucker === true) {
+                    wm.notif(`WebDesk Services`, `Your DeskID is back online.`);
+                    fucker = false;
+                }
             });
 
             sys.peer.on('error', async (err) => {
                 console.log(`<!> whoops: ${err}`);
-                wm.notif('Reboot WebDesk', `Your connection was interrupted, so your DeskID is broken. Reboot WebDesk to fix this.`);
-                if (!sys.deskid && retryc < 3) {
+                if (fucker === false) {
+                    if (err.message.includes('Lost connection to server')) {
+                        wm.notif('Reboot WebDesk', `Your connection was interrupted, so your DeskID is broken. WebDesk will try to restore the connection.`);
+                    } else if (err.message.includes('is taken')) {
+                        wm.notif('DeskID is taken', `Your DeskID is in use by someone else or another tab. You've been given a temporary DeskID until next reboot.`);
+                    }
+                }
+                if (err.message.includes('is taken')) {
+                    ptp.go(gen(8));
+                    return;
+                } else if (err.message.includes(`Error: Could not connect to peer ` + sys.echoid)) {
+                    wm.wal(`<p class="bold">EchoDesk Connection Interrupted</p><p>The other WebDesk might have rebooted, or is encountering network issues.</p><p>Check your Internet on this side too.</p>`);
+                }
+                fucker = true;
+                if (retryc < 3) {
                     console.log('<!> DeskID failed to register, trying again...');
                     retryc++;
                     setTimeout(attemptConnection, 10000);
                 } else if (retryc >= 3) {
                     console.log('<!> Maximum retry attempts reached. DeskID registration failed.');
-                    wm.wal(`<p class="h3">WebDesk to WebDesk services are disabled</p><p>Your DeskID didn't register for some reason, therefore you can't use WebDrop, WebCall or Migration Assistant.</p><p>If you'd like, you can reboot to try again. Check your Internet too.</p>`, 'reboot()', 'Reboot');
-                } else {
-                    snack('Failed to connect.');
+                    wm.wal(`<p class="bold">WebDesk to WebDesk services are disabled</p><p>Your DeskID didn't register for some reason, therefore you can't use WebDrop, WebCall or Migration Assistant.</p><p>If you'd like, you can reboot to try again. Check your Internet too.</p>`, () => wd.reboot(), 'Reboot');
                 }
             });
 
@@ -37,7 +53,6 @@ var ptp = {
                     try {
                         const parsedData = JSON.parse(data);
                         if (parsedData.type === 'request') {
-                            console.log('Received request:', parsedData.message);
                             const response = {
                                 response: sys.name
                             };
@@ -127,6 +142,7 @@ async function handleData(conn, data) {
             }
         } else if (data.name === "EchoGive") {
             if (sys.setupd === "echo") {
+                sys.model.innerText = data.act + ": " + data.path;
                 if (data.act === "read") {
                     const fileData = await fs.read(data.path);
                     if (fileData === null) {

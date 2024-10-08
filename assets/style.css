@@ -10,13 +10,14 @@
     --ui3: #dddddd;
     --bc: rgb(220, 220, 220, 0.6);
     --font: #000;
-    --bl1: 14px;
-    --bl2: 9px;
-    --rad1: 15px;
+    --bl1: 12px;
+    --bl2: 8px;
+    --rad1: 16px;
     --rad2: 12px;
     --rad3: 9px;
     --fz1: 15px;
     --fz2: 12px;
+    --fz3: 10px;
     --inv: 0;
     --wina: 0px;
 }
@@ -348,6 +349,17 @@ p {
     box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2);
 }
 
+.b5 {
+    padding: 2px;
+    border-radius: 8px;
+    background-color: rgba(var(--accent), 0.5);
+    font-size: var(--fz2);
+    border: none;
+    cursor: pointer;
+    transition: all 0.05s ease-in-out;
+    margin-left: 4px;
+}
+
 .b4 {
     padding: 1px 3px;
     border-radius: 8px;
@@ -616,7 +628,7 @@ p {
     padding: 8px;
     border-radius: var(--rad1);
     margin-bottom: 5px;
-    animation: notif 0.45s ease-out;
+    animation: notif 0.7s ease-out;
     text-align: left;
     -webkit-backdrop-filter: blur(var(--bl1));
     backdrop-filter: blur(var(--bl1));
@@ -672,7 +684,7 @@ p {
     border-top-right-radius: var(--rad1);
     background-color: var(--ui1);
     box-shadow: rgba(0, 0, 0, 0.3) 0px 0px 75px 15px;
-    animation: tb 1.1s cubic-bezier(0.25, 1, 0.5, 1) forwards;
+    animation: tb 1s ease;
     backdrop-filter: blur(var(--bl2));
     -webkit-backdrop-filter: blur(var(--bl2));
     z-index: 3;
@@ -684,16 +696,16 @@ p {
 
 @keyframes tb {
     0% {
-        bottom: -130px;
-        left: 20px;
-        right: 20px;
+        bottom: -135px;
+        left: 30px;
+        right: 30px;
         border-radius: var(--rad1);
     }
 
-    60% {
-        bottom: 16px;
-        left: 20px;
-        right: 20px;
+    55% {
+        bottom: 35px;
+        left: 35px;
+        right: 35px;
         border-radius: var(--rad1);
     }
 
@@ -823,4 +835,8 @@ p {
     background-color: var(--ui2);
     z-index: 9999;
     animation: snack 0.5s ease-in-out;
+}
+
+.greyp {
+    color: #aaa;
 }

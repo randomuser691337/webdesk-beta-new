@@ -127,15 +127,15 @@ var wd = {
             }
         }
         function controlcenter() {
-            if (el.sm == undefined) {
-                el.sm = tk.c('div', document.body, 'tbmenu');
-                el.sm.style.width = "200px";
-                el.sm.style.right = "4px";
+            if (el.cc == undefined) {
+                el.cc = tk.c('div', document.body, 'tbmenu');
+                el.cc.style.width = "200px";
+                el.cc.style.right = "4px";
                 const btm = el.taskbar.getBoundingClientRect();
-                el.sm.style.bottom = btm.height + btm.x + 4 + "px";
-                tk.p(`Controls`, 'h2', el.sm);
-                tk.p(`Your DeskID is ${sys.deskid}`, undefined, el.sm);
-                const ok = tk.c('div', el.sm, 'embed nest');
+                el.cc.style.bottom = btm.height + btm.x + 4 + "px";
+                tk.p(`Controls`, 'h2', el.cc);
+                tk.p(`Your DeskID is ${sys.deskid}`, undefined, el.cc);
+                const ok = tk.c('div', el.cc, 'embed nest');
                 tk.cb('b3 b2', 'Settings', function () {
                     app.settings.init();
                     controlcenter();
@@ -144,9 +144,30 @@ var wd = {
                     wd.fullscreen();
                     controlcenter();
                 }, ok);
+                tk.cb('b3 b2', 'Add File', function () {
+                    const input = document.createElement('input');
+                    input.type = 'file';
+                    input.style.display = 'none';
+                    input.addEventListener('change', function (event) {
+                        const file = event.target.files[0];
+                        if (file) {
+                            const reader = new FileReader();
+
+                            reader.onload = async function (e) {
+                                const silly = e.target.result;
+                                await fs.write(`/user/files/` + file.name, silly);
+                            };
+
+                            reader.readAsDataURL(file);
+                        }
+                    });
+
+                    input.click();
+                    controlcenter();
+                }, ok);
             } else {
-                ui.dest(el.sm, 150);
-                el.sm = undefined;
+                ui.dest(el.cc, 150);
+                el.cc = undefined;
             }
         }
         function desktopgo() {
@@ -309,6 +330,22 @@ var wd = {
             sys.full = true;
             document.documentElement.requestFullscreen();
         }
+    },
+    download: function (file, fileName) {
+        let downloadLink = document.createElement('a')
+  
+        if (typeof file === 'string' && file.startsWith('data:')) {
+          downloadLink.href = file
+          downloadLink.download = fileName
+        } else if (file instanceof File || file instanceof Blob) {
+          downloadLink.href = URL.createObjectURL(file)
+          downloadLink.download = file.name || fileName
+        }
+      
+        downloadLink.style.display = 'none'
+        document.body.appendChild(downloadLink)
+        downloadLink.click()
+        document.body.removeChild(downloadLink)
     }
 }
 

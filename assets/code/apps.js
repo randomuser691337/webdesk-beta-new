@@ -85,6 +85,7 @@ var app = {
             tk.img('./assets/img/setup/first.svg', 'setupi', first);
             tk.p('In EchoDesk Mode', 'h2', first);
             tk.p(`Use the ID below to start your WebDesk on another WebDesk. Be aware, the other person will have full access to your files.`, undefined, first);
+            sys.model = tk.p(`Most recent file action will show here`, 'greyp', first);
             tk.p('--------', 'h2 deskid', first);
             tk.cb('b1', `Exit EchoDesk`, () => wd.reboot(), first);
             sys.setupd = "echo";
@@ -104,7 +105,21 @@ var app = {
             const first = tk.c('div', main, 'setb');
             tk.img('./assets/img/setup/first.svg', 'setupi', first);
             tk.p('Welcome to WebDesk!', 'h2', first);
-            tk.cb('b1', `Guest`, () => wd.desktop('Guest', gen(8)), first);
+            tk.cb('b1', `EchoDesk`, function () {
+                const echotemp = tk.c('div', main, 'setb hide');
+                tk.img('./assets/img/setup/quick.png', 'setupi', echotemp);
+                tk.p('EchoDesk', 'h2', echotemp);
+                tk.p(`Enter the EchoDesk ID, and hit "Okay" to connect to the other WebDesk.`, undefined, echotemp);
+                const input = tk.c('input', echotemp, 'i1');
+                input.placeholder = "Enter EchoDesk ID";
+                tk.cb('b1', 'Back', () => ui.sw2(echotemp, first), echotemp);tk.cb('b1', 'Okay', () => window.location.href = "./echodesk.html?deskid=" + input.value, echotemp);
+                ui.sw2(first, echotemp);
+            }, first);
+            tk.cb('b1', `Guest`, function () {
+                sys.guest = true;
+                wd.desktop('Guest', gen(8));
+                wm.notif('Welcome to WebDesk!', `You've logged in as a guest, so WebDesk will be erased on reload and some features won't be available.`)
+            }, first);
             tk.cb('b1', `Let's go`, () => ui.sw2(first, transfer), first);
             // migrate menu
             const transfer = tk.c('div', main, 'setb hide');
@@ -304,7 +319,6 @@ var app = {
                                 tk.p('Deleting this file will erase your data on next restart.', 'warn', menu);
                             }
                             tk.cb('b1 b2', 'Open', async function () {
-                                ui.dest(menu);
                                 const yeah = await fs.read(thing.path);
                                 if (yeah.includes('data:video') || yeah.includes('data:image') || yeah.includes('data:audio')) {
                                     app.imgview.init(yeah);
@@ -330,6 +344,10 @@ var app = {
                                 tk.cb('b1', 'Cancel', function () {
                                     ui.dest(menu2);
                                 }, menu2);
+                            }, menu);
+                            tk.cb('b1 b2', 'Download', function () {
+                                wd.download(yeah, `WebDesk File ${gen(4)}`);
+                                ui.dest(menu);
                             }, menu);
                             tk.cb('b1 b2', 'Rename/Move', function () {
                                 ui.dest(menu);
@@ -360,6 +378,14 @@ var app = {
                             e.dataTransfer.setData('text/plain', thing.path);
                         });
                         selfdestruct.draggable = true;
+                        /* tk.cb('b5', 'Open', async function () {
+                            const yeah = await fs.read(thing.path);
+                            if (yeah.includes('data:video') || yeah.includes('data:image') || yeah.includes('data:audio')) {
+                                app.imgview.init(yeah);
+                            } else {
+                                app.textedit.init(yeah, thing.path);
+                            }
+                        }, selfdestruct); */
                     }
                 });
             }
@@ -383,9 +409,9 @@ var app = {
             const info = tk.c('div', main, 'abtinfo');
             const logo = tk.img('./assets/img/favicon.png', 'abtimg', side);
             tk.p('WebDesk', 'h2', info);
-            tk.p(`Updated: ${abt.lastmod}`, undefined, info);
-            tk.p(`DeskID: ${sys.deskid}`, undefined, info);
-            tk.p(`Version: ${abt.ver}`, undefined, info);
+            tk.p(`<span class="bold">Updated</span> ${abt.lastmod}`, undefined, info);
+            tk.p(`<span class="bold">DeskID</span> ${sys.deskid}`, undefined, info);
+            tk.p(`<span class="bold">Version</span> ${abt.ver}`, undefined, info);
             /* fs.space().then(result => {
                 console.log(result);
                 const prog1 = tk.c('div', info, 'progress-bar');
@@ -401,12 +427,19 @@ var app = {
         name: 'Data Assistant',
         init: async function () {
             const win = tk.mbw('Data Assistant', '300px', 'auto', true, undefined, undefined);
-            tk.p(`Your apps will close, and unsaved data will be lost.`, undefined, win.main);
-            tk.cb('b1 b2', 'Migrate', async function () {
-                await fs.write('/system/migval', 'down');
-                ui.show(document.getElementById('death'), 400);
-                setTimeout(reboot, 390);
-            }, win.main);
+            if (sys.guest === false) {
+                tk.p(`Your apps will close, and unsaved data will be lost.`, undefined, win.main);
+                tk.cb('b1 b2', 'Migrate', async function () {
+                    await fs.write('/system/migval', 'down');
+                    ui.show(document.getElementById('death'), 400);
+                    setTimeout(reboot, 390);
+                }, win.main);
+            } else {
+                tk.p(`You're in Guest mode. Reboot WebDesk and go through Setup to copy your data over.`, undefined, win.main);
+                tk.cb('b1', 'Reboot', async function () {
+                    wd.reboot();
+                }, win.main);
+            }
         }
     },
     echoclient: {
@@ -414,14 +447,18 @@ var app = {
         name: 'EchoDesk',
         init: async function () {
             const win = tk.mbw('EchoDesk', '300px', 'auto', true, undefined, undefined);
-            tk.p(`If you're connecting: Enter the EchoDesk ID and hit "Connect". The other WebDesk will appear as a window.`, undefined, win.main);
-            tk.p(`If you're the host: Click "Enter EchoDesk Mode". Your apps will close, unsaved data will be lost.`, undefined, win.main);
-            tk.cb('b1 b2', 'Enter EchoDesk mode', async function () {
-                await fs.write('/system/migval', 'echo');
-                ui.show(document.getElementById('death'), 400);
-                setTimeout(reboot, 390);
-            }, win.main);
-            tk.p(`Connecting`, undefined, win.main);
+            if (sys.guest === true) {
+                tk.p(`Enter the EchoDesk ID and hit "Connect". The other WebDesk will appear as a window. <span class="bold">You're in Guest mode, so you can't enter EchoDesk mode.</span>`, undefined, win.main);
+            } else {
+                tk.p(`If you're connecting: Enter the EchoDesk ID and hit "Connect". The other WebDesk will appear as a window.`, undefined, win.main);
+                tk.p(`If you're the host: Click "Enter EchoDesk Mode". Your apps will close, unsaved data will be lost.`, undefined, win.main);
+                tk.cb('b1 b2', 'Enter EchoDesk mode', async function () {
+                    await fs.write('/system/migval', 'echo');
+                    ui.show(document.getElementById('death'), 400);
+                    setTimeout(reboot, 390);
+                }, win.main);
+            }
+            tk.p(`Connect to other WebDesk`, undefined, win.main);
             const input = tk.c('input', win.main, 'i1');
             input.placeholder = "Enter EchoDesk ID";
             tk.cb('b1 b2', 'Connect', async function () {
