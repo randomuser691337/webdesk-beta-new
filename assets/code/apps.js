@@ -18,6 +18,17 @@ var app = {
                 fs.del('/system/apps.json');
                 setTimeout(function () { window.location.reload() }, 250);
             }, 'Okay'), generalPane);
+            const earth = tk.cb('b1 b2', 'Enable Earthquake Mode (Restarting stops it)', function () {
+                const style = document.createElement('style');
+                style.innerHTML = `
+                    div, button, p {
+                        display: inline-block;
+                        animation: wiggle 0.12s ease-in-out infinite !important;
+                    }
+                `;
+                document.head.appendChild(style);
+                app.ach.unlock('Japan Simulator', `Maybe reconsider living there?`);
+            }, generalPane);
             tk.cb('b1', 'Back', () => ui.sw2(generalPane, mainPane), generalPane);
             // Appearance pane
             tk.p('Appearance', undefined, appearPane);
@@ -112,7 +123,7 @@ var app = {
                 tk.p(`Enter the EchoDesk ID, and hit "Okay" to connect to the other WebDesk.`, undefined, echotemp);
                 const input = tk.c('input', echotemp, 'i1');
                 input.placeholder = "Enter EchoDesk ID";
-                tk.cb('b1', 'Back', () => ui.sw2(echotemp, first), echotemp);tk.cb('b1', 'Okay', () => window.location.href = "./echodesk.html?deskid=" + input.value, echotemp);
+                tk.cb('b1', 'Back', () => ui.sw2(echotemp, first), echotemp); tk.cb('b1', 'Okay', () => window.location.href = "./echodesk.html?deskid=" + input.value, echotemp);
                 ui.sw2(first, echotemp);
             }, first);
             tk.cb('b1', `Guest`, function () {
@@ -286,18 +297,20 @@ var app = {
                     fuck = path;
                 });
 
-                win.main.addEventListener('dragover', (e) => {
+                items.addEventListener('dragover', (e) => {
                     e.preventDefault();
                 });
 
-                win.main.addEventListener('drop', async (e) => {
+                items.addEventListener('drop', async (e) => {
                     e.preventDefault();
                     const text = e.dataTransfer.getData('text/plain');
                     const move1 = await fs.read(text);
                     const relativePath = text.split('/').pop();
                     await fs.write(fuck + relativePath, move1);
-                    navto(fuck);
                     console.log(`Niggle chiggles`);
+                    setTimeout(async function () {
+                        await navto(fuck);
+                    }, 300);
                 });
 
                 const thing = await fs.ls(path);
@@ -325,6 +338,7 @@ var app = {
                                 } else {
                                     app.textedit.init(yeah, thing.path);
                                 }
+                                ui.dest(menu);
                             }, menu);
                             tk.cb('b1 b2', 'Open with', function () {
                                 ui.dest(menu);

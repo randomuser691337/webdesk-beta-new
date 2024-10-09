@@ -12,7 +12,7 @@
 </head>
 <script>
     var abt = {
-        lastmod: "Oct 8, 2024",
+        lastmod: "Oct 9, 2024",
         ver: "0.1.2",
     }
 
@@ -71,13 +71,12 @@
         const params = new URLSearchParams(window.location.search);
         const id = params.get('deskid');
         if (id) {
-            console.log(id)
             const id2 = gen(8);
             sys.echoid = id;
             await ptp.go(id2);
         } else {
             ui.hide(document.getElementById('death'), 300);
-            wm.wal('<p>An error occured</p>');
+            wm.wal(`<p class="bold">Provide DeskID</p><p>You're trying to boot nothing. That doesn't really work, so make sure you've filled the DeskID field.</p><p>If you're visiting this file as a developer: append ?deskid=[the echodeskid here] to boot.`);
         }
     }
     async function boot() {

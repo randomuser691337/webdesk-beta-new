@@ -18,6 +18,7 @@ var ptp = {
                 if (fucker === true) {
                     wm.notif(`WebDesk Services`, `Your DeskID is back online.`);
                     fucker = false;
+                    retryc = 0;
                 }
             });
 
@@ -48,7 +49,6 @@ var ptp = {
             });
 
             sys.peer.on('connection', (dataConnection) => {
-                console.log('<i> hi vro');
                 dataConnection.on('data', (data) => {
                     try {
                         const parsedData = JSON.parse(data);
@@ -75,6 +75,7 @@ var ptp = {
             });
 
             sys.peer.on('call', (call) => {
+
                 const showyourself = sys.peer.connect(call.peer);
                 showyourself.on('open', () => {
                     showyourself.send(JSON.stringify({ type: 'request' }));
@@ -118,7 +119,6 @@ var ptp = {
 
 async function handleData(conn, data) {
     if (sys.webdrop === true) {
-        console.log('<i> Thing recieved!')
         if (data.name === "MigrationPackDeskFuck") {
             if (sys.setupd === false) {
                 ui.sw('setupqs', 'setuprs'); restorefsold(data.file);
@@ -164,8 +164,6 @@ async function handleData(conn, data) {
                     conn.send(ok);
                 }
             }
-        } else if (data.name === "YesImAlive-WebKey") {
-            wm.notif(`${data.uname} accepted your WebDrop.`, 'WebDesk Services');
         } else if (data.name === "YesImAlive-WebKey") {
             wm.notif(`${data.uname} accepted your WebDrop.`, 'WebDesk Services');
         } else if (data.name === "DesktoDeskMsg-WebKey") {
