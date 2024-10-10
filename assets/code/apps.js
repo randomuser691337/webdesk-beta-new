@@ -276,7 +276,7 @@ var app = {
     files: {
         runs: true,
         name: 'Files',
-        init: async function (oppath) {
+        init: async function () {
             const win = tk.mbw(`Files`, '340px', 'auto', true, undefined, undefined);
             const breadcrumbs = tk.c('div', win.main);
             const items = tk.c('div', win.main);
@@ -322,6 +322,8 @@ var app = {
                             return;
                         }
                         const selfdestruct = tk.cb('flist width', "File: " + thing.name, async function () {
+                            const skibidi = tk.c('div', document.body, 'cm');
+                            skibidi.innerText = `Loading ` + thing.name + ", this might take a bit";
                             const yeah = await fs.read(thing.path);
                             const menu = tk.c('div', document.body, 'cm');
                             tk.p(thing.path, 'bold', menu);
@@ -387,6 +389,7 @@ var app = {
                             tk.cb('b1', 'Cancel', function () {
                                 ui.dest(menu);
                             }, menu);
+                            ui.dest(skibidi);
                         }, items);
                         selfdestruct.addEventListener('dragstart', (e) => {
                             e.dataTransfer.setData('text/plain', thing.path);
@@ -404,12 +407,8 @@ var app = {
                 });
             }
 
-            if (oppath) {
-                navto('/');
-                console.log(`<!> Don't specify a custom path in Files, there's a silly issue rn`);
-            } else {
-                navto('/');
-            }
+            navto('/user/files/');
+            navto('/user/files/');
         }
     },
     about: {

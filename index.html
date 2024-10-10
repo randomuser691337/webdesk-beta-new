@@ -74,6 +74,10 @@
             const darkpref = await fs.read('/user/info/lightdarkpref');
             const lightdark = await fs.read('/user/info/lightdark');
             const color = await fs.read('/user/info/color');
+            const placehold = await fs.read('/user/files/Welcome to WebDesk!.txt');
+            if (!placehold) {
+                fs.write('/user/files/Welcome to WebDesk!.txt', `Welcome to WebDesk! This is your Files folder, where things you upload are stored. Use the buttons at the top to navigate between folders.`);
+            }
             await wd.desktop(sd, deskid, 'wait');
             await ptp.go(deskid);
             sys.setupd = true;

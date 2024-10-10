@@ -26,7 +26,7 @@ var ptp = {
                 console.log(`<!> whoops: ${err}`);
                 if (fucker === false) {
                     if (err.message.includes('Lost connection to server')) {
-                        wm.notif('Reboot WebDesk', `Your connection was interrupted, so your DeskID is broken. WebDesk will try to restore the connection.`);
+                        wm.notif('Connection Error', `Your connection was interrupted, so your DeskID is broken. WebDesk is trying to restore the connection.`);
                     } else if (err.message.includes('is taken')) {
                         wm.notif('DeskID is taken', `Your DeskID is in use by someone else or another tab. You've been given a temporary DeskID until next reboot.`);
                     }
@@ -38,13 +38,13 @@ var ptp = {
                     wm.wal(`<p class="bold">EchoDesk Connection Interrupted</p><p>The other WebDesk might have rebooted, or is encountering network issues.</p><p>Check your Internet on this side too.</p>`);
                 }
                 fucker = true;
-                if (retryc < 3) {
+                if (retryc < 5) {
                     console.log('<!> DeskID failed to register, trying again...');
                     retryc++;
                     setTimeout(attemptConnection, 10000);
-                } else if (retryc >= 3) {
+                } else if (retryc >= 5) {
                     console.log('<!> Maximum retry attempts reached. DeskID registration failed.');
-                    wm.wal(`<p class="bold">WebDesk to WebDesk services are disabled</p><p>Your DeskID didn't register for some reason, therefore you can't use WebDrop, WebCall or Migration Assistant.</p><p>If you'd like, you can reboot to try again. Check your Internet too.</p>`, () => wd.reboot(), 'Reboot');
+                    wm.notif(`Your DeskID is disabled`, `You will not be able to send messages to other`, () => wd.reboot());
                 }
             });
 
