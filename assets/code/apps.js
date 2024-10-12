@@ -100,6 +100,19 @@ var app = {
             tk.p(`Use the ID below to start your WebDesk on another WebDesk. Be aware, the other person will have full access to your files.`, undefined, first);
             sys.model = tk.p(`Most recent file action will show here`, 'greyp', first);
             tk.p('--------', 'h2 deskid', first);
+            const ok = tk.c('p', first);
+            var qrcode = new QRCode(ok, {
+                text: `${window.location.origin}/echodesk.html?deskid=${sys.deskid}`,
+                width: 128,
+                height: 128,
+                colorDark: "#ffffff",
+                colorLight: "#000000",
+                correctLevel: QRCode.CorrectLevel.H
+            });
+            setTimeout(function () {
+                qrcode.clear();
+                qrcode.makeCode(`${window.location.origin}/echodesk.html?deskid=${sys.deskid}`);
+            }, 2000);
             tk.cb('b1', `Exit EchoDesk`, () => wd.reboot(), first);
             sys.setupd = "echo";
         }

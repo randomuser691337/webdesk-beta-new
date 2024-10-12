@@ -146,6 +146,7 @@ p {
     background-color: var(--ui1);
     border-radius: var(--rad1);
     max-width: 85% !important;
+    max-height: 85% !important;
     animation: setup 1.4s cubic-bezier(0.25, 1, 0.5, 1) forwards;
     width: 550px;
     height: 400px;
@@ -874,4 +875,8 @@ a:active {
     80% { transform: translate(-0.75px, 1.5px) rotate(1.125deg); }
     90% { transform: translate(2.25px, -0.75px) rotate(-0.75deg); }
     100% { transform: translate(0, 0) rotate(0deg); }
+}
+
+p img {
+    border-radius: 8px;
 }
