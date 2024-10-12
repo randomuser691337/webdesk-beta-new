@@ -187,6 +187,8 @@ p {
     backdrop-filter: blur(var(--bl1));
     resize: both;
     animation: winanim 0.35s ease;
+    min-width: 80px;
+    min-height: 50px;
 }
 
 .content {
@@ -311,7 +313,7 @@ p {
     font-size: var(--fz1);
     padding: 4px 7px;
     margin: 1px;
-    transition: 0.08s ease-in-out;
+    transition: 0.07s ease-in-out;
     cursor: pointer;
     border: 2px solid transparent;
     color: var(--font);
@@ -319,32 +321,32 @@ p {
 
 .b1:hover {
     box-shadow: rgba(0, 0, 0, 0.2) 0px 0px 20px 4px;
-    border: 2px solid rgba(var(--acc), 0.5);
+    border: 2px solid rgba(var(--acc), 0.7);
 }
 
 .b1:active {
     transform: scale(0.88);
-    background-color: rgba(var(--acc), 0.35);
+    background-color: rgba(var(--acc), 0.5);
 }
 
 .b3 {
     padding: 2px 6px;
     border-radius: 8px;
-    background-color: rgba(var(--accent), 0.3);
+    background-color: rgba(var(--accent), 0.35);
     font-size: var(--fz1);
     border: 1px solid transparent;
     cursor: pointer;
-    transition: all 0.05s ease-in-out;
+    transition: all 0.07s ease;
     margin: 1px;
 }
 
 .b3:hover {
-    border: 1px solid rgba(var(--accent), 0.45);
+    background-color: rgba(var(--accent), 0.4);
+    border: 1px solid rgba(var(--accent), 0.65);
 }
 
 .b3:active {
-    background-color: rgba(var(--accent), 0.35);
-    border-color: rgba(var(--accent), 0.8);
+    background-color: rgba(var(--accent), 0.45);
     transform: scale(0.90);
     box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2);
 }
@@ -516,7 +518,7 @@ p {
 }
 
 ::-webkit-scrollbar {
-    width: 10px;
+    width: 8px;
     pointer-events: auto;
 }
 
@@ -527,13 +529,17 @@ p {
 }
 
 ::-webkit-scrollbar-thumb {
-    background: rgba(var(--accent), 0.2);
+    background: rgba(var(--accent), 0.4);
     border-radius: 5px;
     pointer-events: auto;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-    background: rgba(var(--accent), 0.4);
+    background: rgba(var(--accent), 0.55);
+}
+
+::-webkit-scrollbar-thumb:active {
+    background: rgba(var(--accent), 0.7);
 }
 
 .circle {
@@ -839,6 +845,21 @@ p {
 
 .greyp {
     color: #aaa;
+}
+
+a {
+    color: var(--fz1);
+    transition: 0.05s;
+    text-decoration: underline;
+    cursor: pointer;
+}
+
+a:hover {
+    opacity: 0.8;
+}
+
+a:active {
+    opacity: 0.6;
 }
 
 @keyframes wiggle {

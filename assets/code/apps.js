@@ -23,10 +23,12 @@ var app = {
                 style.innerHTML = `
                     div, button, p {
                         display: inline-block;
-                        animation: wiggle 0.12s ease-in-out infinite !important;
+                        animation: wiggle 0.26s infinite !important;
                     }
                 `;
                 document.head.appendChild(style);
+                const sigma = ui.play('/assets/other/quake.mp3');
+                sigma.loop = true;
                 app.ach.unlock('Japan Simulator', `Maybe reconsider living there?`);
             }, generalPane);
             tk.cb('b1', 'Back', () => ui.sw2(generalPane, mainPane), generalPane);
@@ -259,18 +261,59 @@ var app = {
         runs: false,
         name: 'TextEdit',
         init: async function (contents, path) {
-            const win = tk.mbw('TextEdit', '300px', 'auto', true, undefined, undefined);
-            const ok = tk.c('textarea', win.main, 't1');
-            ok.rows = "10";
-            ok.placeholder = "Start typing something...";
-            if (contents) {
-                ok.innerText = contents;
+            tk.css('./assets/lib/browse.css');
+            const win = tk.mbw(`TextEdit`, '500px', '340px', true);
+            ui.dest(win.title, 0);
+            const tabs = tk.c('div', win.main, 'tabbar d');
+            const btnnest = tk.c('div', tabs, 'tnav');
+            const editdiv = tk.c('div', win.main, 'browsertab');
+            editdiv.style.display = "block";
+            editdiv.style.borderRadius = "0px";
+            win.main.classList = "browsercont";
+            tk.cb('b4 rb browserbutton', 'x', function () {
+                ui.dest(win.win, 150);
+                ui.dest(win.tbn, 150);
+            }, btnnest);
+            tk.cb('b4 yb browserbutton', '-', function () {
+                ui.hide(win.win, 150);
+            }, btnnest);
+            const genit = gen(8);
+            editdiv.id = genit;
+            const editor = ace.edit(`${genit}`);
+            editor.session.setOption("wrap", true);
+            function ok() {
+                if (ui.light === true) {
+                    editor.setTheme(null);
+                } else {
+                    editor.setTheme("ace/theme/monokai");
+                }
             }
-            const save = tk.cb('b4 b2', 'Save', async function () {
-                await fs.write(path, ok.value);
+            ok();
+            const colorch = setInterval(() => {
+                ok();
+            }, 700);
+            editor.setValue(contents, -1);
+            async function save() {
+                const newContents = editor.getValue();
+                await fs.write(path, newContents);
                 wm.snack('Saved');
-            }, win.main);
-            win.win.style.resize = "horizontal";
+            }
+            tk.cb('b4 browserbutton', 'Save', async function () {
+                await save();
+            }, btnnest);
+            wd.win();
+            editor.container.addEventListener('keydown', async function (event) {
+                if ((event.ctrlKey || event.metaKey) && event.key === 's') {
+                    event.preventDefault();
+                    await save();
+                }
+            });
+            new ResizeObserver(() => {
+                editor.resize();
+            }).observe(win.win);
+            win.closebtn.addEventListener('mousedown', function () {
+                clearInterval(colorch);
+            });
         }
     },
     files: {
@@ -281,37 +324,39 @@ var app = {
             const breadcrumbs = tk.c('div', win.main);
             const items = tk.c('div', win.main);
             var fuck = undefined;
+            let dragoverListener = null;
+            let dropListener = null;
             async function navto(path) {
                 items.innerHTML = "";
                 breadcrumbs.innerHTML = "";
                 let crumbs = path.split('/').filter(Boolean);
-                let currentp = '/';
+                let currentPath = '/';
+
                 tk.cb('flist', 'Root', () => navto('/'), breadcrumbs);
+
                 crumbs.forEach((crumb, index) => {
-                    currentp += crumb + '/';
+                    currentPath += crumb + '/';
                     tk.cb('flists', '/', undefined, breadcrumbs);
-                    tk.cb('flist', crumb, () => {
-                        let newPath = crumbs.slice(0, index + 1).join('/');
-                        navto('/' + newPath + "/");
-                    }, breadcrumbs);
-                    fuck = path;
+                    tk.cb('flist', crumb, () => navto('/' + crumbs.slice(0, index + 1).join('/') + "/"), breadcrumbs);
                 });
 
-                items.addEventListener('dragover', (e) => {
-                    e.preventDefault();
-                });
+                fuck = currentPath;
 
-                items.addEventListener('drop', async (e) => {
+                if (dragoverListener) items.removeEventListener('dragover', dragoverListener);
+                if (dropListener) items.removeEventListener('drop', dropListener);
+
+                dragoverListener = e => e.preventDefault();
+                dropListener = async e => {
                     e.preventDefault();
                     const text = e.dataTransfer.getData('text/plain');
                     const move1 = await fs.read(text);
                     const relativePath = text.split('/').pop();
-                    await fs.write(fuck + relativePath, move1);
-                    console.log(`Niggle chiggles`);
-                    setTimeout(async function () {
-                        await navto(fuck);
-                    }, 300);
-                });
+                    await fs.write(currentPath + relativePath, move1);
+                    setTimeout(() => navto(currentPath), 300);
+                };
+
+                items.addEventListener('dragover', dragoverListener);
+                items.addEventListener('drop', dropListener);
 
                 const thing = await fs.ls(path);
                 thing.items.forEach(function (thing) {
@@ -395,19 +440,10 @@ var app = {
                             e.dataTransfer.setData('text/plain', thing.path);
                         });
                         selfdestruct.draggable = true;
-                        /* tk.cb('b5', 'Open', async function () {
-                            const yeah = await fs.read(thing.path);
-                            if (yeah.includes('data:video') || yeah.includes('data:image') || yeah.includes('data:audio')) {
-                                app.imgview.init(yeah);
-                            } else {
-                                app.textedit.init(yeah, thing.path);
-                            }
-                        }, selfdestruct); */
                     }
                 });
             }
 
-            navto('/user/files/');
             navto('/user/files/');
         }
     },
@@ -425,14 +461,19 @@ var app = {
             tk.p(`<span class="bold">Updated</span> ${abt.lastmod}`, undefined, info);
             tk.p(`<span class="bold">DeskID</span> ${sys.deskid}`, undefined, info);
             tk.p(`<span class="bold">Version</span> ${abt.ver}`, undefined, info);
-            /* fs.space().then(result => {
-                console.log(result);
-                const prog1 = tk.c('div', info, 'progress-bar');
-                const prog2 = tk.c('div', prog1, 'progress');
-                prog2.style.width = result.usedprct + "%";
-            }).catch(err => {
-                console.error(err);
-            }); */
+            tk.cb('b2 b4', 'Credits', function () {
+                const ok = tk.c('div', document.body, 'cm');
+                ok.innerHTML = `<p class="bold">Credits</p>
+                <p>All the libraries or materials that helped create WebDesk.</p>
+                <p><a href="https://peerjs.com/" target="blank">PeerJS: DeskID/online services</a></p>
+                <p><a href="https://jquery.com/" target="blank">jQuery: WebDesk's UI</a></p>
+                <p><a href="https://ace.c9.io/" target="blank">Ace: TextEdit's engine</a></p>
+                <p><a href="https://jscolor.com/" target="blank">jscolor: Color picker</a></p>`;
+                tk.cb('b1', 'Close', function () {
+                    ui.dest(ok, 200);
+                }, ok);
+            }, info);
+            win.win.style.resize = "none";
         }
     },
     backup: {
@@ -474,12 +515,11 @@ var app = {
             tk.p(`Connect to other WebDesk`, undefined, win.main);
             const input = tk.c('input', win.main, 'i1');
             input.placeholder = "Enter EchoDesk ID";
-            tk.cb('b1 b2', 'Connect', async function () {
-                /* const the = tk.mbw('EchoDesk Viewer', '100%', '100%', undefined, undefined, undefined);
-                const frame = tk.c('embed', the.main, 'embed');
-                frame.style.height = "90%";
-                frame.src = "./echodesk.html?deskid=" + input.value; */
-                app.browser.init("./echodesk.html?deskid=" + input.value);
+            tk.cb('b1 b2', 'Connect in New Tab', async function () {
+                window.open("./echodesk.html?deskid=" + input.value, '_blank');
+            }, win.main);
+            tk.cb('b1 b2', 'Connect Normally', async function () {
+                app.browser.view("./echodesk.html?deskid=" + input.value);
             }, win.main);
         }
     },
@@ -619,7 +659,7 @@ var app = {
     browser: {
         runs: true,
         name: 'Browser',
-        init: async function (path) {
+        init: async function (path2) {
             tk.css('./assets/lib/browse.css');
             const win = tk.mbw('Browser', '80vw', '82vh', true);
             ui.dest(win.title, 0);
@@ -707,11 +747,39 @@ var app = {
             }, okiedokie);
 
             setTimeout(function () {
-                if (path) {
-                    addtab(path);
+                if (typeof path2 === "string") {
+                    addtab(path2);
                 } else {
                     addtab();
                 }
+            }, 250);
+            wd.win();
+        },
+        view: async function (path2) {
+            tk.css('./assets/lib/browse.css');
+            const win = tk.mbw(`Embedder - ` + path2, '80vw', '82vh', true);
+            ui.dest(win.title, 0);
+            const tabs = tk.c('div', win.main, 'tabbar d');
+            const btnnest = tk.c('div', tabs, 'tnav');
+            const tab = tk.c('embed', win.main, 'browsertab');
+            win.main.classList = "browsercont";
+            tk.cb('b4 rb browserbutton', 'x', function () {
+                ui.dest(win.win, 150);
+                ui.dest(win.tbn, 150);
+            }, btnnest);
+            tk.cb('b4 yb browserbutton', '-', function () {
+                ui.hide(win.win, 150);
+            }, btnnest);
+            tk.cb('b4 browserbutton', '⟳', function () {
+                tab.src = tab.src;
+            }, btnnest);
+            setTimeout(function () {
+                if (path2) {
+                    tab.src = path2;
+                } else {
+                    tab.src = "https://meower.xyz";
+                }
+                ui.show(tab, 0);
             }, 250);
             wd.win();
         }
@@ -751,7 +819,7 @@ var app = {
                                     oncall = true;
                                     ui.dest(win.tbn, 100);
                                     ui.dest(win.win, 100);
-                                    app.webcall.answer(remoteStream, call, parsedData.response);
+                                    app.webcall.answer(remoteStream, call, parsedData.response, stream);
                                 });
 
                                 call.on('error', (err) => {
@@ -771,28 +839,34 @@ var app = {
                 go();
             }, win.main);
         },
-        answer: async function (remoteStream, call, name) {
+        answer: async function (remoteStream, call, name, fein) {
             const win = tk.mbw('WebCall', '250px', 'auto', true, undefined, undefined);
             const stat = tk.ps(`WebCall - ${name}`, undefined, win.main);
             const audioElement = tk.c('audio', win.main, 'hide');
             audioElement.srcObject = remoteStream;
             audioElement.autoplay = true;
             audioElement.controls = true;
+
             let isMuted = false;
             const remoteAudioTrack = remoteStream.getAudioTracks()[0];
+
             const muteButton = tk.cb('b1', 'Mute', function () {
-                if (isMuted) {
-                    remoteAudioTrack.enabled = true;
-                    muteButton.textContent = 'Mute';
-                } else {
-                    remoteAudioTrack.enabled = false;
-                    muteButton.textContent = 'Unmute';
+                if (remoteAudioTrack) {
+                    if (isMuted) {
+                        remoteAudioTrack.enabled = true;
+                        muteButton.textContent = 'Mute';
+                    } else {
+                        remoteAudioTrack.enabled = false;
+                        muteButton.textContent = 'Unmute';
+                    }
+                    isMuted = !isMuted;
                 }
-                isMuted = !isMuted;
             }, win.main);
 
             function crashout() {
                 call.close();
+                fein.getTracks().forEach(track => track.stop());
+                remoteStream.getTracks().forEach(track => track.stop());
                 ui.dest(win.tbn, 100);
                 ui.dest(win.win, 100);
             }
@@ -809,7 +883,7 @@ var app = {
 
             tk.cb('b1', 'End', () => crashout(), win.main);
 
-            win.closebtn.addEventListener('click', function () {
+            win.closebtn.addEventListener('mousedown', function () {
                 crashout();
             });
         }

@@ -90,7 +90,7 @@ var ptp = {
                                 navigator.mediaDevices.getUserMedia({ audio: true }).then((stream) => {
                                     call.answer(stream);
                                     call.on('stream', (remoteStream) => {
-                                        app.webcall.answer(remoteStream, call, parsedData.response);
+                                        app.webcall.answer(remoteStream, call, parsedData.response, stream);
                                     });
                                 }).catch((err) => {
                                     wm.notif('WebCall Error', 'Microphone access is denied, calling/answering might fail.');
