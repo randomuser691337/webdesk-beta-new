@@ -30,7 +30,7 @@
         currentf: undefined,
         full: false,
         guest: false,
-        light: true,   
+        light: true,
     }
 
     var el = {
@@ -73,7 +73,22 @@
         const migcheck = await fs.read('/system/migval');
         const sd = await fs.read('/user/info/name');
         if (sd && !migcheck) {
+            const url = window.location.href;
+            const params = new URLSearchParams(window.location.search);
+            const id = params.get('deskid');
+            if (id) {
+                sys.migrid = id;
+                const id = gen(7);
+                await ptp.go(id);
+                ui.crtheme('#010101', true);
+                wd.dark('nosave');
+                app.migrate.init('skibidi');
+            }
             const deskid = await fs.read('/system/deskid');
+            if (deskid.length === 8) {
+                await wd.newid();
+                window.location.reload();
+            }
             const darkpref = await fs.read('/user/info/lightdarkpref');
             const lightdark = await fs.read('/user/info/lightdark');
             const color = await fs.read('/user/info/color');
@@ -128,17 +143,17 @@
                 }
             }
         } else if (migcheck === "down") {
-            const id = gen(8);
+            const id = gen(7);
             await ptp.go(id);
             ui.crtheme('#010101', true);
-            wd.dark();
+            wd.dark('nosave');
             await fs.del('/system/migval');
             app.migrate.init('down');
         } else if (migcheck === "echo") {
-            const id = gen(8);
+            const id = gen(7);
             await ptp.go(id);
             ui.crtheme('#010101', true);
-            wd.dark();
+            wd.dark('nosave');
             await fs.del('/system/migval');
             app.echodesk.init();
         } else {
@@ -148,7 +163,7 @@
             sys.setupd = false;
         }
 
-        ui.hide(document.getElementById('death'), 300);
+        ui.hide(document.getElementById('death'), 200);
 
         const dropZone = document.body;
         ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {

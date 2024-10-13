@@ -73,11 +73,11 @@
         const params = new URLSearchParams(window.location.search);
         const id = params.get('deskid');
         if (id) {
-            const id2 = gen(8);
+            const id2 = gen(7);
             sys.echoid = id;
             await ptp.go(id2);
         } else {
-            ui.hide(document.getElementById('death'), 300);
+            ui.hide(document.getElementById('death'), 200);
             wm.wal(`<p class="bold">Provide DeskID</p><p>You're trying to boot nothing. That doesn't really work, so make sure you've filled the DeskID field.</p><p>If you're visiting this file as a developer: append ?deskid=[the echodeskid here] to boot.`);
         }
     }
@@ -85,7 +85,7 @@
         let boot = false;
         setTimeout(function () {
             if (boot === false) {
-                ui.hide(document.getElementById('death'), 300);
+                ui.hide(document.getElementById('death'), 200);
                 wm.wal(`<p class="bold">EchoDesk failed to boot</p><p>Click "Try Again" if you want, otherwise check the other WebDesk, make sure your connection is OK, and disable your VPN if it's on.</p>`, () => reboot(), 'Try Again', 'noclose');
             }
         }, 9000);
@@ -153,7 +153,7 @@
             sys.setupd = false;
         }
 
-        ui.hide(document.getElementById('death'), 300);
+        ui.hide(document.getElementById('death'), 200);
 
         const dropZone = document.body;
         ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {

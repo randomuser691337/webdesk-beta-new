@@ -16,8 +16,8 @@
     --rad2: 12px;
     --rad3: 9px;
     --fz1: 15px;
-    --fz2: 12px;
-    --fz3: 10px;
+    --fz2: 14px;
+    --fz3: 13px;
     --inv: 0;
     --wina: 0px;
 }
@@ -266,7 +266,7 @@ p {
     padding: 3px;
     border-radius: var(--rad2);
     text-align: left;
-    margin-bottom: 6px;
+    margin-bottom: 12px;
     background-color: var(--ui1);
 }
 
@@ -367,7 +367,7 @@ p {
     padding: 1px 3px;
     border-radius: 8px;
     background-color: rgba(var(--accent), 0.25);
-    font-size: var(--fz2);
+    font-size: var(--fz3);
     border: 1px solid transparent;
     cursor: pointer;
     transition: all 0.05s ease-in-out;
@@ -700,6 +700,10 @@ p {
     border-top: 1px solid var(--bc);
 }
 
+.taskbar button {
+    padding: 3px 5px;
+    font-size: var(--fz2);
+}
 
 @keyframes tb {
     0% {
@@ -732,7 +736,7 @@ p {
     transform: translate(-50%, -50%);
     box-shadow: rgba(0, 0, 0, 0.3) 0px 0px 75px 15px;
     z-index: 10;
-    width: 240px;
+    width: 280px;
 }
 
 .tbmenu {
@@ -877,6 +881,41 @@ a:active {
     100% { transform: translate(0, 0) rotate(0deg); }
 }
 
-p img {
+.split {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin: 10px auto;
+    width: 75%;
+}
+
+.splititem {
+    max-width: 50%;
+    text-align: center;
+    padding-left: 20px !important;
+    padding-right: 20px !important;
+    padding: 10px;
+}
+
+.splititem img {
     border-radius: 8px;
+    border: 1px solid #000;
+}
+
+.splititem p {
+    margin-left: 0px !important;
+    margin-right: 0px !important;
+    padding-left: 0px !important;
+    padding-right: 0px !important;
+}
+
+.splititem:first-child {
+    border-right: 2px solid #444;
+}
+
+@media (max-width: 768px) {
+    .splititem {
+        width: 100%;
+        max-width: 100% !important;
+    }
 }
