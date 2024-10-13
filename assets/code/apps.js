@@ -170,7 +170,7 @@ var app = {
             });
             setTimeout(function () {
                 qrcode.clear();
-                qrcode.makeCode(`${window.location.origin}/echodesk.html?deskid=${sys.deskid}`);
+                qrcode.makeCode(`${window.location.origin}?deskid=${sys.deskid}`);
             }, 2000);
             transfer.id = "quickstartwdsetup";
             // copying menu
