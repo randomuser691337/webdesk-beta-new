@@ -223,43 +223,60 @@ var app = {
             const bar = tk.c('div', main, 'setupbar');
             const tnav = tk.c('div', bar, 'tnav');
             const title = tk.c('div', bar, 'title');
-            tk.cb('b4', 'Force Exit', () => wm.wal(`<p>If WebDesk is stuck, use this to leave.</p><p>Note: If you have lots of files or a slow connection, it's normal for things to take a while.</p>`, () => reboot(), 'Force Exit'), tnav);
-            tk.cb('b4 time', 'what', undefined, title);
-            // migrate menu
+            tk.cb('b4', 'Force Exit', () => wm.wal(
+                `<p>If WebDesk is stuck, use this to leave.</p>
+                <p>Note: If you have lots of files or a slow connection, it's normal for things to take a while.</p>`,
+                () => reboot(),
+                'Force Exit'
+            ), tnav);
+    
+            // migration menu
             let transfer = tk.c('div', main, 'setb');
             tk.img('./assets/img/setup/quick.png', 'setupi', transfer);
             tk.p('Migration Assistant', 'h2', transfer);
-            let the = undefined;
+            let [the, inp, stats] = [undefined];
             if (yeah === "skibidi") {
-                let stats = tk.p(`WARNING: Scanning someone else's code shares all your files and data with them.`, 'bold', transfer);
+                stats = tk.p(`WARNING: Scanning someone else's code shares all your files and data with them.`, 'bold', transfer);
+                tk.p(`If you scanned someone else's code, please hit "Cancel" to stop migration.`, undefined, transfer);
                 the = sys.migrid;
             } else {
-                let stats = tk.p(`WARNING: Using someone else's code shares all your files and data with them.`, 'bold', transfer);
-                let inp = tk.c('input', transfer, 'i1');
+                stats = tk.p(`WARNING: Using someone else's code shares all your files and data with them.`, 'bold', transfer);
+                inp = tk.c('input', transfer, 'i1');
                 inp.placeholder = "Enter the code shown on the other WebDesk";
             }
+
             tk.cb('b1', `Cancel`, function () {
+                window.location.href = window.location.origin;
                 ui.show(document.getElementById('death'), 200);
                 setTimeout(wd.reboot, 210);
             }, transfer);
             tk.cb('b1', 'OK, copy data!', async function () {
                 stats.innerText = `Connecting to other WebDesk...`;
-                the = inp.value;
+    
+                if (inp) { 
+                    the = inp.value;
+                }
+    
                 migrationgo(the, stats).then((result) => {
                     if (result === true) {
                         ui.sw2(transfer, sum);
                     } else {
-                        wm.wal(`<p>Data Assistant couldn't communicate with the other WebDesk</p>`, () => wd.reboot(), 'Reboot Now');
+                        wm.wal(`<p>Data Assistant couldn't communicate with the other WebDesk</p>`, 
+                            () => wd.reboot(), 'Reboot Now');
                         console.log(`<!> Data Assistant Error: ${result}`);
                     }
                 }).catch((error) => {
-                    wm.wal(`<p>Data Assistant encountered an error</p>`, () => reboot(), 'Reboot Now');
+                    wm.wal(`<p>Data Assistant encountered an error</p>`, 
+                        () => reboot(), 'Reboot Now');
                     console.log('<!> ' + error);
                 });
-
+    
                 setTimeout(function () {
-                    if (stats.innerText === `Connecting to other WebDesk...`); {
-                        wm.wal(`<p>Couldn't connect to other WebDesk, try these things to fix it:</p><li>Check your Internet connection</li><li>Disable your VPN temporarily, then reload both WebDesks</li><li>Reload the other WebDesk first, then this one second</li>`);
+                    if (stats.innerText === `Connecting to other WebDesk...`) {
+                        wm.wal(`<p>Couldn't connect to other WebDesk, try these things to fix it:</p>
+                        <li>Check your Internet connection</li>
+                        <li>Disable your VPN temporarily, then reload both WebDesks</li>
+                        <li>Reload the other WebDesk first, then this one second</li>`);
                     }
                 }, 9000);
             }, transfer);
@@ -269,7 +286,9 @@ var app = {
             tk.img('./assets/img/setup/check.svg', 'setupi', sum);
             tk.p('All done!', 'h2', sum);
             tk.p(`Data has been moved to the other WebDesk. Hit "Finish" to go back to WebDesk, or you can erase this one if you're not going to use it.`, undefined, sum);
-            tk.cb('b1', 'Erase This WebDesk', function () { app.eraseassist.init(); }, sum); tk.cb('b1', 'Finish', function () { wd.reboot(); }, sum);
+            tk.cb('b1', 'Erase This WebDesk', function () { app.eraseassist.init(); }, sum);
+            tk.cb('b1', 'Finish', function () { wd.reboot(); }, sum);
+            
             sum.id = "setupdone";
         }
     },

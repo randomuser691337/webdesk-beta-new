@@ -75,14 +75,16 @@
         if (sd && !migcheck) {
             const url = window.location.href;
             const params = new URLSearchParams(window.location.search);
-            const id = params.get('deskid');
-            if (id) {
-                sys.migrid = id;
+            const uid = params.get('deskid');
+            if (uid) {
+                sys.migrid = uid;
                 const id = gen(7);
                 await ptp.go(id);
                 ui.crtheme('#010101', true);
                 wd.dark('nosave');
                 app.migrate.init('skibidi');
+                ui.hide(document.getElementById('death'), 200);
+                return;
             }
             const deskid = await fs.read('/system/deskid');
             if (deskid.length === 8) {
