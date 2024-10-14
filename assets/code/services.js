@@ -24,9 +24,9 @@ var ptp = {
 
             sys.peer.on('error', async (err) => {
                 console.log(`<!> whoops: ${err}`);
-                if (err.includes('Could not connect to')) {
+                if (err.message.includes('Could not connect to')) {
                     return;
-                } 
+                }
                 if (fucker === false) {
                     if (err.message.includes('Lost connection to server')) {
                         wm.notif('Connection Error', `Your connection was interrupted, so your DeskID is broken. WebDesk is trying to restore the connection.`);
@@ -133,8 +133,8 @@ async function handleData(conn, data) {
                     return;
                 }
                 ui.sw('quickstartwdsetup', 'quickstartwdgoing');
+                el.migstat.innerText = "Copying: " + data.filename;
                 fs.write(data.filename, data.file);
-                el.migstat.innerText = "Restored: " + data.filename;
             }
         } else if (data.name === "MigrationEnd") {
             if (sys.setupd === false) {

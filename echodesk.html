@@ -12,7 +12,7 @@
 </head>
 <script>
     var abt = {
-        lastmod: "Oct 12, 2024",
+        lastmod: "Oct 13, 2024",
         ver: "0.1.3",
     }
 
@@ -50,7 +50,10 @@
     <div id="notif"></div>
     <div id="death"
         style="z-index: 9999; position: fixed; left: 0px; right: 0px; bottom: 0px; top: 0px; background-color: #000;">
-        
+        <div class="center">
+            <p class="bold">Loading</p>
+            <p>EchoDesk is loading files</p>
+        </div>
     </div>
 </body>
 
@@ -88,7 +91,7 @@
                 ui.hide(document.getElementById('death'), 200);
                 wm.wal(`<p class="bold">EchoDesk failed to boot</p><p>Click "Try Again" if you want, otherwise check the other WebDesk, make sure your connection is OK, and disable your VPN if it's on.</p>`, () => reboot(), 'Try Again', 'noclose');
             }
-        }, 9000);
+        }, 12000);
         const migcheck = await fs.read('/system/migval');
         const sd = await fs.read('/user/info/name');
         if (sd && !migcheck) {
@@ -104,13 +107,13 @@
                 sys.autodarkacc = false;
             }
             if (lightdark === "dark") {
-                wd.dark();
+                wd.dark('nosave');
             } else if (lightdark === "clear") {
-                wd.clearm();
+                wd.clearm('nosave');
             } else if (lightdark === "clear2") {
-                wd.clearm2();
+                wd.clearm2('nosave');
             } else {
-                wd.light();
+                wd.light('nosave');
             }
             ui.crtheme(color);
             const data = await fs.read('/system/apps.json');

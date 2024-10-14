@@ -202,7 +202,10 @@ var wd = {
         ui.sw2(div1, div2); ui.masschange('name', name); fs.write('/user/info/name', name); fs.write('/system/info/setuptime', Date.now()); fs.write('/system/info/setupver', abt.ver);
     },
     reboot: function () {
-        window.location.reload();
+        ui.show(document.getElementById('death'), 200);
+        setTimeout(function () {
+            window.location.href = window.location.origin;
+        }, 210);
     },
     dark: function (fucker) {
         ui.cv('ui1', 'rgb(40, 40, 40, 0.6)');
@@ -226,19 +229,23 @@ var wd = {
         }
         ui.light = true;
     },
-    clearm: function () {
+    clearm: function (fucker) {
         ui.cv('ui1', 'rgb(255, 255, 255, 0)');
         ui.cv('ui2', 'rgba(var(--accent), 0.1)');
         ui.cv('ui3', 'rgba(var(--accent) 0.2)');
         ui.cv('bc', 'rgb(255, 255, 255, 0)');
         ui.cv('font', '#000');
-        fs.write('/user/info/lightdark', 'clear');
+        if (!fucker === "nosave") {
+            fs.write('/user/info/lightdark', 'clear');
+        }
         ui.light = true;
     },
-    clearm2: function () {
+    clearm2: function (fucker) {
         wd.clearm();
         ui.cv('font', '#fff');
-        fs.write('/user/info/lightdark', 'clear2');
+        if (!fucker === "nosave") {
+            fs.write('/user/info/lightdark', 'clear2');
+        }
         ui.light = false;
     },
     timec: function (id) {

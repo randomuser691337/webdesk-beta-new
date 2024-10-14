@@ -12,7 +12,7 @@
 </head>
 <script>
     var abt = {
-        lastmod: "Oct 12, 2024",
+        lastmod: "Oct 13, 2024",
         ver: "0.1.3",
     }
 
@@ -108,13 +108,13 @@
                 sys.autodarkacc = false;
             }
             if (lightdark === "dark") {
-                wd.dark();
+                wd.dark('nosave');
             } else if (lightdark === "clear") {
-                wd.clearm();
+                wd.clearm('nosave');
             } else if (lightdark === "clear2") {
-                wd.clearm2();
+                wd.clearm2('nosave');
             } else {
-                wd.light();
+                wd.light('nosave');
             }
             ui.crtheme(color);
             const data = await fs.read('/system/apps.json');

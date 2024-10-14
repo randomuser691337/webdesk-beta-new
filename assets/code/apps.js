@@ -6,10 +6,12 @@ var app = {
             const main = tk.mbw('Settings', '300px', 'auto', true, undefined, undefined);
             const generalPane = tk.c('div', main.main, 'hide');
             const appearPane = tk.c('div', main.main, 'hide');
+            const userPane = tk.c('div', main.main, 'hide');
             const mainPane = tk.c('div', main.main);
             // Main pane
             tk.p('Settings', undefined, mainPane);
             tk.cb('b1 b2', 'General', () => ui.sw2(mainPane, generalPane), mainPane);
+            tk.cb('b1 b2', 'WebDesk User', () => ui.sw2(mainPane, userPane), mainPane);
             tk.cb('b1 b2', 'Appearance', () => ui.sw2(mainPane, appearPane), mainPane);
             // General pane
             tk.p('General', undefined, generalPane);
@@ -74,6 +76,27 @@ var app = {
                 fs.del('/user/info/lightdarkpref');
                 wm.wal('Reboot to finish resetting colors.', () => wd.reboot(), 'Reboot');
             }, appearPane); tk.cb('b1', 'Back', () => ui.sw2(appearPane, mainPane), appearPane);
+            tk.p('WebDesk User', undefined, userPane);
+            tk.cb('b1 b2', 'Change Username', function () {
+                const ok = tk.mbw('Change Username', '300px', 'auto', true, undefined, undefined);
+                const inp = tk.c('input', ok.main, 'i1');
+                inp.placeholder = "New name here";
+                tk.cb('b1', 'Change name', async function () {
+                   await fs.write('/user/info/name', inp.value);
+                   ok.main.innerHTML = `<p>Reboot WebDesk to finish changing your username.</p><p>All unsaved data will be lost.</p>`;
+                   tk.cb('b1', 'Reboot', () => wd.reboot(), ok.main);
+                }, ok.main);
+            }, userPane);
+            tk.cb('b1 b2', 'Change DeskID', function () {
+                const ok = tk.mbw('Change DeskID', '300px', 'auto', true, undefined, undefined);
+                tk.p(`Changing your DeskID will make your WebDesk unreachable to those without your new ID.`, undefined, ok.main);
+                tk.cb('b1', 'Continue', async function () {
+                   const newid = await wd.newid();
+                   ok.main.innerHTML = `<p>Reboot WebDesk to finish changing your DeskID.</p><p>All unsaved data will be lost. Your new ID is ${newid}.</p>`;
+                   tk.cb('b1', 'Reboot', () => wd.reboot(), ok.main);
+                }, ok.main);
+            }, userPane);
+            tk.cb('b1', 'Back', () => ui.sw2(userPane, mainPane), userPane);
         }
     },
     eraseassist: {
@@ -110,7 +133,7 @@ var app = {
                 height: 128,
                 colorDark: "#ffffff",
                 colorLight: "#000000",
-                correctLevel: QRCode.CorrectLevel.H
+                correctLevel: QRCode.CorrectLevel.M
             });
             setTimeout(function () {
                 qrcode.clear();
@@ -177,6 +200,7 @@ var app = {
             const copy = tk.c('div', main, 'setb hide');
             tk.img('./assets/img/setup/restore.svg', 'setupi', copy);
             tk.p('Restoring from other WebDesk', 'h2', copy);
+            tk.p('Do not touch the other WebDesk, it could interrupt the copying process.', undefined, copy);
             tk.p('This might take a while depending on settings and file size.', undefined, copy);
             el.migstat = tk.p('Starting...', 'restpg', copy);
             tk.cb('b1', 'Cancel', function () { fs.erase('reboot'); }, copy);
@@ -229,7 +253,7 @@ var app = {
                 () => reboot(),
                 'Force Exit'
             ), tnav);
-    
+
             // migration menu
             let transfer = tk.c('div', main, 'setb');
             tk.img('./assets/img/setup/quick.png', 'setupi', transfer);
@@ -246,31 +270,29 @@ var app = {
             }
 
             tk.cb('b1', `Cancel`, function () {
-                window.location.href = window.location.origin;
-                ui.show(document.getElementById('death'), 200);
-                setTimeout(wd.reboot, 210);
+                wd.reboot();
             }, transfer);
             tk.cb('b1', 'OK, copy data!', async function () {
                 stats.innerText = `Connecting to other WebDesk...`;
-    
-                if (inp) { 
+
+                if (inp) {
                     the = inp.value;
                 }
-    
+
                 migrationgo(the, stats).then((result) => {
                     if (result === true) {
                         ui.sw2(transfer, sum);
                     } else {
-                        wm.wal(`<p>Data Assistant couldn't communicate with the other WebDesk</p>`, 
+                        wm.wal(`<p>Data Assistant couldn't communicate with the other WebDesk</p>`,
                             () => wd.reboot(), 'Reboot Now');
                         console.log(`<!> Data Assistant Error: ${result}`);
                     }
                 }).catch((error) => {
-                    wm.wal(`<p>Data Assistant encountered an error</p>`, 
+                    wm.wal(`<p>Data Assistant encountered an error</p>`,
                         () => reboot(), 'Reboot Now');
                     console.log('<!> ' + error);
                 });
-    
+
                 setTimeout(function () {
                     if (stats.innerText === `Connecting to other WebDesk...`) {
                         wm.wal(`<p>Couldn't connect to other WebDesk, try these things to fix it:</p>
@@ -284,11 +306,10 @@ var app = {
             // summary
             const sum = tk.c('div', main, 'setb hide');
             tk.img('./assets/img/setup/check.svg', 'setupi', sum);
-            tk.p('All done!', 'h2', sum);
-            tk.p(`Data has been moved to the other WebDesk. Hit "Finish" to go back to WebDesk, or you can erase this one if you're not going to use it.`, undefined, sum);
-            tk.cb('b1', 'Erase This WebDesk', function () { app.eraseassist.init(); }, sum);
-            tk.cb('b1', 'Finish', function () { wd.reboot(); }, sum);
-            
+            tk.p('Finishing Up', 'h2', sum);
+            tk.p(`Wait for the other WebDesk to finish before hitting "Done" or "Erase".`, undefined, sum);
+            tk.cb('b1', 'Erase', function () { app.eraseassist.init(); }, sum);
+            tk.cb('b1', 'Done', function () { wd.reboot(); }, sum);
             sum.id = "setupdone";
         }
     },
@@ -473,6 +494,9 @@ var app = {
                                 inp.placeholder = "Enter DeskID";
                                 tk.cb('b1 b2', 'WebDrop', async function () {
                                     menu2.innerHTML = `<p class="bold">Sending file</p><p>Depending on the size, this might take a bit</p>`;
+                                    tk.cb('b1', 'Close (No status updates)', function () {
+                                        ui.dest(menu2);
+                                    }, menu2);
                                     await custf(inp.value, thing.name, yeah).then((check) => {
                                         if (check === true) {
                                             menu2.innerHTML = `<p class="bold">File sent</p><p>The other person can accept or deny</p>`;
@@ -567,8 +591,7 @@ var app = {
                 tk.p(`Your apps will close, and unsaved data will be lost.`, undefined, win.main);
                 tk.cb('b1 b2', 'Migrate', async function () {
                     await fs.write('/system/migval', 'down');
-                    ui.show(document.getElementById('death'), 200);
-                    setTimeout(reboot, 210);
+                    wd.reboot();
                 }, win.main);
             } else {
                 tk.p(`You're in Guest mode. Reboot WebDesk and go through Setup to copy your data over.`, undefined, win.main);
@@ -586,12 +609,11 @@ var app = {
             if (sys.guest === true) {
                 tk.p(`Enter the EchoDesk ID and hit "Connect". The other WebDesk will appear as a window. <span class="bold">You're in Guest mode, so you can't enter EchoDesk mode.</span>`, undefined, win.main);
             } else {
-                tk.p(`If you're connecting: Enter the EchoDesk ID and hit "Connect". The other WebDesk will appear as a window.`, undefined, win.main);
-                tk.p(`If you're the host: Click "Enter EchoDesk Mode". Your apps will close, unsaved data will be lost.`, undefined, win.main);
+                tk.p(`If you're connecting: Enter the EchoDesk ID and hit either of the "Connect" buttons.`, undefined, win.main);
+                tk.p(`If you're the host: Hit "Enter EchoDesk Mode". Your apps will close, unsaved data will be lost.`, undefined, win.main);
                 tk.cb('b1 b2', 'Enter EchoDesk mode', async function () {
                     await fs.write('/system/migval', 'echo');
-                    ui.show(document.getElementById('death'), 200);
-                    setTimeout(reboot, 210);
+                    wd.reboot();
                 }, win.main);
             }
             tk.p(`Connect to other WebDesk`, undefined, win.main);
