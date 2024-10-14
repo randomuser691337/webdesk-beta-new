@@ -202,51 +202,36 @@ var wd = {
         ui.sw2(div1, div2); ui.masschange('name', name); fs.write('/user/info/name', name); fs.write('/system/info/setuptime', Date.now()); fs.write('/system/info/setupver', abt.ver);
     },
     reboot: function () {
-        ui.show(document.getElementById('death'), 200);
-        setTimeout(function () {
-            window.location.href = window.location.origin;
-        }, 210);
+        window.location.reload();
     },
-    dark: function (fucker) {
+    dark: function () {
         ui.cv('ui1', 'rgb(40, 40, 40, 0.6)');
         ui.cv('ui2', '#1b1b1b');
         ui.cv('ui3', '#2b2b2b');
         ui.cv('bc', 'rgb(44, 44, 44, 0.5)');
         ui.cv('font', '#fff');
-        if (!fucker === "nosave") {
-            fs.write('/user/info/lightdark', 'dark');
-        }
-        ui.light = false;
+        fs.write('/user/info/lightdark', 'dark');
     },
-    light: function (fucker) {
+    light: function () {
         ui.cv('ui1', 'rgb(255, 255, 255, 0.6)');
         ui.cv('ui2', '#ffffff');
         ui.cv('ui3', '#dddddd');
         ui.cv('bc', 'rgb(200, 200, 200, 0.6)');
         ui.cv('font', '#000');
-        if (!fucker === "nosave") {
-            fs.del('/user/info/lightdark');
-        }
-        ui.light = true;
+        fs.del('/user/info/lightdark');
     },
-    clearm: function (fucker) {
+    clearm: function () {
         ui.cv('ui1', 'rgb(255, 255, 255, 0)');
         ui.cv('ui2', 'rgba(var(--accent), 0.1)');
         ui.cv('ui3', 'rgba(var(--accent) 0.2)');
         ui.cv('bc', 'rgb(255, 255, 255, 0)');
         ui.cv('font', '#000');
-        if (!fucker === "nosave") {
-            fs.write('/user/info/lightdark', 'clear');
-        }
-        ui.light = true;
+        fs.write('/user/info/lightdark', 'clear');
     },
-    clearm2: function (fucker) {
+    clearm2: function () {
         wd.clearm();
         ui.cv('font', '#fff');
-        if (!fucker === "nosave") {
-            fs.write('/user/info/lightdark', 'clear2');
-        }
-        ui.light = false;
+        fs.write('/user/info/lightdark', 'clear2');
     },
     timec: function (id) {
         const timeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
@@ -333,7 +318,7 @@ var wd = {
         await fs.write('/system/apps.json', JSON.stringify(obj, null, 4));
     },
     newid: async function () {
-        const sigma = gen(7);
+        const sigma = gen(8);
         await fs.write('/system/deskid', sigma);
         return sigma;
     },
@@ -348,15 +333,15 @@ var wd = {
     },
     download: function (file, fileName) {
         let downloadLink = document.createElement('a')
-
+  
         if (typeof file === 'string' && file.startsWith('data:')) {
-            downloadLink.href = file
-            downloadLink.download = fileName
+          downloadLink.href = file
+          downloadLink.download = fileName
         } else if (file instanceof File || file instanceof Blob) {
-            downloadLink.href = URL.createObjectURL(file)
-            downloadLink.download = file.name || fileName
+          downloadLink.href = URL.createObjectURL(file)
+          downloadLink.download = file.name || fileName
         }
-
+      
         downloadLink.style.display = 'none'
         document.body.appendChild(downloadLink)
         downloadLink.click()

@@ -54,4 +54,7 @@ var fs = {
     getall: function () {
         return this.askwfs('all');
     },
+    space: function () {
+        return this.askwfs('space');
+    },
 };
