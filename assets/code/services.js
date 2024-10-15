@@ -30,8 +30,10 @@ var ptp = {
                 if (fucker === false) {
                     if (err.message.includes('Lost connection to server')) {
                         wm.notif('Connection Error', `Your connection was interrupted, so your DeskID is broken. WebDesk is trying to restore the connection.`);
+                        app.ach.unlock('DeskID Issues', `Here's an achievement for your troubles.`);
                     } else if (err.message.includes('is taken')) {
                         wm.notif('DeskID is taken', `Your DeskID is in use by someone else or another tab. You've been given a temporary DeskID until next reboot.`);
+                        app.ach.unlock('Identity Theft', "¯\\_(ツ)_/¯");
                     }
                 }
                 if (err.message.includes('is taken')) {

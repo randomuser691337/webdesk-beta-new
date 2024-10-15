@@ -12,7 +12,7 @@
 </head>
 <script>
     var abt = {
-        lastmod: "Oct 13, 2024",
+        lastmod: "Oct 15, 2024",
         ver: "0.1.3",
     }
 
@@ -98,7 +98,6 @@
             const darkpref = await fs.read('/user/info/lightdarkpref');
             const lightdark = await fs.read('/user/info/lightdark');
             const color = await fs.read('/user/info/color');
-            await wd.desktop(sd, sys.deskid, 'wait');
             sys.setupd = true;
             sys.name = sd;
             if (darkpref === "auto") {
@@ -143,6 +142,7 @@
                     });
                 }
             }
+            await wd.desktop(sd, sys.deskid, 'wait');
             boot = true;
         } else if (migcheck) {
             ui.crtheme('#010101', true);
@@ -155,7 +155,6 @@
             app.setup.init();
             sys.setupd = false;
         }
-
         ui.hide(document.getElementById('death'), 200);
 
         const dropZone = document.body;

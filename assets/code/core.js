@@ -179,7 +179,7 @@ var wd = {
             tk.cb('b1 time', '--:--', () => controlcenter(), titletb);
         }
         if (waitopt === "wait") {
-            setTimeout(function () { desktopgo(); }, 400);
+            setTimeout(function () { desktopgo(); }, 200);
         } else {
             desktopgo();
         }
@@ -205,13 +205,13 @@ var wd = {
         ui.show(document.getElementById('death'), 200);
         setTimeout(function () {
             window.location.href = window.location.origin;
-        }, 210);
+        }, 200);
     },
     dark: function (fucker) {
         ui.cv('ui1', 'rgb(40, 40, 40, 0.6)');
         ui.cv('ui2', '#1b1b1b');
         ui.cv('ui3', '#2b2b2b');
-        ui.cv('bc', 'rgb(44, 44, 44, 0.5)');
+        ui.cv('bc', 'rgb(70, 70, 70, 0.6)');
         ui.cv('font', '#fff');
         if (!fucker === "nosave") {
             fs.write('/user/info/lightdark', 'dark');

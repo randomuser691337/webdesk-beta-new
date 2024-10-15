@@ -16,9 +16,9 @@ var app = {
             // General pane
             tk.p('General', undefined, generalPane);
             tk.cb('b1 b2 red', 'Erase This WebDesk', () => app.eraseassist.init(), generalPane);
-            tk.cb('b1 b2 red', 'Remove All App Market Apps', () => wm.wal(`<p>Warning: Removing all App Market apps will cause a reboot and delete them, but their data will remain.</p>`, function () {
-                fs.del('/system/apps.json');
-                setTimeout(function () { window.location.reload() }, 250);
+            tk.cb('b1 b2 red', 'Remove All App Market Apps', () => wm.wal(`<p>Warning: Removing all App Market apps will cause a reboot and delete them, but their data will remain.</p>`, async function () {
+                await fs.del('/system/apps.json');
+                wd.reboot();
             }, 'Okay'), generalPane);
             const earth = tk.cb('b1 b2', 'Enable Earthquake Mode (Restarting stops it)', function () {
                 const style = document.createElement('style');
@@ -82,18 +82,18 @@ var app = {
                 const inp = tk.c('input', ok.main, 'i1');
                 inp.placeholder = "New name here";
                 tk.cb('b1', 'Change name', async function () {
-                   await fs.write('/user/info/name', inp.value);
-                   ok.main.innerHTML = `<p>Reboot WebDesk to finish changing your username.</p><p>All unsaved data will be lost.</p>`;
-                   tk.cb('b1', 'Reboot', () => wd.reboot(), ok.main);
+                    await fs.write('/user/info/name', inp.value);
+                    ok.main.innerHTML = `<p>Reboot WebDesk to finish changing your username.</p><p>All unsaved data will be lost.</p>`;
+                    tk.cb('b1', 'Reboot', () => wd.reboot(), ok.main);
                 }, ok.main);
             }, userPane);
             tk.cb('b1 b2', 'Change DeskID', function () {
                 const ok = tk.mbw('Change DeskID', '300px', 'auto', true, undefined, undefined);
                 tk.p(`Changing your DeskID will make your WebDesk unreachable to those without your new ID.`, undefined, ok.main);
                 tk.cb('b1', 'Continue', async function () {
-                   const newid = await wd.newid();
-                   ok.main.innerHTML = `<p>Reboot WebDesk to finish changing your DeskID.</p><p>All unsaved data will be lost. Your new ID is ${newid}.</p>`;
-                   tk.cb('b1', 'Reboot', () => wd.reboot(), ok.main);
+                    const newid = await wd.newid();
+                    ok.main.innerHTML = `<p>Reboot WebDesk to finish changing your DeskID.</p><p>All unsaved data will be lost. Your new ID is ${newid}.</p>`;
+                    tk.cb('b1', 'Reboot', () => wd.reboot(), ok.main);
                 }, ok.main);
             }, userPane);
             tk.cb('b1', 'Back', () => ui.sw2(userPane, mainPane), userPane);
@@ -332,9 +332,23 @@ var app = {
         }
     },
     textedit: {
-        runs: false,
+        runs: true,
         name: 'TextEdit',
         init: async function (contents, path) {
+            if (!path) {
+                const ok = tk.c('div', document.body, 'cm');
+                tk.p('Start new document', undefined, ok);
+                const inp = tk.c('input', ok, 'i1');
+                inp.placeholder = "File path e.g /user/files/doc.txt";
+                tk.cb('b1', 'Cancel', function () {
+                    ui.dest(ok);
+                }, ok);
+                tk.cb('b1', 'Create', function () {
+                    app.textedit.init('', inp.value);
+                    ui.dest(ok);
+                }, ok);
+                return;
+            }
             tk.css('./assets/lib/browse.css');
             const win = tk.mbw(`TextEdit`, '500px', '340px', true);
             ui.dest(win.title, 0);
@@ -354,6 +368,7 @@ var app = {
             const genit = gen(8);
             editdiv.id = genit;
             const editor = ace.edit(`${genit}`);
+            editor.setFontSize("var(--fz3)");
             editor.session.setOption("wrap", true);
             function ok() {
                 if (ui.light === true) {
@@ -374,6 +389,31 @@ var app = {
             }
             tk.cb('b4 browserbutton', 'Save', async function () {
                 await save();
+            }, btnnest);
+            tk.cb('b4 browserbutton', 'Menu', async function () {
+                const menu = tk.c('div', document.body, 'cm');
+                tk.p(`Menu`, undefined, menu);
+                tk.cb('b1 b2', 'Select All', function () {
+                    editor.selectAll();
+                    ui.dest(menu, 120);
+                }, menu);
+                tk.cb('b1 b2', 'Replace', function () {
+                    editor.execCommand('replace');
+                    ui.dest(menu, 120);
+                }, menu);
+                tk.cb('b1 b2', 'Find', function () {
+                    editor.execCommand('find');
+                    ui.dest(menu, 120);
+                }, menu);
+                tk.cb('b1', 'Undo', function () {
+                    editor.execCommand('undo');
+                }, menu);
+                tk.cb('b1', 'Close', function () {
+                    ui.dest(menu, 120);
+                }, menu);
+                tk.cb('b1', 'Redo', function () {
+                    editor.execCommand('redo');
+                }, menu);
             }, btnnest);
             wd.win();
             editor.container.addEventListener('keydown', async function (event) {
@@ -730,6 +770,7 @@ var app = {
 
             const win = tk.mbw('Achievements', '300px', 'auto', true, undefined, undefined);
             tk.p(`WebDesk Achievements`, 'h2', win.main);
+            tk.p(`Remember: These are jokes and don't actually do anything`, undefined, win.main);
             tk.p(`Unlocked <span class="b achcount"></span> achievements`, undefined, win.main);
             await load();
         },
