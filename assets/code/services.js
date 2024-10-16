@@ -6,25 +6,7 @@ var ptp = {
         var fucker = false;
 
         async function attemptConnection() {
-            sys.peer = new Peer(id, {
-                config: {
-                    // Copy-pasted, if they don't work AND you have a free
-                    // alernative, dm me on Discord: macos.amfi
-                    iceServers: [
-                        {
-                            urls: "stun:stun.l.google.com:19302"
-                        },
-                        {
-                            urls: "stun:stun1.l.google.com:19302"
-                        },
-                        {
-                            urls: "turn:openrelay.metered.ca:80",
-                            username: "openrelayproject",
-                            credential: "openrelayproject"
-                        }
-                    ]
-                }
-            });            
+            sys.peer = new Peer(id, { config: { 'iceServers': [{ urls: 'stun:freeturn.net:3478' }, { urls: 'turn:freeturn.net:3478', username: 'free', credential: 'free' }] } });
 
             sys.peer.on('open', (peerId) => {
                 ui.masschange('deskid', peerId);
