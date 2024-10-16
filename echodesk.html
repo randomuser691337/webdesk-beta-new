@@ -99,6 +99,20 @@
             const darkpref = await fs.read('/user/info/lightdarkpref');
             const lightdark = await fs.read('/user/info/lightdark');
             const color = await fs.read('/user/info/color');
+            const font = await fs.read('/user/info/font');
+            if (font === "big") {
+                ui.cv('fz3', '14px');
+                ui.cv('fz2', '15px');
+                ui.cv('fz1', '17px');
+            } else if (font === "small") {
+                ui.cv('fz3', '10px');
+                ui.cv('fz2', '12px');
+                ui.cv('fz1', '13px');
+            } else {
+                ui.cv('fz3', '12px');
+                ui.cv('fz2', '14px');
+                ui.cv('fz1', '15px');
+            }
             sys.setupd = true;
             sys.name = sd;
             if (darkpref === "auto") {

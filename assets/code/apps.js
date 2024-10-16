@@ -6,12 +6,14 @@ var app = {
             const main = tk.mbw('Settings', '300px', 'auto', true, undefined, undefined);
             const generalPane = tk.c('div', main.main, 'hide');
             const appearPane = tk.c('div', main.main, 'hide');
+            const accPane = tk.c('div', main.main, 'hide');
             const userPane = tk.c('div', main.main, 'hide');
             const mainPane = tk.c('div', main.main);
             // Main pane
             tk.p('Settings', undefined, mainPane);
             tk.cb('b1 b2', 'General', () => ui.sw2(mainPane, generalPane), mainPane);
             tk.cb('b1 b2', 'WebDesk User', () => ui.sw2(mainPane, userPane), mainPane);
+            tk.cb('b1 b2', 'Accessibility', () => ui.sw2(mainPane, accPane), mainPane);
             tk.cb('b1 b2', 'Appearance', () => ui.sw2(mainPane, appearPane), mainPane);
             // General pane
             tk.p('General', undefined, generalPane);
@@ -76,6 +78,7 @@ var app = {
                 fs.del('/user/info/lightdarkpref');
                 wm.wal('Reboot to finish resetting colors.', () => wd.reboot(), 'Reboot');
             }, appearPane); tk.cb('b1', 'Back', () => ui.sw2(appearPane, mainPane), appearPane);
+            // User pane
             tk.p('WebDesk User', undefined, userPane);
             tk.cb('b1 b2', 'Change Username', function () {
                 const ok = tk.mbw('Change Username', '300px', 'auto', true, undefined, undefined);
@@ -97,6 +100,27 @@ var app = {
                 }, ok.main);
             }, userPane);
             tk.cb('b1', 'Back', () => ui.sw2(userPane, mainPane), userPane);
+            // Access pane
+            tk.p('Font size', undefined, accPane);
+            tk.cb('b1 b2', 'Bigger', function () {
+                ui.cv('fz3', '14px');
+                ui.cv('fz2', '15px');
+                ui.cv('fz1', '17px');
+                fs.write('/user/info/font', 'big');
+            }, accPane);
+            tk.cb('b1 b2', 'Normal', function () {
+                ui.cv('fz3', '12px');
+                ui.cv('fz2', '14px');
+                ui.cv('fz1', '15px');
+                fs.write('/user/info/font', 'normal');
+            }, accPane);
+            tk.cb('b1 b2', 'Smaller', function () {
+                ui.cv('fz3', '10px');
+                ui.cv('fz2', '12px');
+                ui.cv('fz1', '13px');
+                fs.write('/user/info/font', 'small');
+            }, accPane);
+            tk.cb('b1', 'Back', () => ui.sw2(accPane, mainPane), accPane);
         }
     },
     eraseassist: {
