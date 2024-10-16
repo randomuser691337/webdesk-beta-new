@@ -14,7 +14,7 @@
     --bl2: 8px;
     --rad1: 16px;
     --rad2: 12px;
-    --rad3: 9px;
+    --rad3: 10px;
     --fz1: 15px;
     --fz2: 14px;
     --fz3: 12px;
@@ -602,7 +602,7 @@ p {
     position: fixed;
     top: 0px;
     right: 0px;
-    bottom: 55px;
+    bottom: 45px;
     width: 250px;
     padding: 10px;
     overflow-x: visible;

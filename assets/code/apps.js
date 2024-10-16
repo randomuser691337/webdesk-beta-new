@@ -558,13 +558,13 @@ var app = {
                                 const inp = tk.c('input', menu2, 'i1');
                                 inp.placeholder = "Enter new path";
                                 inp.value = thing.path;
-                                tk.cb('b1 b2', 'Rename/Move', function () {
+                                tk.cb('b1', 'Cancel', function () {
+                                    ui.dest(menu2);
+                                }, menu2);
+                                tk.cb('b1', 'Rename/Move', function () {
                                     fs.write(inp.value, yeah);
                                     fs.del(thing.path, yeah);
                                     navto(path);
-                                    ui.dest(menu2);
-                                }, menu2);
-                                tk.cb('b1', 'Cancel', function () {
                                     ui.dest(menu2);
                                 }, menu2);
                             }, menu);
