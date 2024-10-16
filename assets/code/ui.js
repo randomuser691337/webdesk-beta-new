@@ -304,6 +304,9 @@ var tk = {
         windowDiv.appendChild(contentDiv);
         document.body.appendChild(windowDiv);
         wd.win(); ui.center(windowDiv);
+        windowDiv.addEventListener('mousedown', function () {
+            wd.win(windowDiv);
+        });
         return { win: windowDiv, main: contentDiv, tbn, title: titlebarDiv, closebtn: closeButton };
     }
 }

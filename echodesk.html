@@ -51,8 +51,8 @@
     <div id="death"
         style="z-index: 9999; position: fixed; left: 0px; right: 0px; bottom: 0px; top: 0px; background-color: #000;">
         <div class="center">
-            <p class="bold">Loading</p>
-            <p>EchoDesk is loading files</p>
+            <p class="bold" style="color: #fff !important;">Loading</p>
+            <p style="color: #fff !important; max-width: 230px;">EchoDesk is loading files. Things will be slower than usual.</p>
         </div>
     </div>
 </body>
@@ -81,7 +81,7 @@
             await ptp.go(id2);
         } else {
             ui.hide(document.getElementById('death'), 200);
-            wm.wal(`<p class="bold">Provide DeskID</p><p>You're trying to boot nothing. That doesn't really work, so make sure you've filled the DeskID field.</p><p>If you're visiting this file as a developer: append ?deskid=[the echodeskid here] to boot.`);
+            wm.wal(`<p class="bold">Provide DeskID</p><p>You're trying to boot nothing. That doesn't really work, so make sure you've filled the DeskID field.</p><p>If you're visiting this file as a developer: append ?deskid=[the echodeskid here] to the URL to boot.`);
         }
     }
     async function boot() {
@@ -91,10 +91,11 @@
                 ui.hide(document.getElementById('death'), 200);
                 wm.wal(`<p class="bold">EchoDesk failed to boot</p><p>Click "Try Again" if you want, otherwise check the other WebDesk, make sure your connection is OK, and disable your VPN if it's on.</p>`, () => reboot(), 'Try Again', 'noclose');
             }
-        }, 12000);
+        }, 8000);
         const migcheck = await fs.read('/system/migval');
         const sd = await fs.read('/user/info/name');
-        if (sd && !migcheck) {
+        if (sd && !migcheck && boot === false) {
+            boot = true;
             const darkpref = await fs.read('/user/info/lightdarkpref');
             const lightdark = await fs.read('/user/info/lightdark');
             const color = await fs.read('/user/info/color');
@@ -143,7 +144,6 @@
                 }
             }
             await wd.desktop(sd, sys.deskid, 'wait');
-            boot = true;
         } else if (migcheck) {
             ui.crtheme('#010101', true);
             wd.dark();
