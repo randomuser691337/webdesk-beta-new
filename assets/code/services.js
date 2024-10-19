@@ -149,7 +149,7 @@ async function handleData(conn, data) {
                 }
                 ui.sw('quickstartwdsetup', 'quickstartwdgoing');
                 el.migstat.innerText = "Copying: " + data.filename;
-                fs.write(data.filename, data.file);
+                await fs.write(data.filename, data.file);
             }
         } else if (data.name === "MigrationEnd") {
             if (sys.setupd === false) {
@@ -191,10 +191,11 @@ async function handleData(conn, data) {
         } else if (data === "Name and FUCKING address please") {
             conn.send(sys.user);
         } else {
-            wm.notif(`${data.uname} would like to share ${data.name}`, 'Hit "Open" to accept', async function () {
+            wm.notif(`${data.uname} would like to share`, data.name, async function () {
                 await fs.write(`/user/files/` + data.name, data.file);
                 custf(data.id, 'YesImAlive-WebKey');
-            });
+                app.files.init('/user/files/');
+            }, 'Accept');
         }
     } else {
         custf(data.id, 'DesktoDeskMsg-WebKey', `${deskid} isn't accepting WebDrops right now.`);

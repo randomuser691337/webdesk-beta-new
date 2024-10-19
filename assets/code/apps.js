@@ -22,6 +22,10 @@ var app = {
                 await fs.del('/system/apps.json');
                 wd.reboot();
             }, 'Okay'), generalPane);
+            tk.cb('b1 b2 red', 'Enter Recovery Mode', function () {
+                fs.write('/system/migval', 'rec');
+                wd.reboot();
+            }, generalPane);
             const earth = tk.cb('b1 b2', 'Enable Earthquake Mode (Restarting stops it)', function () {
                 const style = document.createElement('style');
                 style.innerHTML = `
@@ -97,27 +101,25 @@ var app = {
                     const newid = await wd.newid();
                     ok.main.innerHTML = `<p>Reboot WebDesk to finish changing your DeskID.</p><p>All unsaved data will be lost. Your new ID is ${newid}.</p>`;
                     tk.cb('b1', 'Reboot', () => wd.reboot(), ok.main);
+                    app.ach.unlock('Just when you thought you knew me, I vanish!', 'Good luck WebDropping to nothing!');
                 }, ok.main);
+                ok.closebtn.addEventListener('mousedown', function () {
+                    app.ach.unlock('Nevermind', 'Your dark reputation follows you.');
+                });
             }, userPane);
             tk.cb('b1', 'Back', () => ui.sw2(userPane, mainPane), userPane);
             // Access pane
             tk.p('Font size', undefined, accPane);
             tk.cb('b1 b2', 'Bigger', function () {
-                ui.cv('fz3', '14px');
-                ui.cv('fz2', '15px');
-                ui.cv('fz1', '17px');
+                wd.bgft();
                 fs.write('/user/info/font', 'big');
             }, accPane);
             tk.cb('b1 b2', 'Normal', function () {
-                ui.cv('fz3', '12px');
-                ui.cv('fz2', '14px');
-                ui.cv('fz1', '15px');
+                wd.meft();
                 fs.write('/user/info/font', 'normal');
             }, accPane);
             tk.cb('b1 b2', 'Smaller', function () {
-                ui.cv('fz3', '10px');
-                ui.cv('fz2', '12px');
-                ui.cv('fz1', '13px');
+                wd.smft();
                 fs.write('/user/info/font', 'small');
             }, accPane);
             tk.cb('b1', 'Back', () => ui.sw2(accPane, mainPane), accPane);
@@ -166,6 +168,45 @@ var app = {
             sys.setupd = "echo";
         }
     },
+    recovery: {
+        runs: false,
+        init: async function () {
+            const id = gen(7);
+            await ptp.go(id);
+            ui.crtheme('#010101', true);
+            wd.dark('nosave');
+            await fs.del('/system/migval');
+            ui.hide(document.getElementById('death'), 200);
+            const main = tk.c('div', document.getElementById('setuparea'), 'setupbox');
+            // HAHAHAHAHA FUNNY NUMBER!!!!
+            main.style.height = "420px";
+            // create setup menubar
+            const bar = tk.c('div', main, 'setupbar');
+            const tnav = tk.c('div', bar, 'tnav');
+            const title = tk.c('div', bar, 'title');
+            tk.cb('b4', 'Force Exit', () => wm.wal(`<p>If WebDesk is stuck, use this to leave.</p><p>Note: If you have lots of files or a slow connection, it's normal for things to take a while.</p>`, () => reboot(), 'Force Exit'), tnav);
+            tk.cb('b4 time', 'what', undefined, title);
+            // first menu
+            const first = tk.c('div', main, 'setb');
+            tk.img('./assets/img/setup/first.svg', 'setupi', first);
+            tk.p('Recovery', 'h2', first);
+            tk.p(`WebDesk couldn't boot or you wanted to come here, so we threw you here. Here's your options:`, undefined, first);
+            tk.cb('b1 b2', `Half-boot (Lets you use WebDesk, but won't fix your problem)`, function () {
+                wd.desktop('Half-boot', id, undefined);
+                ui.dest(main, 200);
+                app.ach.unlock('Maximum effort...?', `Just fix the issue at hand!`);
+            }, first);
+            tk.cb('b1 b2', 'Delete Apps (Usually the main issue, your data will remain)', function () {
+                fs.del('/system/apps.json');
+                fs.delfold('/system/apps');
+                wm.notif(`Deleted apps`, 'All apps were deleted, their data is safe.');
+            }, first);
+            tk.cb('b1 b2', 'Files (Wanna go digging or editing?)', () => app.files.init(), first);
+            tk.cb('b1 b2', 'Settings (Self-explanatory)', () => app.settings.init(), first);
+            tk.cb('b1', 'Exit Recovery', () => wd.reboot(), first);
+            app.ach.unlock('Recovery Mode', `I've got a bad feeling about this… but let's do it anyway!`);
+        }
+    },
     setup: {
         runs: false,
         init: function () {
@@ -192,8 +233,9 @@ var app = {
             }, first);
             tk.cb('b1', `Guest`, function () {
                 sys.guest = true;
+                sys.name = "Guest";
                 wd.desktop('Guest', gen(8));
-                wm.notif('Welcome to WebDesk!', `You've logged in as a guest, so WebDesk will be erased on reload and some features won't be available.`)
+                wm.notif('Welcome to WebDesk!', `You've logged in as a guest, so WebDesk will be erased on reload and some features won't be available.`);
             }, first);
             tk.cb('b1', `Let's go`, () => ui.sw2(first, transfer), first);
             // migrate menu
@@ -225,7 +267,7 @@ var app = {
             tk.img('./assets/img/setup/restore.svg', 'setupi', copy);
             tk.p('Restoring from other WebDesk', 'h2', copy);
             tk.p('Do not touch the other WebDesk, it could interrupt the copying process.', undefined, copy);
-            tk.p('This might take a while depending on settings and file size.', undefined, copy);
+            tk.p(`It's normal for this to take an unreasonable amount of time sometimes.`, undefined, copy);
             el.migstat = tk.p('Starting...', 'restpg', copy);
             tk.cb('b1', 'Cancel', function () { fs.erase('reboot'); }, copy);
             copy.id = "quickstartwdgoing";
@@ -332,6 +374,7 @@ var app = {
             tk.img('./assets/img/setup/check.svg', 'setupi', sum);
             tk.p('Finishing Up', 'h2', sum);
             tk.p(`Wait for the other WebDesk to finish before hitting "Done" or "Erase".`, undefined, sum);
+            tk.p(`It's normal for this to take an unreasonable amount of time sometimes.`, undefined, sum);
             tk.cb('b1', 'Erase', function () { app.eraseassist.init(); }, sum);
             tk.cb('b1', 'Done', function () { wd.reboot(); }, sum);
             sum.id = "setupdone";
@@ -341,7 +384,7 @@ var app = {
         runs: false,
         name: 'Iris',
         init: async function (contents) {
-            const win = tk.mbw('Iris Media Viewer', '550px', 'auto', true, undefined, undefined);
+            const win = tk.mbw('Iris Media Viewer', '550px', 'auto', undefined, undefined, undefined);
             if (contents.includes('data:image')) {
                 const img = tk.c('img', win.main, 'embed');
                 img.src = contents;
@@ -499,12 +542,63 @@ var app = {
                 const thing = await fs.ls(path);
                 thing.items.forEach(function (thing) {
                     if (thing.type === "folder") {
-                        const selfdestruct = tk.cb('flist width', "Folder: " + thing.name, () => navto(thing.path + "/"), items);
+                        const target = tk.cb('flist width', "Folder: " + thing.name, () => navto(thing.path + "/"), items);
+                        let timer;
+                        let isLongPress = false;
+                        
+                        function openmenu() {
+                            const menu = tk.c('div', document.body, 'cm');
+                            tk.p(thing.path, 'bold', menu);
+                            if (thing.path.includes('/system')) {
+                                tk.p('This is the system folder, modifying it will likely cause damage.', 'warn', menu);
+                            }
+                            if (thing.path.includes('/user')) {
+                                tk.p('This is your user folder, modifying this could cause harm.', 'warn', menu);
+                            }
+                            tk.cb('b1 b2', 'Delete folder', function () {
+                                fs.delfold(thing.path);
+                                ui.dest(target);
+                                ui.dest(menu);
+                            }, menu);
+                            tk.cb('b1', 'Close', function () {
+                                ui.dest(menu);
+                            }, menu);
+                        }
+                        
+                        target.addEventListener('touchstart', function (e) {
+                            e.preventDefault();
+                            isLongPress = false;
+                            timer = setTimeout(() => {
+                                isLongPress = true;
+                                openmenu();
+                            }, 500);
+                        });
+                        
+                        target.addEventListener('touchend', function (e) {
+                            clearTimeout(timer);
+                            if (!isLongPress) {
+                                navto(thing.path + "/");
+                            }
+                        });
+                        
+                        target.addEventListener('touchmove', function (e) {
+                            clearTimeout(timer);
+                        });
+                        
+                        target.addEventListener('touchcancel', function (e) {
+                            clearTimeout(timer); 
+                        });
+                        
+                        target.addEventListener('contextmenu', function (e) {
+                            e.preventDefault();
+                            openmenu();
+                        });
+                        
                     } else {
                         if (thing.name == "") {
                             return;
                         }
-                        const selfdestruct = tk.cb('flist width', "File: " + thing.name, async function () {
+                        const target = tk.cb('flist width', "File: " + thing.name, async function () {
                             const skibidi = tk.c('div', document.body, 'cm');
                             skibidi.innerText = `Loading ` + thing.name + ", this might take a bit";
                             const yeah = await fs.read(thing.path);
@@ -553,7 +647,10 @@ var app = {
                                 const menu2 = tk.c('div', document.body, 'cm');
                                 const inp = tk.c('input', menu2, 'i1');
                                 inp.placeholder = "Enter DeskID";
-                                tk.cb('b1 b2', 'WebDrop', async function () {
+                                tk.cb('b1', 'Cancel', function () {
+                                    ui.dest(menu2);
+                                }, menu2);
+                                tk.cb('b1', 'WebDrop', async function () {
                                     menu2.innerHTML = `<p class="bold">Sending file</p><p>Depending on the size, this might take a bit</p>`;
                                     tk.cb('b1', 'Close (No status updates)', function () {
                                         ui.dest(menu2);
@@ -571,9 +668,6 @@ var app = {
                                             }, menu2);
                                         }
                                     });
-                                }, menu2);
-                                tk.cb('b1', 'Cancel', function () {
-                                    ui.dest(menu2);
                                 }, menu2);
                             }, menu);
                             tk.cb('b1 b2', 'Rename/Move', function () {
@@ -594,7 +688,7 @@ var app = {
                             }, menu);
                             tk.cb('b1 b2', 'Delete file', function () {
                                 fs.del(thing.path);
-                                ui.dest(selfdestruct);
+                                ui.dest(target);
                                 ui.dest(menu);
                             }, menu);
                             tk.cb('b1', 'Cancel', function () {
@@ -602,10 +696,10 @@ var app = {
                             }, menu);
                             ui.dest(skibidi);
                         }, items);
-                        selfdestruct.addEventListener('dragstart', (e) => {
+                        target.addEventListener('dragstart', (e) => {
                             e.dataTransfer.setData('text/plain', thing.path);
                         });
-                        selfdestruct.draggable = true;
+                        target.draggable = true;
                     }
                 });
             }
@@ -712,13 +806,14 @@ var app = {
 
             console.log(`<i> Installing ${apploc}`);
             const apps = await fs.read('/system/apps.json');
+            let the = Date.now();
             if (apps) {
                 const ok = await execute(`https://appmarket.meower.xyz` + apploc);
-                const newen = { name: app.name, ver: app.ver, id: Date.now(), exec: ok };
+                const newen = { name: app.name, ver: app.ver, id: the, exec: '/system/apps/' + the + '.js' };
+                await fs.write('/system/apps/' + the + '.js', ok);
                 const jsondata = JSON.parse(apps);
                 const check = jsondata.some(entry => entry.name === newen.name);
                 if (check === true) {
-                    console.log('<i> Already installed');
                     wm.wal('<p>Already installed!</p>')
                 } else {
                     jsondata.push(newen);
@@ -731,7 +826,8 @@ var app = {
                 }
             } else {
                 const ok = await execute(`https://appmarket.meower.xyz` + apploc);
-                await fs.write('/system/apps.json', [{ name: app.name, ver: app.ver, id: Date.now(), exec: ok }]);
+                await fs.write('/system/apps.json', [{ name: app.name, ver: app.ver, id: the, exec: '/system/apps/' + the + '.js' }]);
+                await fs.write('/system/apps/' + the + '.js', ok);
                 wm.notif(`Installed: `, app.name);
             }
         },
@@ -760,7 +856,6 @@ var app = {
             await loadapps();
         },
     },
-
     ach: {
         runs: true,
         name: 'Achievements',
@@ -909,6 +1004,8 @@ var app = {
                 currentBtn.innerText = searchInput.value;
                 if (searchInput.value.includes('porn') || searchInput.value.includes('e621') || searchInput.value.includes('rule34') || searchInput.value.includes('r34') || searchInput.value.includes('xvideos') || searchInput.value.includes('c.ai') || searchInput.value.includes('webtoon')) {
                     app.ach.unlock('The Gooner', `We won't judge — we promise.`);
+                } else if (searchInput.value.includes(window.origin)) {
+                    app.ach.unlock('Webception!', `Just know that the other WebDesk will probably end up erased.`);
                 }
             }, okiedokie);
 

@@ -54,4 +54,7 @@ var fs = {
     getall: function () {
         return this.askwfs('all');
     },
+    delfold: function (path) {
+        return this.askwfs('delfold', path);
+    },
 };

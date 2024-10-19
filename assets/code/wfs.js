@@ -69,6 +69,13 @@ function idbop(operation, params, opt, requestId) {
                 console.error('Error fetching files:', error);
             });
             break;
+        case 'delfold':
+            fs2.nukefold(params).then(result => {
+                self.postMessage({ type: 'result', data: result, requestId });
+            }).catch(error => {
+                self.postMessage({ type: 'error', data: error, requestId });
+            });
+            break;
         case 'ls':
             fs2.folder(params).then(result => {
                 self.postMessage({ type: 'result', data: result, requestId });
@@ -194,6 +201,33 @@ var fs2 = {
             };
         });
     },
+    nukefold: async function (path) {
+        return new Promise((resolve, reject) => {
+            const transaction = db.transaction(['main'], 'readonly');
+            const objectStore = transaction.objectStore('main');
+            objectStore.openCursor().onsuccess = async function (event) {
+                const cursor = event.target.result;
+                if (cursor) {
+                    if (cursor.key.startsWith(path)) {
+                        const relativePath = cursor.key.substring(path.length);
+                        const parts = relativePath.split('/');
+                        if (parts.length > 1) {
+                            fs2.nukefold(path + parts[0] + '/');
+                        } else {
+                            fs2.del(cursor.key);
+                        }
+                    }
+                    cursor.continue();
+                } else {
+                    resolve(true);
+                }
+            };
+    
+            objectStore.openCursor().onerror = function (event) {
+                reject(event.target.error);
+            };
+        });
+    },    
     all: function () {
         return new Promise((resolve, reject) => {
             const transaction = db.transaction(['main'], 'readonly');

@@ -286,7 +286,7 @@ var tk = {
         if (full === undefined) {
             maximizeButton.classList.add('gre');
             maximizeButton.addEventListener('mousedown', function () {
-                max(windowDiv.id);
+                wm.max(windowDiv);
             });
         }
 
@@ -303,10 +303,11 @@ var tk = {
         contentDiv.classList.add('content');
         windowDiv.appendChild(contentDiv);
         document.body.appendChild(windowDiv);
-        wd.win(); ui.center(windowDiv);
+        wd.win();
         windowDiv.addEventListener('mousedown', function () {
             wd.win(windowDiv);
         });
+        setTimeout(function () {ui.center(windowDiv);}, 15);
         return { win: windowDiv, main: contentDiv, tbn, title: titlebarDiv, closebtn: closeButton };
     }
 }
