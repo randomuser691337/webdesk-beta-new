@@ -57,4 +57,7 @@ var fs = {
     delfold: function (path) {
         return this.askwfs('delfold', path);
     },
+    persist: function () {
+        return this.askwfs('persist');
+    },
 };

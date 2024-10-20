@@ -18,6 +18,11 @@ var app = {
             // General pane
             tk.p('General', undefined, generalPane);
             tk.cb('b1 b2 red', 'Erase This WebDesk', () => app.eraseassist.init(), generalPane);
+            tk.cb('b1 b2 red', 'Request Persistance (Stops browser from erasing WebDesk)', function () {
+                fs.persist();
+                app.ach.unlock('The Keeper', `Won't save your data from the death of the universe, though!`);
+                wm.notif('Requested persistance!', 'Might have worked, might have not.');
+            }, generalPane);
             tk.cb('b1 b2 red', 'Remove All App Market Apps', () => wm.wal(`<p>Warning: Removing all App Market apps will cause a reboot and delete them, but their data will remain.</p>`, async function () {
                 await fs.del('/system/apps.json');
                 wd.reboot();
@@ -482,6 +487,18 @@ var app = {
                     editor.execCommand('redo');
                 }, menu);
             }, btnnest);
+            tk.cb('b4 browserbutton', 'Run', async function () {
+                const menu = tk.c('div', document.body, 'cm');
+                tk.p(`WAIT!!!`, 'h2', menu);
+                tk.p(`RUN THIS CODE CAREFULLY. It will have full access to your data. It's safer to use an incognito window, if possible. If you were told to copy/paste something here, you're probably getting scammed.`, undefined, menu);
+                tk.cb('b1 b2', 'I understand, run the code', function () {
+                    ui.dest(menu, 120);
+                    eval(editor.getValue());
+                }, menu);
+                tk.cb('b1', 'Close', function () {
+                    ui.dest(menu, 120);
+                }, menu);
+            }, btnnest);
             wd.win();
             editor.container.addEventListener('keydown', async function (event) {
                 if ((event.ctrlKey || event.metaKey) && event.key === 's') {
@@ -545,7 +562,7 @@ var app = {
                         const target = tk.cb('flist width', "Folder: " + thing.name, () => navto(thing.path + "/"), items);
                         let timer;
                         let isLongPress = false;
-                        
+
                         function openmenu() {
                             const menu = tk.c('div', document.body, 'cm');
                             tk.p(thing.path, 'bold', menu);
@@ -564,7 +581,7 @@ var app = {
                                 ui.dest(menu);
                             }, menu);
                         }
-                        
+
                         target.addEventListener('touchstart', function (e) {
                             e.preventDefault();
                             isLongPress = false;
@@ -573,27 +590,27 @@ var app = {
                                 openmenu();
                             }, 500);
                         });
-                        
+
                         target.addEventListener('touchend', function (e) {
                             clearTimeout(timer);
                             if (!isLongPress) {
                                 navto(thing.path + "/");
                             }
                         });
-                        
+
                         target.addEventListener('touchmove', function (e) {
                             clearTimeout(timer);
                         });
-                        
+
                         target.addEventListener('touchcancel', function (e) {
-                            clearTimeout(timer); 
+                            clearTimeout(timer);
                         });
-                        
+
                         target.addEventListener('contextmenu', function (e) {
                             e.preventDefault();
                             openmenu();
                         });
-                        
+
                     } else {
                         if (thing.name == "") {
                             return;
@@ -612,7 +629,7 @@ var app = {
                             }
                             tk.cb('b1 b2', 'Open', async function () {
                                 const yeah = await fs.read(thing.path);
-                                if (yeah.includes('data:video') || yeah.includes('data:image') || yeah.includes('data:audio')) {
+                                if (yeah.includes('data:')) {
                                     app.imgview.init(yeah);
                                 } else {
                                     app.textedit.init(yeah, thing.path);
@@ -806,13 +823,12 @@ var app = {
 
             console.log(`<i> Installing ${apploc}`);
             const apps = await fs.read('/system/apps.json');
-            let the = Date.now();
             if (apps) {
                 const ok = await execute(`https://appmarket.meower.xyz` + apploc);
-                const newen = { name: app.name, ver: app.ver, id: the, exec: '/system/apps/' + the + '.js' };
-                await fs.write('/system/apps/' + the + '.js', ok);
+                const newen = { name: app.name, ver: app.ver, appid: app.appid, exec: '/system/apps/' + app.appid + '.js' };
+                await fs.write('/system/apps/' + app.appid + '.js', ok);
                 const jsondata = JSON.parse(apps);
-                const check = jsondata.some(entry => entry.name === newen.name);
+                const check = jsondata.some(entry => entry.appid === newen.appid);
                 if (check === true) {
                     wm.wal('<p>Already installed!</p>')
                 } else {
@@ -826,8 +842,8 @@ var app = {
                 }
             } else {
                 const ok = await execute(`https://appmarket.meower.xyz` + apploc);
-                await fs.write('/system/apps.json', [{ name: app.name, ver: app.ver, id: the, exec: '/system/apps/' + the + '.js' }]);
-                await fs.write('/system/apps/' + the + '.js', ok);
+                await fs.write('/system/apps.json', [{ name: app.name, ver: app.ver, appid: app.appid, exec: '/system/apps/' + app.appid + '.js' }]);
+                await fs.write('/system/apps/' + app.appid + '.js', ok);
                 wm.notif(`Installed: `, app.name);
             }
         },
@@ -979,7 +995,7 @@ var app = {
                 }, 200);
             }
 
-            tk.cb('b4 browserbutton', '+', addtab, searchbtns);
+            tk.cb('b4 browserbutton', '+', () => addtab(), searchbtns);
             tk.cb('b4 rb browserbutton', 'x', function () {
                 ui.dest(win.win, 150);
                 ui.dest(win.tbn, 150);

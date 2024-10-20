@@ -8,6 +8,7 @@
     <meta name="mobile-web-app-capable" content="yes">
     <link rel="shortcut icon" href="./assets/img/favicon.png">
     <link rel="apple-touch-icon" href="./assets/img/noround.png">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/xterm/css/xterm.css" />
     <title>WebDesk</title>
 </head>
 <script>
@@ -69,6 +70,8 @@
 <script src="./assets/code/ui.js"></script>
 <script src="./assets/code/fs.js"></script>
 <script src="./assets/code/apps.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/xterm/lib/xterm.js"></script>
+<script src="https://cdn.socket.io/4.3.2/socket.io.min.js"></script>
 <script>
     async function boot() {
         let boot = false;
@@ -144,13 +147,13 @@
                     const response = await fetch('https://appmarket.meower.xyz/refresh');
                     const onlineApps = await response.json();
                     for (const inapp of apps) {
-                        await wd.loadapps(inapp, onlineApps);
+                        await wd.loadapps(inapp, onlineApps, apps);
                     }
                 } catch (err) {
                     console.log(err);
                     try {
                         for (const inapp of apps) {
-                            await wd.loadapps(inapp, inapp);
+                            await wd.loadapps(inapp, inapp, inapp);
                         }
                     } catch (error) {
                         if (sys.fucker === false) {

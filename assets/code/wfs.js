@@ -62,6 +62,9 @@ function idbop(operation, params, opt, requestId) {
         case 'list':
             fs2.list(params);
             break;
+        case 'persist':
+            fs2.persist();
+            break;
         case 'all':
             fs2.all().then(files => {
                 self.postMessage({ type: 'result', data: files, requestId });
@@ -171,6 +174,21 @@ var fs2 = {
             console.log("<!> Error erasing: ", event.target.error);
         };
     },
+    persist: function () {
+        if ('storage' in navigator && 'persist' in navigator.storage) {
+            navigator.storage.persist().then(function (persistent) {
+                if (persistent) {
+                    console.log('<i> Persistence is granted.');
+                } else {
+                    console.log('<!> Persistence is not granted.');
+                }
+            }).catch(function (error) {
+                console.error('<!> Error requesting persistence:', error);
+            });
+        } else {
+            console.log('<!> Persistence API is not supported in this browser.');
+        }
+    },
     folder: function (path) {
         return new Promise((resolve, reject) => {
             const transaction = db.transaction(['main'], 'readonly');
@@ -222,12 +240,12 @@ var fs2 = {
                     resolve(true);
                 }
             };
-    
+
             objectStore.openCursor().onerror = function (event) {
                 reject(event.target.error);
             };
         });
-    },    
+    },
     all: function () {
         return new Promise((resolve, reject) => {
             const transaction = db.transaction(['main'], 'readonly');

@@ -212,7 +212,7 @@ var wd = {
         }, 200);
     },
     dark: function (fucker) {
-        ui.cv('ui1', 'rgb(40, 40, 40, 0.6)');
+        ui.cv('ui1', 'rgb(44, 44, 44, 0.65)');
         ui.cv('ui2', '#1b1b1b');
         ui.cv('ui3', '#2b2b2b');
         ui.cv('bc', 'rgb(70, 70, 70, 0.6)');
@@ -223,13 +223,12 @@ var wd = {
         ui.light = false;
     },
     light: function (fucker) {
-        ui.cv('ui1', 'rgb(255, 255, 255, 0.6)');
+        ui.cv('ui1', 'rgb(240, 240, 240, 0.65)');
         ui.cv('ui2', '#ffffff');
         ui.cv('ui3', '#dddddd');
         ui.cv('bc', 'rgb(220, 220, 220, 0.6)');
         ui.cv('font', '#000');
         if (fucker !== "nosave") {
-            console.log('What the fuck is wrong with this');
             fs.write('/user/info/lightdark', 'light');
         }
         ui.light = true;
@@ -382,7 +381,7 @@ var wd = {
         ui.cv('fz2', '15px');
         ui.cv('fz1', '17px');
     },
-    loadapps: async function (inapp, onlineApps) {
+    loadapps: async function (inapp, onlineApps, apps) {
         const onlineApp = onlineApps.find(app => app.name === inapp.name);
 
         if (onlineApp.ver === inapp.ver && sys.fucker === false) {
@@ -409,11 +408,11 @@ var wd = {
         if (performance.memory) {
             setInterval(() => {
                 const memoryUsage = performance.memory.usedJSHeapSize / performance.memory.jsHeapSizeLimit;
-                if (memoryUsage > 0.8) {
+                if (memoryUsage > 0.75) {
                     app.ach.unlock(`Time to make the chimichangas!`, `Quite literally, if your device gets that hot.`);
                     wm.notif(`STOP WHATEVER YOU'RE DOING`, `WebDesk is going to crash due to overuse of resources, or it will start deleting things from memory.`);
                 }
-            }, 7000);
+            }, 4000);
         }
     }
 }
