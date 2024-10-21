@@ -177,6 +177,9 @@ var ui = {
         link.click();
         document.body.removeChild(link);
         URL.revokeObjectURL(url);
+    },
+    copy: function (text) {
+        navigator.clipboard.writeText(text);
     }
 }
 
@@ -307,7 +310,7 @@ var tk = {
         windowDiv.addEventListener('mousedown', function () {
             wd.win(windowDiv);
         });
-        setTimeout(function () {ui.center(windowDiv);}, 15);
+        setTimeout(function () { ui.center(windowDiv); }, 15);
         return { win: windowDiv, main: contentDiv, tbn, title: titlebarDiv, closebtn: closeButton };
     }
 }

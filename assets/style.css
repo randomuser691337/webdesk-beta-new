@@ -5,7 +5,7 @@
     --bg2: #aaccff;
     --accent: 0, 60, 255;
     --acc: var(--accent);
-    --ui1: rgb(255, 255, 255, 0.6);
+    --ui1: rgb(250, 250, 250, 0.6);
     --ui2: #ffffff;
     --ui3: #dddddd;
     --bc: rgb(220, 220, 220, 0.6);
@@ -633,10 +633,10 @@ p {
     box-sizing: border-box;
     background-color: var(--ui1);
     border: 1px solid var(--bc);
-    padding: 8px;
+    padding: 9px;
     border-radius: var(--rad1);
     margin-bottom: 5px;
-    animation: notif 0.5s ease-out;
+    animation: notif 0.45s ease-out;
     text-align: left;
     -webkit-backdrop-filter: blur(var(--bl1));
     backdrop-filter: blur(var(--bl1));
@@ -657,7 +657,6 @@ p {
     margin-bottom: 2px;
     margin-top: 2px;
     font-size: var(--fz2) !important;
-    cursor: pointer;
     -webkit-backdrop-filter: blur(var(--bl1));
     backdrop-filter: blur(var(--bl1));
 }

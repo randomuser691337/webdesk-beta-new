@@ -19,12 +19,18 @@ var wm = {
             btn.addEventListener('click', btn1);
         }
     },
-    snack: function (txt) {
+    snack: function (txt, time) {
         const div = tk.c('div', document.body, 'snack');
         div.innerText = txt;
-        setTimeout(() => {
-            ui.dest(div, 300);
-        }, 4000);
+        if (time) {
+            setTimeout(() => {
+                ui.dest(div, 300);
+            }, time);
+        } else {
+            setTimeout(() => {
+                ui.dest(div, 300);
+            }, 4000);
+        }
         div.addEventListener('click', function () {
             ui.dest(div, 140);
         });
@@ -94,6 +100,6 @@ var wm = {
         }
         const txt = tk.c('span', div, 'bold');
         txt.innerText = ` - ${wd.timecs(Date.now())}`
-        return {div, title, content, dismiss: dbtn};
+        return { div, title, content, dismiss: dbtn };
     }
 }

@@ -212,7 +212,7 @@ var wd = {
         }, 200);
     },
     dark: function (fucker) {
-        ui.cv('ui1', 'rgb(44, 44, 44, 0.65)');
+        ui.cv('ui1', 'rgb(44, 44, 44, 0.6)');
         ui.cv('ui2', '#1b1b1b');
         ui.cv('ui3', '#2b2b2b');
         ui.cv('bc', 'rgb(70, 70, 70, 0.6)');
@@ -223,7 +223,7 @@ var wd = {
         ui.light = false;
     },
     light: function (fucker) {
-        ui.cv('ui1', 'rgb(240, 240, 240, 0.65)');
+        ui.cv('ui1', 'rgb(250, 250, 250, 0.6)');
         ui.cv('ui2', '#ffffff');
         ui.cv('ui3', '#dddddd');
         ui.cv('bc', 'rgb(220, 220, 220, 0.6)');

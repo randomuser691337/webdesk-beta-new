@@ -13,7 +13,7 @@
 </head>
 <script>
     var abt = {
-        lastmod: "Oct 17, 2024",
+        lastmod: "Oct 21, 2024",
         ver: "0.1.4",
     }
 
@@ -70,8 +70,6 @@
 <script src="./assets/code/ui.js"></script>
 <script src="./assets/code/fs.js"></script>
 <script src="./assets/code/apps.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/xterm/lib/xterm.js"></script>
-<script src="https://cdn.socket.io/4.3.2/socket.io.min.js"></script>
 <script>
     async function boot() {
         let boot = false;
@@ -173,6 +171,7 @@
             wd.dark('nosave');
             await fs.del('/system/migval');
             app.migrate.init('down');
+            boot = true;
         } else if (migcheck === "echo") {
             const id = gen(7);
             await ptp.go(id);
@@ -180,6 +179,7 @@
             wd.dark('nosave');
             await fs.del('/system/migval');
             app.echodesk.init();
+            boot = true;
         } else if (migcheck === "rec") {
             await app.recovery.init();
         } else {
@@ -188,6 +188,7 @@
             await ptp.go(id);
             app.setup.init();
             sys.setupd = false;
+            boot = true;
         }
 
         wd.perfmon();

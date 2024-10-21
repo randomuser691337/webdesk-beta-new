@@ -25,6 +25,7 @@ var app = {
             }, generalPane);
             tk.cb('b1 b2 red', 'Remove All App Market Apps', () => wm.wal(`<p>Warning: Removing all App Market apps will cause a reboot and delete them, but their data will remain.</p>`, async function () {
                 await fs.del('/system/apps.json');
+                await fs.delfold('/system/apps');
                 wd.reboot();
             }, 'Okay'), generalPane);
             tk.cb('b1 b2 red', 'Enter Recovery Mode', function () {
@@ -106,7 +107,7 @@ var app = {
                     const newid = await wd.newid();
                     ok.main.innerHTML = `<p>Reboot WebDesk to finish changing your DeskID.</p><p>All unsaved data will be lost. Your new ID is ${newid}.</p>`;
                     tk.cb('b1', 'Reboot', () => wd.reboot(), ok.main);
-                    app.ach.unlock('Just when you thought you knew me, I vanish!', 'Good luck WebDropping to nothing!');
+                    app.ach.unlock('The Vanisher', 'Good luck WebDropping to nothing!');
                 }, ok.main);
                 ok.closebtn.addEventListener('mousedown', function () {
                     app.ach.unlock('Nevermind', 'Your dark reputation follows you.');
@@ -518,7 +519,7 @@ var app = {
         runs: true,
         name: 'Files',
         init: async function () {
-            const win = tk.mbw(`Files`, '340px', 'auto', true, undefined, undefined);
+            const win = tk.mbw(`Files`, '340px', 'auto', undefined, undefined, undefined);
             const breadcrumbs = tk.c('div', win.main);
             const items = tk.c('div', win.main);
             var fuck = undefined;
@@ -830,7 +831,7 @@ var app = {
                 const jsondata = JSON.parse(apps);
                 const check = jsondata.some(entry => entry.appid === newen.appid);
                 if (check === true) {
-                    wm.wal('<p>Already installed!</p>')
+                    wm.snack('Already installed');
                 } else {
                     jsondata.push(newen);
                     if (update === true) {
@@ -859,9 +860,7 @@ var app = {
                         const notif = tk.c('div', win.main, 'notif2');
                         tk.p(`<span class="bold">${app2.name}</bold> by ${app2.pub}`, 'bold', notif);
                         tk.p(app2.info, undefined, notif);
-                        notif.addEventListener('click', async function () {
-                            app.appmark.create(app2.path, app2);
-                        });
+                        tk.cb('b3', 'App ID', () => wm.notif(`${app2.name}'s App ID:`, app2.appid, () => ui.copy(app2.appid), 'Copy'), notif); tk.cb('b3', 'Install', () => app.appmark.create(app2.path, app2), notif)
                     });
                 } catch (error) {
                     console.log(error);
@@ -916,9 +915,7 @@ var app = {
                     const newen = { name: name, cont: content, time: Date.now() };
                     const jsondata = JSON.parse(data);
                     const check = jsondata.some(entry => entry.name === newen.name);
-                    if (check === true) {
-                        console.log('<i> Already achieved!');
-                    } else {
+                    if (check !== true) {
                         wm.notif(`Achieved: ` + name, content, () => app.ach.init());
                         jsondata.push(newen);
                         fs.write('/user/info/achieve.json', jsondata);
@@ -985,12 +982,13 @@ var app = {
                     ui.dest(tabBtn);
                     ui.dest(currentTab);
                 }, tabBtn);
-                setTimeout(function () {
+                setInterval(function () {
                     const currentUrl = currentTab.src;
                     if (currentUrl !== lastUrl) {
                         lastUrl = currentUrl;
                         urls.push(currentUrl);
                         thing = [...urls];
+                        console.log(thing);
                     }
                 }, 200);
             }
@@ -1007,7 +1005,8 @@ var app = {
                 currentTab.src = currentTab.src;
             }, searchbtns);
             tk.cb('b4 browserbutton', '<', function () {
-                let omfg = thing.length - 2
+                let omfg = thing - 2;
+                console.log(omfg);
                 currentTab.url = omfg;
             }, searchbtns);
             tk.cb('b4 browserbutton', '>', function () {

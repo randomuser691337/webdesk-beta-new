@@ -12,7 +12,7 @@
 </head>
 <script>
     var abt = {
-        lastmod: "Oct 17, 2024",
+        lastmod: "Oct 21, 2024",
         ver: "0.1.4",
     }
 
@@ -158,9 +158,11 @@
             wm.wal(`<p>WebDesks in EchoDesk mode cannot enter Recovery, Migration Assistant, etc.</p>`, () => wd.reboot(), 'Reboot', 'noclose');
             app.ach.unlock('Dead End', `Life is an endless series of trainwrecks with only brief, commercial-like breaks of happiness.`);
             await fs.del('/system/migval');
+            boot = true;
         } else {
             wm.wal(`<p>I'm sorry, how did you get here?</p><p>Come on dude, at least go fully set up the other WebDesk.</p>`);
             sys.setupd = false;
+            boot = true;
         }
 
         wd.perfmon();
