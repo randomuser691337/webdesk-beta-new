@@ -12,7 +12,7 @@
 </head>
 <script>
     var abt = {
-        lastmod: "Oct 21, 2024",
+        lastmod: "Oct 22, 2024",
         ver: "0.1.4",
     }
 
@@ -167,7 +167,8 @@
 
         wd.perfmon();
         ui.hide(document.getElementById('death'), 200);
-
+        wm.notif('Welcome to EchoDesk', `Your current DeskID is temporary, and features are disabled.`);
+        app.ach.unlock(`EchoDesk`, `Better than remote desktop in some cases?`);
         const dropZone = document.body;
         ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
             dropZone.addEventListener(eventName, preventDefaults, false);

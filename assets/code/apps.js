@@ -8,12 +8,16 @@ var app = {
             const appearPane = tk.c('div', main.main, 'hide');
             const accPane = tk.c('div', main.main, 'hide');
             const userPane = tk.c('div', main.main, 'hide');
+            const appPane = tk.c('div', main.main, 'hide');
             const mainPane = tk.c('div', main.main);
             // Main pane
             tk.p('Settings', undefined, mainPane);
-            tk.cb('b1 b2', 'General', () => ui.sw2(mainPane, generalPane), mainPane);
-            tk.cb('b1 b2', 'WebDesk User', () => ui.sw2(mainPane, userPane), mainPane);
+            if (sys.guest !== true) {
+                tk.cb('b1 b2', 'General', () => ui.sw2(mainPane, generalPane), mainPane);
+                tk.cb('b1 b2', 'WebDesk User', () => ui.sw2(mainPane, userPane), mainPane);
+            }
             tk.cb('b1 b2', 'Accessibility', () => ui.sw2(mainPane, accPane), mainPane);
+            tk.cb('b1 b2', 'Manage Apps', () => ui.sw2(mainPane, appPane), mainPane);
             tk.cb('b1 b2', 'Appearance', () => ui.sw2(mainPane, appearPane), mainPane);
             // General pane
             tk.p('General', undefined, generalPane);
@@ -28,10 +32,12 @@ var app = {
                 await fs.delfold('/system/apps');
                 wd.reboot();
             }, 'Okay'), generalPane);
-            tk.cb('b1 b2 red', 'Enter Recovery Mode', function () {
-                fs.write('/system/migval', 'rec');
-                wd.reboot();
-            }, generalPane);
+            if (sys.guest !== true) {
+                tk.cb('b1 b2 red', 'Enter Recovery Mode', function () {
+                    fs.write('/system/migval', 'rec');
+                    wd.reboot();
+                }, generalPane);
+            }
             const earth = tk.cb('b1 b2', 'Enable Earthquake Mode (Restarting stops it)', function () {
                 const style = document.createElement('style');
                 style.innerHTML = `
@@ -54,7 +60,7 @@ var app = {
                 ui.crtheme(event.target.value);
             });
             new JSColor(bg1, undefined);
-            tk.p('UI Theme', undefined, appearPane);
+            bg1.style.marginBottom = '9px';
             tk.cb('b1 b2', 'Light mode', function () {
                 fs.del('/user/info/lightdarkpref');
                 sys.autodarkacc = false;
@@ -76,12 +82,12 @@ var app = {
                 sys.autodarkacc = false;
                 wd.clearm2();
             }, appearPane);
-            tk.cb('b1 b2', 'Clear mode (Dark Text)', function () {
+            const btn2 = tk.cb('b1 b2', 'Clear mode (Dark Text)', function () {
                 fs.del('/user/info/lightdarkpref');
                 sys.autodarkacc = false;
                 wd.clearm();
             }, appearPane);
-            tk.p('Other', undefined, appearPane);
+            btn2.style.marginBottom = '9px';
             tk.cb('b1', 'Reset Colors', function () {
                 fs.del('/user/info/color');
                 fs.del('/user/info/lightdark');
@@ -129,6 +135,42 @@ var app = {
                 fs.write('/user/info/font', 'small');
             }, accPane);
             tk.cb('b1', 'Back', () => ui.sw2(accPane, mainPane), accPane);
+            // App pane
+            tk.p('App Management', undefined, appPane);
+            try {
+                const data = await fs.read('/system/apps.json');
+                if (data) {
+                    const parsed = JSON.parse(data);
+                    parsed.forEach((entry) => {
+                        const notif = tk.c('div', appPane, 'notif2');
+                        tk.p(entry.name, 'bold', notif);
+                        tk.p(entry.appid, undefined, notif);
+                        tk.cb('b3', 'App info', async function () {
+                            const ok = tk.c('div', document.body, 'cm');
+                            tk.p('App Info', 'bold', ok);
+                            tk.p(`<span class="bold">Name</bold> ` + entry.name);
+                            tk.p(`<span class="bold">App ID</bold> ` + entry.appid);
+                            tk.p(`<span class="bold">Version</bold> ` + entry.ver);
+                            tk.p(`<span class="bold">Path</bold> ` + entry.exec);
+                            tk.cb('b1', 'Close', )
+                        }, notif);
+                        tk.cb('b3', 'Remove', async function () {
+                            const updatedApps = parsed.filter(item => item.appid !== entry.appid);
+                            const updatedData = JSON.stringify(updatedApps);
+                            await fs.write('/system/apps.json', updatedData);
+                            delete app[entry.appid];
+                            ui.dest(notif);
+                            wm.notif('Removed ' + entry.name, `It's been removed, but a reboot is needed to clear it completely.`, function () {
+                                wd.reboot();
+                            }, 'Reboot');
+                        }, notif);
+                    });
+                }
+            } catch (error) {
+                console.log('<!> Achievements shat itself: ', error);
+                return null;
+            }
+            tk.cb('b1', 'Back', () => ui.sw2(appPane, mainPane), appPane);
         }
     },
     eraseassist: {
@@ -210,7 +252,7 @@ var app = {
             tk.cb('b1 b2', 'Files (Wanna go digging or editing?)', () => app.files.init(), first);
             tk.cb('b1 b2', 'Settings (Self-explanatory)', () => app.settings.init(), first);
             tk.cb('b1', 'Exit Recovery', () => wd.reboot(), first);
-            app.ach.unlock('Recovery Mode', `I've got a bad feeling about this… but let's do it anyway!`);
+            app.ach.unlock('Recovery', `Bad decisions probably led you here.`);
         }
     },
     setup: {
@@ -780,7 +822,7 @@ var app = {
         init: async function () {
             const win = tk.mbw('EchoDesk', '300px', 'auto', true, undefined, undefined);
             if (sys.guest === true) {
-                tk.p(`Enter the EchoDesk ID and hit "Connect". The other WebDesk will appear as a window. <span class="bold">You're in Guest mode, so you can't enter EchoDesk mode.</span>`, undefined, win.main);
+                tk.p(`Enter the EchoDesk ID and hit either of the "Connect" buttons. <span class="bold">You're in Guest mode, so you can't enter EchoDesk mode.</span>`, undefined, win.main);
             } else {
                 tk.p(`If you're connecting: Enter the EchoDesk ID and hit either of the "Connect" buttons.`, undefined, win.main);
                 tk.p(`If you're the host: Hit "Enter EchoDesk Mode". Your apps will close, unsaved data will be lost.`, undefined, win.main);
@@ -908,6 +950,43 @@ var app = {
             tk.p(`Unlocked <span class="b achcount"></span> achievements`, undefined, win.main);
             await load();
         },
+        liltman: async function () {
+            async function load() {
+                try {
+                    const data = await fs.read('/system/apps.json');
+                    if (data) {
+                        const parsed = JSON.parse(data);
+                        let yeah = 0;
+
+                        parsed.forEach((entry) => {
+                            const notif = tk.c('div', win.main, 'notif2');
+                            tk.p(entry.name, 'bold', notif);
+                            tk.p(entry.appid, undefined, notif);
+                            tk.cb('b3', 'Remove', async function () {
+                                const updatedApps = parsed.filter(item => item.appid !== entry.appid);
+                                const updatedData = JSON.stringify(updatedApps);
+                                await fs.write('/system/apps.json', updatedData);
+                                delete app[entry.appid];
+                                ui.dest(notif);
+                                wm.notif('Removed ' + entry.name, `It's been removed, but a reboot is needed to clear it completely.`, function () {
+                                    wd.reboot();
+                                }, 'Reboot');
+                            }, notif);
+                            yeah++;
+                        });
+                    }
+                } catch (error) {
+                    console.log('<!> Achievements shat itself: ', error);
+                    return null;
+                }
+            }
+
+            const win = tk.mbw('Achievements', '300px', 'auto', true, undefined, undefined);
+            tk.p(`Apps`, 'h2', win.main);
+            tk.p(`Remember: These are jokes and don't actually do anything`, undefined, win.main);
+            tk.p(`Unlocked <span class="b achcount"></span> achievements`, undefined, win.main);
+            await load();
+        },
         unlock: async function (name, content) {
             try {
                 const data = await fs.read('/user/info/achieve.json');
@@ -949,7 +1028,7 @@ var app = {
             let currentBtn = tk.c('div', win.main, 'hide');
             let currentName = tk.c('div', win.main, 'hide');
             win.main.classList = "browsercont";
-
+            const searchInput = tk.c('input', okiedokie, 'i1 browserbutton');
             function addtab(ok) {
                 const tab = tk.c('embed', win.main, 'browsertab');
                 if (ok) {
@@ -988,7 +1067,8 @@ var app = {
                         lastUrl = currentUrl;
                         urls.push(currentUrl);
                         thing = [...urls];
-                        console.log(thing);
+                        searchInput.innerText = currentUrl;
+                        currentName.innerText = currentUrl;
                     }
                 }, 200);
             }
@@ -1005,17 +1085,34 @@ var app = {
                 currentTab.src = currentTab.src;
             }, searchbtns);
             tk.cb('b4 browserbutton', '<', function () {
-                let omfg = thing - 2;
-                console.log(omfg);
-                currentTab.url = omfg;
+                if (thing.length > 1) {
+                    const currentIndex = thing.indexOf(currentTab.src);
+                    if (currentIndex > 0) {
+                        const li = thing[currentIndex - 1];
+                        searchInput.value = li;
+                        currentTab.src = li;
+                        currentName.innerText = li;
+                    }
+                }
             }, searchbtns);
             tk.cb('b4 browserbutton', '>', function () {
-                currentTab.contentWindow.history.go(1);
+                if (thing.length > 1) {
+                    const currentIndex = thing.indexOf(currentTab.src);
+                    if (currentIndex < thing.length - 1) {
+                        const li = thing[currentIndex + 1];
+                        searchInput.value = li;
+                        currentTab.src = li;
+                        currentName.innerText = li;
+                    }
+                }
             }, searchbtns);
-            const searchInput = tk.c('input', okiedokie, 'i1 browserbutton');
             searchInput.placeholder = "Enter URL";
             tk.cb('b4 browserbutton', 'Go!', function () {
-                currentTab.src = "https://" + searchInput.value;
+                if (searchInput.value.includes('https://')) {
+                    currentTab.src = searchInput.value;
+                } else {
+                    currentTab.src = "https://" + searchInput.value;
+                }
                 currentBtn.innerText = searchInput.value;
                 if (searchInput.value.includes('porn') || searchInput.value.includes('e621') || searchInput.value.includes('rule34') || searchInput.value.includes('r34') || searchInput.value.includes('xvideos') || searchInput.value.includes('c.ai') || searchInput.value.includes('webtoon')) {
                     app.ach.unlock('The Gooner', `We won't judge — we promise.`);

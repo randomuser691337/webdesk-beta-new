@@ -8,12 +8,11 @@
     <meta name="mobile-web-app-capable" content="yes">
     <link rel="shortcut icon" href="./assets/img/favicon.png">
     <link rel="apple-touch-icon" href="./assets/img/noround.png">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/xterm/css/xterm.css" />
     <title>WebDesk</title>
 </head>
 <script>
     var abt = {
-        lastmod: "Oct 21, 2024",
+        lastmod: "Oct 22, 2024",
         ver: "0.1.4",
     }
 
@@ -95,7 +94,12 @@
                 return;
             }
             const deskid = await fs.read('/system/deskid');
-            if (deskid.length === 8) {
+            if (deskid) {
+                if (deskid.length === 8) {
+                    await wd.newid();
+                    window.location.reload();
+                }
+            } else {
                 await wd.newid();
                 window.location.reload();
             }
@@ -221,6 +225,7 @@
                 reader.onload = async function (e) {
                     const contents = e.target.result;
                     await fs.write(`/user/files/${file.name}`, contents);
+                    app.files.init('/user/files/');
                 };
 
                 reader.readAsDataURL(file);

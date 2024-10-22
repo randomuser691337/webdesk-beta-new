@@ -397,7 +397,7 @@ var wd = {
                 return;
             }
         } else {
-            const remove = apps.filter(item => item.id !== inapp.id);
+            const remove = apps.filter(item => item.appid !== inapp.appid);
             const removed = JSON.stringify(remove);
             fs.write('/system/apps.json', removed);
             app.appmark.create(onlineApp.path, onlineApp, true);
