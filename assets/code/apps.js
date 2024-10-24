@@ -147,12 +147,24 @@ var app = {
                         tk.p(entry.appid, undefined, notif);
                         tk.cb('b3', 'App info', async function () {
                             const ok = tk.c('div', document.body, 'cm');
-                            tk.p('App Info', 'bold', ok);
-                            tk.p(`<span class="bold">Name</bold> ` + entry.name);
-                            tk.p(`<span class="bold">App ID</bold> ` + entry.appid);
-                            tk.p(`<span class="bold">Version</bold> ` + entry.ver);
-                            tk.p(`<span class="bold">Path</bold> ` + entry.exec);
-                            tk.cb('b1', 'Close', )
+                            tk.p('App Info', 'h2', ok);
+                            const ok2 = tk.c('div', ok, undefined);
+                            tk.p(`<span class="bold">Name</span> ` + entry.name, undefined, ok2);
+                            if (entry.installedon === undefined) {
+                                tk.p(`<span class="bold">Modified</span> ` + 'Unknown', undefined, ok2);
+                            } else {
+                                tk.p(`<span class="bold">Modified</span> ` + wd.timec(entry.installedon), undefined, ok2);
+                            }
+                            tk.p(`<span class="bold">App ID</span> ` + entry.appid, undefined, ok2);
+                            if (entry.dev === undefined) {
+                                tk.p(`<span class="bold">Developer</span> ` + 'Unknown', undefined, ok2);
+                            } else {
+                                tk.p(`<span class="bold">Developer</span> ` + entry.dev, undefined, ok2);
+                            }
+                            tk.p(`<span class="bold">Version</span> ` + entry.ver, undefined, ok2);
+                            tk.cb('b1', 'Close', function () {
+                                ui.dest(ok);
+                            }, ok)
                         }, notif);
                         tk.cb('b3', 'Remove', async function () {
                             const updatedApps = parsed.filter(item => item.appid !== entry.appid);
@@ -473,16 +485,22 @@ var app = {
             editdiv.style.display = "block";
             editdiv.style.borderRadius = "0px";
             win.main.classList = "browsercont";
-            tk.cb('b4 rb browserbutton', 'x', function () {
-                ui.dest(win.win, 150);
-                ui.dest(win.tbn, 150);
-            }, btnnest);
-            tk.cb('b4 yb browserbutton', '-', function () {
-                ui.hide(win.win, 150);
-            }, btnnest);
             const genit = gen(8);
             editdiv.id = genit;
             const editor = ace.edit(`${genit}`);
+            const fucker = tk.cb('winb red', '', function () {
+                editor.destroy();
+                ui.dest(win.win, 150);
+                ui.dest(win.tbn, 150);
+                clearInterval(colorch);
+            }, btnnest);
+            fucker.style.marginLeft = "6px";
+            tk.cb('winb yel', '', function () {
+                ui.hide(win.win, 150);
+            }, btnnest);
+            tk.cb('winb gre', '', function () {
+                wm.max(win.win);
+            }, btnnest);
             editor.setFontSize("var(--fz3)");
             editor.session.setOption("wrap", true);
             function ok() {
@@ -552,9 +570,6 @@ var app = {
             new ResizeObserver(() => {
                 editor.resize();
             }).observe(win.win);
-            win.closebtn.addEventListener('mousedown', function () {
-                clearInterval(colorch);
-            });
         }
     },
     files: {
@@ -789,7 +804,8 @@ var app = {
                 <p><a href="https://davidshimjs.github.io/qrcodejs/" target="blank">qrcode.js: Any WebDesk QR codes</a></p>
                 <p><a href="https://jquery.com/" target="blank">jQuery: WebDesk's UI</a></p>
                 <p><a href="https://ace.c9.io/" target="blank">Ace: TextEdit's engine</a></p>
-                <p><a href="https://jscolor.com/" target="blank">jscolor: Color picker</a></p>`;
+                <p><a href="https://jscolor.com/" target="blank">jscolor: Color picker</a></p>
+                <p><a href="https://ace.c9.io/" target="blank">jszip: ZIP file handling</a></p>`;
                 tk.cb('b1', 'Close', function () {
                     ui.dest(ok, 200);
                 }, ok);
@@ -868,7 +884,7 @@ var app = {
             const apps = await fs.read('/system/apps.json');
             if (apps) {
                 const ok = await execute(`https://appmarket.meower.xyz` + apploc);
-                const newen = { name: app.name, ver: app.ver, appid: app.appid, exec: '/system/apps/' + app.appid + '.js' };
+                const newen = { name: app.name, ver: app.ver, installedon: Date.now(), dev: app.pub, appid: app.appid, exec: '/system/apps/' + app.appid + '.js' };
                 await fs.write('/system/apps/' + app.appid + '.js', ok);
                 const jsondata = JSON.parse(apps);
                 const check = jsondata.some(entry => entry.appid === newen.appid);
@@ -885,7 +901,7 @@ var app = {
                 }
             } else {
                 const ok = await execute(`https://appmarket.meower.xyz` + apploc);
-                await fs.write('/system/apps.json', [{ name: app.name, ver: app.ver, appid: app.appid, exec: '/system/apps/' + app.appid + '.js' }]);
+                await fs.write('/system/apps.json', [{ name: app.name, ver: app.ver, installedon: Date.now(), dev: app.pub, appid: app.appid, exec: '/system/apps/' + app.appid + '.js' }]);
                 await fs.write('/system/apps/' + app.appid + '.js', ok);
                 wm.notif(`Installed: `, app.name);
             }
@@ -1074,12 +1090,16 @@ var app = {
             }
 
             tk.cb('b4 browserbutton', '+', () => addtab(), searchbtns);
-            tk.cb('b4 rb browserbutton', 'x', function () {
+            const fucker = tk.cb('winb red', '', function () {
                 ui.dest(win.win, 150);
                 ui.dest(win.tbn, 150);
             }, btnnest);
-            tk.cb('b4 yb browserbutton', '-', function () {
+            fucker.style.marginLeft = "6px";
+            tk.cb('winb yel', '', function () {
                 ui.hide(win.win, 150);
+            }, btnnest);
+            tk.cb('winb gre', '', function () {
+                wm.max(win.win);
             }, btnnest);
             tk.cb('b4 browserbutton', '⟳', function () {
                 currentTab.src = currentTab.src;
@@ -1138,12 +1158,16 @@ var app = {
             const btnnest = tk.c('div', tabs, 'tnav');
             const tab = tk.c('embed', win.main, 'browsertab');
             win.main.classList = "browsercont";
-            tk.cb('b4 rb browserbutton', 'x', function () {
+            const fucker = tk.cb('winb red', '', function () {
                 ui.dest(win.win, 150);
                 ui.dest(win.tbn, 150);
             }, btnnest);
-            tk.cb('b4 yb browserbutton', '-', function () {
+            fucker.style.marginLeft = "6px";
+            tk.cb('winb yel', '', function () {
                 ui.hide(win.win, 150);
+            }, btnnest);
+            tk.cb('winb gre', '', function () {
+                wm.max(win.win);
             }, btnnest);
             tk.cb('b4 browserbutton', '⟳', function () {
                 tab.src = tab.src;
