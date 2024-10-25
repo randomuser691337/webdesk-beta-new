@@ -178,15 +178,16 @@ var fs2 = {
         if ('storage' in navigator && 'persist' in navigator.storage) {
             navigator.storage.persist().then(function (persistent) {
                 if (persistent) {
-                    console.log('<i> Persistence is granted.');
+                    return true;
                 } else {
-                    console.log('<!> Persistence is not granted.');
+                    return `Some weird issue occured.`;
                 }
             }).catch(function (error) {
-                console.error('<!> Error requesting persistence:', error);
+                console.log('<!> Error requesting persistence: ', error);
+                return error;
             });
         } else {
-            console.log('<!> Persistence API is not supported in this browser.');
+            return "Persistence isn't supported in this browser.";
         }
     },
     folder: function (path) {
