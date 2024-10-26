@@ -6,13 +6,13 @@ var ptp = {
         let notify = false;
 
         async function attemptConnection() {
-            sys.peer = new Peer(id, { 
-                config: { 
+            sys.peer = new Peer(id, {
+                config: {
                     'iceServers': [
-                        { urls: 'stun:freeturn.net:3478' }, 
+                        { urls: 'stun:freeturn.net:3478' },
                         { urls: 'turn:freeturn.net:3478', username: 'free', credential: 'free' }
-                    ] 
-                } 
+                    ]
+                }
             });
 
             sys.peer.on('open', (peerId) => {
@@ -195,6 +195,25 @@ async function handleData(conn, data) {
         } else if (data.name === "DeclineCall-WebKey") {
             fesw('caller3', 'caller1');
             snack('Your call was declined.');
+        } else if (data.name === "Message-WebKey") {
+            if (el.currentid !== data.id) {
+                wm.notif(`Message from ${data.id}`, data.file, async function () {
+                    if (el.currentid !== undefined) {
+                        wm.notif(`Warning`, `Opening this message will end & delete your current DM.`, async function () {
+                            ui.dest(el.webchat.win, 100);
+                            ui.dest(el.webchat.tbn, 100);
+                            el.webchat = undefined;
+                            el.currentid = data.id;
+                            await app.webchat.init(`${data.id}`, `${data.file}`);
+                        });
+                    } else {
+                        el.currentid = data.id;
+                        await app.webchat.init(`${data.id}`, `${data.file}`);
+                    }
+                }, 'Open');
+            } else {
+                await app.webchat.init(`${data.id}`, `${data.file}`);
+            }
         } else if (data === "Name and FUCKING address please") {
             conn.send(sys.user);
         } else {

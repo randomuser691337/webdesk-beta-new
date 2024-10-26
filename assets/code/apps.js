@@ -100,6 +100,9 @@ var app = {
             }, appearPane); tk.cb('b1', 'Back', () => ui.sw2(appearPane, mainPane), appearPane);
             // User pane
             tk.p('WebDesk User', undefined, userPane);
+            tk.cb('b1 b2', 'Enable WebChat Beta', function () {
+                app.webchat.runs = true;
+            }, userPane);
             tk.cb('b1 b2', 'Change Username', function () {
                 const ok = tk.mbw('Change Username', '300px', 'auto', true, undefined, undefined);
                 const inp = tk.c('input', ok.main, 'i1');
@@ -878,6 +881,66 @@ var app = {
                 }
 
                 navto('/user/files/');
+            });
+        }
+    },
+    webchat: {
+        runs: false,
+        name: "WebChat",
+        init: async function (deskid, chat) {
+            if (el.webchat !== undefined) {
+                wd.win(el.webchat);
+                el.currentid = deskid;
+            } else {
+                el.webchat = tk.mbw('WebChat', '300px');
+                let otherid = undefined;
+                wc.dms = tk.c('div', el.webchat.main);
+                wc.messaging = tk.c('div', el.webchat.main, 'hide');
+                wc.chatting = tk.c('div', wc.messaging, 'embed nest')
+                wc.deskidin = tk.c('input', wc.dms, 'i1');
+                wc.deskidin.placeholder = "Enter DeskID of other user";
+                wc.chatting.style.overflow = "auto";
+                wc.chatting.style.height = "400px";
+                el.currentid = deskid;
+
+                tk.cb('b1', 'Message', function () {
+                    ui.sw2(wc.dms, wc.messaging);
+                    otherid = wc.deskidin.value;
+                    el.currentid = wc.deskidin.value;
+                }, wc.dms);
+
+                if (deskid) {
+                    otherid = deskid;
+                }
+
+                wc.messagein = tk.c('input', wc.messaging, 'i1');
+                wc.messagein.placeholder = "Message";
+
+                tk.cb('b1', 'Send', function () {
+                    const msg = wc.messagein.value;
+                    if (msg && otherid) {
+                        custf(otherid, 'Message-WebKey', msg);
+                        wc.sendmsg = tk.c('div', wc.chatting, 'flist full');
+                        wc.sendmsg.innerText = `${sys.deskid}: ` + msg;
+                        wc.messagein.value = '';
+                    }
+                }, wc.messaging);
+            }
+
+            el.webchat.closebtn.addEventListener('mousedown', function () {
+                el.webchat = undefined;
+            });
+
+            return new Promise((resolve) => {
+                let checkDeskAndChat = setInterval(() => {
+                    if (typeof deskid === "string" && typeof chat === "string") {
+                        clearInterval(checkDeskAndChat);
+                        ui.sw2(wc.dms, wc.messaging);
+                        const msg = tk.c('div', wc.chatting, 'flist full');
+                        msg.innerText = `${deskid}: ` + chat;
+                        resolve();
+                    }
+                }, 100);
             });
         }
     },
