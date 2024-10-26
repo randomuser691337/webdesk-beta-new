@@ -6,6 +6,28 @@ var ptp = {
         let notify = false;
 
         async function attemptConnection() {
+            const userAgent = navigator.userAgent;
+           // DeskID does not work on Chrome <79, so instead display a warning
+            const isChrome = userAgent.indexOf("Chrome") > -1 && userAgent.indexOf("Edge") === -1 && userAgent.indexOf("OPR") === -1;
+           if (isChrome) {
+             const chromeVersion = parseInt(userAgent.match(/Chrome\/(\d+)/)[1], 10);
+             if (chromeVersion <= 79) {
+               wm.notif('Browser too old', `You are visiting WebDesk on a old browser (Chrome <79) which does not support PeerJS and will give you a unknown DeskID, your DeskID is unavailable. Upgrade your browser ASAP. `);
+               sys.deskid = "disabled";
+             }
+             return;
+           }
+
+           // DeskID does not work on Firefox <73, so instead display a warning
+           const isFirefox = userAgent.indexOf("Firefox") > -1;
+           if (isFirefox) {
+             const firefoxVersion = parseInt(userAgent.match(/Firefox\/(\d+)/)[1], 10);
+             if (firefoxVersion <= 73) {
+               wm.notif('Browser too old', `You are visiting WebDesk on a old browser (Firefox <74) which does not support PeerJS and will give you a unknown DeskID, your DeskID is unavailable. Upgrade your browser ASAP. `);
+               sys.deskid = "disabled";
+             }
+             return;
+           }
             sys.peer = new Peer(id, {
                 config: {
                     'iceServers': [
