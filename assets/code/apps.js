@@ -265,7 +265,7 @@ var app = {
             tk.cb('b1 b2', `Half-boot (Lets you use WebDesk, but won't fix your problem)`, function () {
                 wd.desktop('Half-boot', id, undefined);
                 ui.dest(main, 200);
-                app.ach.unlock('Maximum effort...?', `Just fix the issue at hand!`);
+                app.ach.unlock('Maximum effort...?', `Recovery Mode exists for a reason.`);
             }, first);
             tk.cb('b1 b2', 'Delete Apps (Usually the main issue, your data will remain)', function () {
                 fs.del('/system/apps.json');
@@ -892,7 +892,7 @@ var app = {
                 wd.win(el.webchat);
                 el.currentid = deskid;
             } else {
-                el.webchat = tk.mbw('WebChat', '300px');
+                el.webchat = tk.mbw('Vanish', '300px');
                 let otherid = undefined;
                 wc.dms = tk.c('div', el.webchat.main);
                 wc.messaging = tk.c('div', el.webchat.main, 'hide');

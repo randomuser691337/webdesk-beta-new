@@ -146,7 +146,7 @@
             if (color) {
                 ui.crtheme(color);
             } else {
-                ui.crtheme('#7A7AFF');
+                wd.seasonal();
             }
             const data = await fs.read('/system/apps.json');
             if (data) {
@@ -165,10 +165,12 @@
                         }
                     } catch (error) {
                         if (sys.fucker === false) {
-                            sys.fucker = true;
-                            fs.del('/system/apps.json');
-                            fs.delfold('/system/apps');
-                            wm.notif('App Issues', 'All apps were uninstalled due to corruption or a WebDesk update. Your data is safe, you can reinstall them anytime.', () => app.appmark.init(), 'App Market');
+                            wm.notif(`An issue occured with your apps.`, `Remove them? Their data will be safe, and you can reinstall them.`, function () {
+                                sys.fucker = true;
+                                fs.del('/system/apps.json');
+                                fs.delfold('/system/apps');
+                                wm.notif('App Issues', 'All apps were uninstalled due to corruption or a WebDesk update. Your data is safe, you can reinstall them anytime.', () => app.appmark.init(), 'App Market');
+                            }, 'Remove');
                         }
                     }
                 }
@@ -193,7 +195,7 @@
         } else if (migcheck === "rec") {
             await app.recovery.init();
         } else {
-            ui.crtheme('#7A7AFF');
+            wd.seasonal();
             const id = await wd.newid();
             await ptp.go(id);
             app.setup.init();

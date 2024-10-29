@@ -1,5 +1,6 @@
 let db;
 const request = indexedDB.open("WebDeskDB", 2);
+const pin = undefined;
 
 request.onerror = function (event) {
     console.error('Error opening database:', event.target.error);
@@ -27,8 +28,31 @@ self.onmessage = function (event) {
     }
 };
 
+async function encrypt(plaintext, key) {
+    const encodedText = new TextEncoder().encode(plaintext);
+
+    const iv = crypto.getRandomValues(new Uint8Array(12)); // Initialization Vector
+
+    const ciphertext = await crypto.subtle.encrypt(
+        {
+            name: "AES-GCM",
+            iv: iv,
+        },
+        key,
+        encodedText
+    );
+
+    return {
+        ciphertext: new Uint8Array(ciphertext),
+        iv: iv,
+    };
+}
+
 function idbop(operation, params, opt, requestId) {
     switch (operation) {
+        case 'unlock':
+            pin = params;
+            break;
         case 'read':
             fs2.read(params)
                 .then(data => {

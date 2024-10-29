@@ -383,25 +383,43 @@ var wd = {
     },
     loadapps: async function (inapp, onlineApps, apps) {
         const onlineApp = onlineApps.find(app => app.name === inapp.name);
-
-        if (onlineApp.ver === inapp.ver && sys.fucker === false) {
-            console.log(`<i> ${inapp.name} is up to date (${inapp.ver} = ${onlineApp.ver})`);
-            const fucker = await fs.read(inapp.exec);
-            if (fucker) {
-                eval(fucker);
-            } else {
-                fs.del('/system/apps.json');
-                fs.delfold('/system/apps');
-                wm.notif('App Issues', 'All apps were uninstalled due to corruption or an update. Your data is safe, you can reinstall them anytime.', () => app.appmark.init(), 'App Market');
-                sys.fucker = true;
-                return;
-            }
+        if (onlineApp === undefined) {
+            wm.notif(inapp.name + ` isn't recognized`, `This app has been blocked for safety. For more details, hit "Open".`, function () {
+                const thing = tk.c('div', document.body, 'cm');
+                tk.p(`This app isn't on the App Market, so it's been flagged and blocked.`, undefined, thing);
+                tk.p(`If you didn't add this, remove all apps. WebDesk will reboot, and all apps will be removed. Their data will be saved.`, undefined, thing);
+                tk.cb('b1 b2', 'Remove All Apps', async function () {
+                    await fs.del('/system/apps.json');
+                    await fs.delfold('/system/apps');
+                    await wd.reboot();
+                }, thing);
+                tk.cb('b1 b2', 'Enable Developer Mode', function () {
+                    
+                }, thing);
+                tk.cb('b1', 'Close', function () {
+                    ui.dest(thing);
+                }, thing);
+            });
         } else {
-            const remove = apps.filter(item => item.appid !== inapp.appid);
-            const removed = JSON.stringify(remove);
-            fs.write('/system/apps.json', removed);
-            app.appmark.create(onlineApp.path, onlineApp, true);
-            console.log(`<!> ${inapp.name} was updated (${inapp.ver} --> ${onlineApp.ver})`);
+            if (onlineApp.ver === inapp.ver && sys.fucker === false) {
+                console.log(`<i> ${inapp.name} is up to date (${inapp.ver} = ${onlineApp.ver})`);
+                const fucker = await fs.read(inapp.exec);
+                if (fucker) {
+                    eval(fucker);
+                } else {
+                    fs.del('/system/apps.json');
+                    fs.delfold('/system/apps');
+                    wm.notif('App Issues', 'All apps were uninstalled due to corruption or an update. Your data is safe, you can reinstall them anytime.', () => app.appmark.init(), 'App Market');
+                    sys.fucker = true;
+                    return;
+                }
+            } else {
+                const remove = apps.filter(item => item.appid !== inapp.appid);
+                const removed = JSON.stringify(remove);
+                fs.write('/system/apps.json', removed);
+                app.appmark.create(onlineApp.path, onlineApp, true);
+                console.log(`<!> ${inapp.name} was updated (${inapp.ver} --> ${onlineApp.ver})`);
+            }
         }
     },
     perfmon: function () {
@@ -413,6 +431,24 @@ var wd = {
                     wm.notif(`STOP WHATEVER YOU'RE DOING`, `WebDesk is going to crash due to overuse of resources, or it will start deleting things from memory.`);
                 }
             }, 4000);
+        }
+    },
+    seasonal: function () {
+        const today = new Date();
+        if (today.getMonth() === 9 && today.getDate() === 31) {
+            ui.crtheme('#694700');
+            wd.dark();
+            wm.notif(`Happy Halloween!`, `To those who celebrate it. If you don't like the color, you can use the default.`, function () {
+                ui.crtheme('#7A7AFF');
+                wd.light();
+            }, 'Set defaults');
+        } else if (today.getMonth() === 11 && today.getDate() === 25) {
+            wm.notif(`Merry Christmas!`, `To those who celebrate it. If you don't like the color, you can use the default.`, function () {
+                ui.crtheme('#00412A');
+                wd.dark();
+            }, 'Set defaults');
+        } else {
+            ui.crtheme('#7A7AFF');
         }
     }
 }
