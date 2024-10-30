@@ -28,26 +28,6 @@ self.onmessage = function (event) {
     }
 };
 
-async function encrypt(plaintext, key) {
-    const encodedText = new TextEncoder().encode(plaintext);
-
-    const iv = crypto.getRandomValues(new Uint8Array(12)); // Initialization Vector
-
-    const ciphertext = await crypto.subtle.encrypt(
-        {
-            name: "AES-GCM",
-            iv: iv,
-        },
-        key,
-        encodedText
-    );
-
-    return {
-        ciphertext: new Uint8Array(ciphertext),
-        iv: iv,
-    };
-}
-
 function idbop(operation, params, opt, requestId) {
     switch (operation) {
         case 'unlock':

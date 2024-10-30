@@ -204,9 +204,18 @@ async function handleData(conn, data) {
                             ui.dest(el.webchat.tbn, 100);
                             el.webchat = undefined;
                             el.currentid = data.id;
+                            custf(data.id, 'Message-WebKey', `End chat with ${data.id}`);
                             await app.webchat.init(`${data.id}`, `${data.file}`);
                         });
                     } else {
+                        if (data.file === `End chat with ${sys.deskid}`) {
+                            ui.dest(el.webchat.win, 100);
+                            ui.dest(el.webchat.tbn, 100);
+                            el.webchat = undefined;
+                            el.currentid = undefined;
+                            wm.snack(`Other user ended the chat`, 10000);
+                            return;
+                        }
                         el.currentid = data.id;
                         await app.webchat.init(`${data.id}`, `${data.file}`);
                     }

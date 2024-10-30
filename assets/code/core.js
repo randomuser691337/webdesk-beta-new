@@ -382,24 +382,31 @@ var wd = {
         ui.cv('fz1', '17px');
     },
     loadapps: async function (inapp, onlineApps, apps) {
-        const onlineApp = onlineApps.find(app => app.name === inapp.name);
+        const onlineApp = onlineApps.find(app => app.appid === inapp.appid);
         if (onlineApp === undefined) {
-            wm.notif(inapp.name + ` isn't recognized`, `This app has been blocked for safety. For more details, hit "Open".`, function () {
-                const thing = tk.c('div', document.body, 'cm');
-                tk.p(`This app isn't on the App Market, so it's been flagged and blocked.`, undefined, thing);
-                tk.p(`If you didn't add this, remove all apps. WebDesk will reboot, and all apps will be removed. Their data will be saved.`, undefined, thing);
-                tk.cb('b1 b2', 'Remove All Apps', async function () {
-                    await fs.del('/system/apps.json');
-                    await fs.delfold('/system/apps');
-                    await wd.reboot();
-                }, thing);
-                tk.cb('b1 b2', 'Enable Developer Mode', function () {
-                    
-                }, thing);
-                tk.cb('b1', 'Close', function () {
-                    ui.dest(thing);
-                }, thing);
-            });
+            if (sys.dev === true) {
+                const fucker = await fs.read(inapp.exec);
+                eval(fucker);
+            } else {
+                wm.notif(inapp.name + ` isn't recognized`, `This app has been blocked for safety. For more details, hit "Open".`, function () {
+                    const thing = tk.c('div', document.body, 'cm');
+                    tk.p(`This app isn't on the App Market, so it's been flagged and blocked.`, undefined, thing);
+                    tk.p(`If you didn't add this, remove all apps. Their data will be saved.`, undefined, thing);
+                    tk.p(`If you want to use this app, enable Developer Mode in Settings.`, undefined, thing);
+                    tk.cb('b1 b2', 'Remove All Apps', async function () {
+                        await fs.del('/system/apps.json');
+                        await fs.delfold('/system/apps');
+                        await wd.reboot();
+                    }, thing);
+                    tk.cb('b1 b2', 'Open Settings', function () {
+                        app.settings.init();
+                        ui.dest(thing);
+                    }, thing);
+                    tk.cb('b1', 'Close', function () {
+                        ui.dest(thing);
+                    }, thing);
+                });
+            }
         } else {
             if (onlineApp.ver === inapp.ver && sys.fucker === false) {
                 console.log(`<i> ${inapp.name} is up to date (${inapp.ver} = ${onlineApp.ver})`);

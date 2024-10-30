@@ -36,12 +36,32 @@ var app = {
                 await fs.delfold('/system/apps');
                 wd.reboot();
             }, 'Okay'), generalPane);
-            if (sys.guest !== true) {
-                tk.cb('b1 b2 red', 'Enter Recovery Mode', function () {
-                    fs.write('/system/migval', 'rec');
-                    wd.reboot();
-                }, generalPane);
-            }
+            tk.cb('b1 b2 red', 'Enter Recovery Mode', function () {
+                fs.write('/system/migval', 'rec');
+                wd.reboot();
+            }, generalPane);
+            tk.cb('b1 b2 red', 'Developer Mode', async function () {
+                const win = tk.mbw('Developer Mode', '340px');
+                const opt = await fs.read('/system/info/devmode');
+                const pane = tk.c('div', win.main);
+                if (opt !== "true") {
+                    tk.p(`Warning: Developer Mode lets you install third-party apps but removes security protections.`, undefined, pane);
+                    tk.p(`Use caution, there's no support for issues relating to Developer Mode.`, undefined, pane);
+                    tk.cb(`b1 b2`, 'Enable (Will cause reboot)', async function () {
+                        await fs.write(`/system/info/devmode`, 'true');
+                        await wd.reboot();
+                    }, pane);
+                } else {
+                    tk.p(`Developer Mode is enabled.`, undefined, pane);
+                    tk.p(`Disabling it will re-enable protections, but all apps will be uninstalled. Their data will be saved.`, undefined, pane);
+                    tk.cb(`b1 b2`, 'Disable (Will cause reboot)', async function () {
+                        await fs.del(`/system/info/devmode`);
+                        await fs.del(`/system/apps.json`);
+                        await fs.delfold(`/system/apps`);
+                        await wd.reboot();
+                    }, pane);  
+                }
+            }, generalPane);
             const earth = tk.cb('b1 b2', 'Enable Earthquake Mode (Restarting stops it)', function () {
                 const style = document.createElement('style');
                 style.innerHTML = `
@@ -886,17 +906,18 @@ var app = {
     },
     webchat: {
         runs: false,
-        name: "WebChat",
+        name: "WebChat (Beta)",
         init: async function (deskid, chat) {
             if (el.webchat !== undefined) {
                 wd.win(el.webchat);
                 el.currentid = deskid;
             } else {
-                el.webchat = tk.mbw('Vanish', '300px');
+                el.webchat = tk.mbw('WebChat', '300px');
                 let otherid = undefined;
                 wc.dms = tk.c('div', el.webchat.main);
                 wc.messaging = tk.c('div', el.webchat.main, 'hide');
                 wc.chatting = tk.c('div', wc.messaging, 'embed nest')
+                tk.p(`Chats are not saved`, undefined, wc.dms);
                 wc.deskidin = tk.c('input', wc.dms, 'i1');
                 wc.deskidin.placeholder = "Enter DeskID of other user";
                 wc.chatting.style.overflow = "auto";
@@ -916,19 +937,24 @@ var app = {
                 wc.messagein = tk.c('input', wc.messaging, 'i1');
                 wc.messagein.placeholder = "Message";
 
-                tk.cb('b1', 'Send', function () {
+                function send() {
                     const msg = wc.messagein.value;
                     if (msg && otherid) {
                         custf(otherid, 'Message-WebKey', msg);
-                        wc.sendmsg = tk.c('div', wc.chatting, 'flist full');
+                        wc.sendmsg = tk.c('div', wc.chatting, 'full msg mesent');
                         wc.sendmsg.innerText = `${sys.deskid}: ` + msg;
                         wc.messagein.value = '';
                     }
-                }, wc.messaging);
+                }
+
+                tk.cb('b1', 'Send', () => send(), wc.messaging);
+
+                ui.key(wc.messagein, "Enter", () => send());
             }
 
             el.webchat.closebtn.addEventListener('mousedown', function () {
                 el.webchat = undefined;
+                custf(el.currentid, 'Message-WebKey', `End chat with ${el.currentid}`);
             });
 
             return new Promise((resolve) => {
@@ -936,7 +962,7 @@ var app = {
                     if (typeof deskid === "string" && typeof chat === "string") {
                         clearInterval(checkDeskAndChat);
                         ui.sw2(wc.dms, wc.messaging);
-                        const msg = tk.c('div', wc.chatting, 'flist full');
+                        const msg = tk.c('div', wc.chatting, 'msg full');
                         msg.innerText = `${deskid}: ` + chat;
                         resolve();
                     }

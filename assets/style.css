@@ -783,7 +783,20 @@ p {
 }
 
 .flist:hover {
-    background-color: var(--ui3);
+    background-color: rgba(var(--accent), 0.3);
+}
+
+.msg {
+    background-color: transparent;
+    font: var(--font);
+    padding: 4px;
+    border: none;
+    border-radius: 9px;
+    font-family: 'PoppinsB', Arial;
+}
+
+.mesent {
+    background-color: rgba(var(--acc), 0.3);
 }
 
 .width {
