@@ -9,15 +9,62 @@ var app = {
             const accPane = tk.c('div', main.main, 'hide');
             const userPane = tk.c('div', main.main, 'hide');
             const appPane = tk.c('div', main.main, 'hide');
+            tk.p('App Management', undefined, appPane);
+            const shitStain = tk.c('div', appPane);
             const mainPane = tk.c('div', main.main);
             // Main pane
             tk.p('Settings', undefined, mainPane);
             if (sys.guest !== true) {
                 tk.cb('b1 b2', 'General', () => ui.sw2(mainPane, generalPane), mainPane);
                 tk.cb('b1 b2', 'WebDesk User', () => ui.sw2(mainPane, userPane), mainPane);
+            } else {
+                tk.p(`Some options are disabled, because you're in Guest mode.`, undefined, mainPane);
             }
             tk.cb('b1 b2', 'Accessibility', () => ui.sw2(mainPane, accPane), mainPane);
-            tk.cb('b1 b2', 'Manage Apps', () => ui.sw2(mainPane, appPane), mainPane);
+            tk.cb('b1 b2', 'Manage Apps', async function () {
+                ui.sw2(mainPane, appPane);
+                shitStain.innerHTML = "";
+                const data = await fs.read('/system/apps.json');
+                if (data) {
+                    const parsed = JSON.parse(data);
+                    parsed.forEach((entry) => {
+                        const notif = tk.c('div', shitStain, 'notif2');
+                        tk.p(entry.name, 'bold', notif);
+                        tk.p(entry.appid, undefined, notif);
+                        tk.cb('b3', 'App info', async function () {
+                            const ok = tk.c('div', document.body, 'cm');
+                            tk.p('App Info', 'h2', ok);
+                            const ok2 = tk.c('div', ok, undefined);
+                            tk.p(`<span class="bold">Name</span> ` + entry.name, undefined, ok2);
+                            if (entry.installedon === undefined) {
+                                tk.p(`<span class="bold">Modified</span> ` + 'Unknown', undefined, ok2);
+                            } else {
+                                tk.p(`<span class="bold">Modified</span> ` + wd.timec(entry.installedon), undefined, ok2);
+                            }
+                            tk.p(`<span class="bold">App ID</span> ` + entry.appid, undefined, ok2);
+                            if (entry.dev === undefined) {
+                                tk.p(`<span class="bold">Developer</span> ` + 'Unknown', undefined, ok2);
+                            } else {
+                                tk.p(`<span class="bold">Developer</span> ` + entry.dev, undefined, ok2);
+                            }
+                            tk.p(`<span class="bold">Version</span> ` + entry.ver, undefined, ok2);
+                            tk.cb('b1', 'Close', function () {
+                                ui.dest(ok);
+                            }, ok)
+                        }, notif);
+                        tk.cb('b3', 'Remove', async function () {
+                            const updatedApps = parsed.filter(item => item.appid !== entry.appid);
+                            const updatedData = JSON.stringify(updatedApps);
+                            await fs.write('/system/apps.json', updatedData);
+                            delete app[entry.appid];
+                            ui.dest(notif);
+                            wm.notif('Removed ' + entry.name, `It's been removed, but a reboot is needed to clear it completely.`, function () {
+                                wd.reboot();
+                            }, 'Reboot');
+                        }, notif);
+                    });
+                }
+            }, mainPane);
             tk.cb('b1 b2', 'Appearance', () => ui.sw2(mainPane, appearPane), mainPane);
             // General pane
             tk.p('General', undefined, generalPane);
@@ -31,11 +78,14 @@ var app = {
                     wm.notif(`Couldn't turn on persistence`);
                 }
             }, generalPane);
-            tk.cb('b1 b2 red', 'Remove All App Market Apps', () => wm.wal(`<p>Warning: Removing all App Market apps will cause a reboot and delete them, but their data will remain.</p>`, async function () {
-                await fs.del('/system/apps.json');
-                await fs.delfold('/system/apps');
-                wd.reboot();
-            }, 'Okay'), generalPane);
+            tk.cb('b1 b2 red', 'Toggle mobile UI', async function () {
+                if (sys.mob === true) {
+                    await fs.write('/user/info/mobile', 'false');
+                } else {
+                    await fs.del('/user/info/mobile');
+                }
+                wm.notif('Reboot to apply changes', undefined, () => wd.reboot(), 'Reboot');
+            }, generalPane);
             tk.cb('b1 b2 red', 'Enter Recovery Mode', function () {
                 fs.write('/system/migval', 'rec');
                 wd.reboot();
@@ -59,7 +109,7 @@ var app = {
                         await fs.del(`/system/apps.json`);
                         await fs.delfold(`/system/apps`);
                         await wd.reboot();
-                    }, pane);  
+                    }, pane);
                 }
             }, generalPane);
             const earth = tk.cb('b1 b2', 'Enable Earthquake Mode (Restarting stops it)', function () {
@@ -167,52 +217,11 @@ var app = {
             }, accPane);
             tk.cb('b1', 'Back', () => ui.sw2(accPane, mainPane), accPane);
             // App pane
-            tk.p('App Management', undefined, appPane);
-            try {
-                const data = await fs.read('/system/apps.json');
-                if (data) {
-                    const parsed = JSON.parse(data);
-                    parsed.forEach((entry) => {
-                        const notif = tk.c('div', appPane, 'notif2');
-                        tk.p(entry.name, 'bold', notif);
-                        tk.p(entry.appid, undefined, notif);
-                        tk.cb('b3', 'App info', async function () {
-                            const ok = tk.c('div', document.body, 'cm');
-                            tk.p('App Info', 'h2', ok);
-                            const ok2 = tk.c('div', ok, undefined);
-                            tk.p(`<span class="bold">Name</span> ` + entry.name, undefined, ok2);
-                            if (entry.installedon === undefined) {
-                                tk.p(`<span class="bold">Modified</span> ` + 'Unknown', undefined, ok2);
-                            } else {
-                                tk.p(`<span class="bold">Modified</span> ` + wd.timec(entry.installedon), undefined, ok2);
-                            }
-                            tk.p(`<span class="bold">App ID</span> ` + entry.appid, undefined, ok2);
-                            if (entry.dev === undefined) {
-                                tk.p(`<span class="bold">Developer</span> ` + 'Unknown', undefined, ok2);
-                            } else {
-                                tk.p(`<span class="bold">Developer</span> ` + entry.dev, undefined, ok2);
-                            }
-                            tk.p(`<span class="bold">Version</span> ` + entry.ver, undefined, ok2);
-                            tk.cb('b1', 'Close', function () {
-                                ui.dest(ok);
-                            }, ok)
-                        }, notif);
-                        tk.cb('b3', 'Remove', async function () {
-                            const updatedApps = parsed.filter(item => item.appid !== entry.appid);
-                            const updatedData = JSON.stringify(updatedApps);
-                            await fs.write('/system/apps.json', updatedData);
-                            delete app[entry.appid];
-                            ui.dest(notif);
-                            wm.notif('Removed ' + entry.name, `It's been removed, but a reboot is needed to clear it completely.`, function () {
-                                wd.reboot();
-                            }, 'Reboot');
-                        }, notif);
-                    });
-                }
-            } catch (error) {
-                console.log('<!> Achievements shat itself: ', error);
-                return null;
-            }
+            tk.cb('b1', 'Remove All', () => wm.wal(`<p>Warning: Removing all App Market apps will cause a reboot and delete them, but their data will remain.</p>`, async function () {
+                await fs.del('/system/apps.json');
+                await fs.delfold('/system/apps');
+                wd.reboot();
+            }, 'Okay'), appPane);
             tk.cb('b1', 'Back', () => ui.sw2(appPane, mainPane), appPane);
         }
     },
@@ -226,7 +235,7 @@ var app = {
     echodesk: {
         runs: false,
         init: function () {
-            const main = tk.c('div', document.getElementById('setuparea'), 'setupbox');
+            const main = tk.c('div', tk.g('setuparea'), 'setupbox');
             // create setup menubar
             const bar = tk.c('div', main, 'setupbar');
             const tnav = tk.c('div', bar, 'tnav');
@@ -267,8 +276,8 @@ var app = {
             ui.crtheme('#010101', true);
             wd.dark('nosave');
             await fs.del('/system/migval');
-            ui.hide(document.getElementById('death'), 200);
-            const main = tk.c('div', document.getElementById('setuparea'), 'setupbox');
+            ui.hide(tk.g('death'), 200);
+            const main = tk.c('div', tk.g('setuparea'), 'setupbox');
             // HAHAHAHAHA FUNNY NUMBER!!!!
             main.style.height = "420px";
             // create setup menubar
@@ -301,7 +310,7 @@ var app = {
     setup: {
         runs: false,
         init: function () {
-            const main = tk.c('div', document.getElementById('setuparea'), 'setupbox');
+            const main = tk.c('div', tk.g('setuparea'), 'setupbox');
             // create setup menubar
             const bar = tk.c('div', main, 'setupbar');
             const tnav = tk.c('div', bar, 'tnav');
@@ -399,7 +408,7 @@ var app = {
     migrate: {
         runs: false,
         init: function (yeah) {
-            const main = tk.c('div', document.getElementById('setuparea'), 'setupbox');
+            const main = tk.c('div', tk.g('setuparea'), 'setupbox');
             // create setup menubar
             const bar = tk.c('div', main, 'setupbar');
             const tnav = tk.c('div', bar, 'tnav');
@@ -830,7 +839,7 @@ var app = {
                 tk.p(text, 'bold', win.win);
                 const breadcrumbs = tk.c('div', win.win);
                 win.main = tk.c('div', win.win, 'embed nest');
-                win.win.style.background = "var(--ui1)";
+                win.win.style.background = "var(--ui3)";
                 win.win.style.width = "300px";
                 win.main.style.height = "300px";
                 win.main.style.overflow = "auto";

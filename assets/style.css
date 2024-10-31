@@ -177,8 +177,6 @@ p {
     border-radius: var(--rad1);
     box-shadow: rgba(0, 0, 0, 0.3) 0px 0px 150px 30px;
     border: 1px solid var(--bc);
-    max-width: 90vw;
-    max-height: 90vh;
     width: auto;
     height: auto;
     z-index: 5;

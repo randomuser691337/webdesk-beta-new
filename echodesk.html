@@ -34,6 +34,7 @@
         fucker: false,
         clip: undefined,
         dev: false,
+        mobile: false,
     }
 
     var el = {
@@ -111,9 +112,15 @@
             const color = await fs.read('/user/info/color');
             const font = await fs.read('/user/info/font');
             const dev = await fs.read('/system/info/devmode');
+            const mob = await fs.read('/user/info/mobile');
             if (dev === "true") {
                 sys.dev = true;
                 wm.notif(`Developer Mode is enabled.`);
+            }
+            if (mob !== "false") {
+                if (/Mobi|Android/i.test(navigator.userAgent) || mob === "true") {
+                    sys.mob = true;
+                }
             }
             if (font === "big") {
                 wd.bgft();

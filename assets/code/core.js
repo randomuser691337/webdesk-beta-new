@@ -48,7 +48,7 @@ var wd = {
 
         $('.d').not('.dragged').on('mousedown touchstart', function (event) {
             var $window = $(this).closest('.window');
-            if (!$window.hasClass('max')) {
+            if (!$window.hasClass('max') && sys.mob !== true) {
                 var offsetX, offsetY;
                 var windows = $('.window');
                 var highestZIndex = Math.max.apply(null, windows.map(function () {
@@ -102,9 +102,9 @@ var wd = {
             if (el.sm == undefined) {
                 el.sm = tk.c('div', document.body, 'tbmenu');
                 el.sm.style.width = "200px";
-                el.sm.style.left = "4px";
+                el.sm.style.left = "3px";
                 const btm = el.taskbar.getBoundingClientRect();
-                el.sm.style.bottom = btm.height + btm.x + 4 + "px";
+                el.sm.style.bottom = btm.height + btm.x + 3 + "px";
                 tk.p(`Hello, ${name}!`, 'h2', el.sm);
                 tk.p(`Your DeskID is ${sys.deskid}`, undefined, el.sm);
                 const ok = tk.c('div', el.sm, 'embed nest');
@@ -130,9 +130,9 @@ var wd = {
             if (el.cc == undefined) {
                 el.cc = tk.c('div', document.body, 'tbmenu');
                 el.cc.style.width = "200px";
-                el.cc.style.right = "4px";
+                el.cc.style.right = "3px";
                 const btm = el.taskbar.getBoundingClientRect();
-                el.cc.style.bottom = btm.height + btm.x + 4 + "px";
+                el.cc.style.bottom = btm.height + btm.x + 3 + "px";
                 tk.p(`Controls`, 'h2', el.cc);
                 tk.p(`Your DeskID is ${sys.deskid}`, undefined, el.cc);
                 const ok = tk.c('div', el.cc, 'embed nest');
@@ -179,7 +179,7 @@ var wd = {
             tk.cb('b1 time', '--:--', () => controlcenter(), titletb);
         }
         if (waitopt === "wait") {
-            setTimeout(function () { desktopgo(); }, 500);
+            setTimeout(function () { desktopgo(); }, 300);
         } else {
             desktopgo();
         }

@@ -180,12 +180,12 @@ var ui = {
     },
     copy: function (text) {
         navigator.clipboard.writeText(text);
-    }, 
+    },
     truncater: function (inputString, size) {
         if (inputString.length <= size) {
             return inputString;
         } else {
-            return inputString.slice(0, size - 3) + '...';
+            return inputString.slice(0, size - 3) + '..';
         }
     },
     key: function (element, keycode, action) {
@@ -195,7 +195,7 @@ var ui = {
                 action();
             }
         });
-    }    
+    }
 }
 
 var tk = {
@@ -273,13 +273,33 @@ var tk = {
     mbw: function (title, wid, hei, full, min, quit) {
         var windowDiv = document.createElement('div');
         windowDiv.classList.add('window');
-        windowDiv.style.width = wid;
-        windowDiv.style.height = hei;
         var titlebarDiv = tk.c('div', undefined, 'd tb');
+        if (sys.mob !== true) {
+            windowDiv.style.width = wid;
+            windowDiv.style.height = hei;
+            windowDiv.style.maxWidth = "80vw";
+            windowDiv.style.maxHeight = "90vh";
+        } else {
+            windowDiv.style.top = "3px";
+            windowDiv.style.left = "3px";
+            windowDiv.style.right = "3px";
+            const btm = el.taskbar.getBoundingClientRect();
+            windowDiv.style.bottom = btm.height + btm.x + 4 + "px";
+        }
         var winbtns = tk.c('div', undefined, 'tnav');
         var closeButton = document.createElement('button');
-        closeButton.classList.add('winb');
-        const shortened = ui.truncater(title, 11);
+        if (sys.mob === true) {
+            closeButton.classList.add('b3');
+            closeButton.innerText = "Quit";
+        } else {
+            closeButton.classList.add('winb');
+        }
+        let shortened;
+        if (sys.mob === true) {
+            shortened = ui.truncater(title, 7);
+        } else {
+            shortened = ui.truncater(title, 11);
+        }
         const tbn = tk.cb('b1', shortened, function () {
             ui.show(windowDiv, 120);
             wd.win(windowDiv);
@@ -293,25 +313,32 @@ var tk = {
         }
 
         var minimizeButton = document.createElement('button');
-        minimizeButton.classList.add('winb');
+        if (sys.mob === true) {
+            minimizeButton.classList.add('b3');
+            minimizeButton.innerText = "Hide";
+        } else {
+            minimizeButton.classList.add('winb');
+        }
         if (min === undefined) {
             minimizeButton.classList.add('yel');
             minimizeButton.addEventListener('mousedown', function () {
                 ui.hide(windowDiv, 100);
             });
         }
-        var maximizeButton = document.createElement('button');
-        maximizeButton.classList.add('winb');
-        if (full === undefined) {
-            maximizeButton.classList.add('gre');
-            maximizeButton.addEventListener('mousedown', function () {
-                wm.max(windowDiv);
-            });
-        }
 
         winbtns.appendChild(closeButton);
         winbtns.appendChild(minimizeButton);
-        winbtns.appendChild(maximizeButton);
+        if (sys.mob !== true) {
+            var maximizeButton = document.createElement('button');
+            maximizeButton.classList.add('winb');
+            if (full === undefined) {
+                maximizeButton.classList.add('gre');
+                maximizeButton.addEventListener('mousedown', function () {
+                    wm.max(windowDiv);
+                });
+            }
+            winbtns.appendChild(maximizeButton);
+        }
         titlebarDiv.appendChild(winbtns);
         var titleDiv = document.createElement('div');
         titleDiv.classList.add('title');
@@ -323,10 +350,13 @@ var tk = {
         windowDiv.appendChild(contentDiv);
         document.body.appendChild(windowDiv);
         wd.win();
+        wd.win(windowDiv);
         windowDiv.addEventListener('mousedown', function () {
             wd.win(windowDiv);
         });
-        setTimeout(function () { ui.center(windowDiv); }, 15);
+        if (sys.mob !== true) {
+            setTimeout(function () { ui.center(windowDiv); }, 15);
+        }
         return { win: windowDiv, main: contentDiv, tbn, title: titlebarDiv, closebtn: closeButton };
     }
 }
