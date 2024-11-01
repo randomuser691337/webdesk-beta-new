@@ -5,9 +5,9 @@
     --bg2: #aaccff;
     --accent: 0, 60, 255;
     --acc: var(--accent);
-    --ui1: rgb(250, 250, 250, 0.6);
+    --ui1: rgb(255, 255, 255, 0.6);
     --ui2: #ffffff;
-    --ui3: #dddddd;
+    --ui3: #ededed;
     --bc: rgb(220, 220, 220, 0.4);
     --font: #000;
     --bl1: 12px;
@@ -688,7 +688,7 @@ p {
     border-top-right-radius: var(--rad1);
     background-color: var(--ui1);
     box-shadow: rgba(0, 0, 0, 0.3) 0px 0px 75px 15px;
-    animation: tb 1s ease;
+    animation: tb 0.5s ease;
     backdrop-filter: blur(var(--bl2));
     -webkit-backdrop-filter: blur(var(--bl2));
     z-index: 3;
@@ -704,17 +704,11 @@ p {
 
 @keyframes tb {
     0% {
-        bottom: -70px;
-        left: 40px;
-        right: 40px;
-        border-radius: var(--rad1);
+        bottom: -90px;
     }
 
-    55% {
-        bottom: 50px;
-        left: 48px;
-        right: 48px;
-        border-radius: var(--rad1);
+    70% {
+        bottom: 4px;
     }
 
     100% {

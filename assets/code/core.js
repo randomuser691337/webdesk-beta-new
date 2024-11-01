@@ -226,9 +226,9 @@ var wd = {
         ui.light = false;
     },
     light: function (fucker) {
-        ui.cv('ui1', 'rgb(250, 250, 250, 0.6)');
+        ui.cv('ui1', 'rgb(255, 255, 255, 0.6)');
         ui.cv('ui2', '#ffffff');
-        ui.cv('ui3', '#dddddd');
+        ui.cv('ui3', '#ededed');
         ui.cv('bc', 'rgb(220, 220, 220, 0.4)');
         ui.cv('font', '#000');
         if (fucker !== "nosave") {
