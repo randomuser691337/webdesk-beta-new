@@ -102,9 +102,9 @@ var wd = {
             if (el.sm == undefined) {
                 el.sm = tk.c('div', document.body, 'tbmenu');
                 el.sm.style.width = "200px";
-                el.sm.style.left = "3px";
+                el.sm.style.left = "5px";
                 const btm = el.taskbar.getBoundingClientRect();
-                el.sm.style.bottom = btm.height + btm.x + 3 + "px";
+                el.sm.style.bottom = btm.height + btm.x + 5 + "px";
                 tk.p(`Hello, ${name}!`, 'h2', el.sm);
                 tk.p(`Your DeskID is ${sys.deskid}`, undefined, el.sm);
                 const ok = tk.c('div', el.sm, 'embed nest');
@@ -130,9 +130,9 @@ var wd = {
             if (el.cc == undefined) {
                 el.cc = tk.c('div', document.body, 'tbmenu');
                 el.cc.style.width = "200px";
-                el.cc.style.right = "3px";
+                el.cc.style.right = "5px";
                 const btm = el.taskbar.getBoundingClientRect();
-                el.cc.style.bottom = btm.height + btm.x + 3 + "px";
+                el.cc.style.bottom = btm.height + btm.x + 5 + "px";
                 tk.p(`Controls`, 'h2', el.cc);
                 tk.p(`Your DeskID is ${sys.deskid}`, undefined, el.cc);
                 const ok = tk.c('div', el.cc, 'embed nest');
@@ -177,6 +177,9 @@ var wd = {
             const start = tk.cb('b1', 'Apps', () => startmenu(), lefttb);
             el.tr = tk.c('div', lefttb);
             tk.cb('b1 time', '--:--', () => controlcenter(), titletb);
+            if (sys.mob === true) {
+                el.tb.style.boxShadow = "none";
+            }
         }
         if (waitopt === "wait") {
             setTimeout(function () { desktopgo(); }, 300);
