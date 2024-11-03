@@ -303,7 +303,7 @@ var tk = {
         if (sys.mob === true) {
             shortened = ui.truncater(title, 7);
         } else {
-            shortened = ui.truncater(title, 11);
+            shortened = ui.truncater(title, 10);
         }
         const tbn = tk.cb('b1', shortened, function () {
             ui.show(windowDiv, 120);

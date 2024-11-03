@@ -173,14 +173,18 @@ var app = {
             tk.cb('b1 b2', 'Enable WebChat Beta', function () {
                 app.webchat.runs = true;
             }, userPane);
-            tk.cb('b1 b2', 'Change Username', function () {
-                const ok = tk.mbw('Change Username', '300px', 'auto', true, undefined, undefined);
-                const inp = tk.c('input', ok.main, 'i1');
-                inp.placeholder = "New name here";
-                tk.cb('b1', 'Change name', async function () {
-                    await fs.write('/user/info/name', inp.value);
-                    ok.main.innerHTML = `<p>Reboot WebDesk to finish changing your username.</p><p>All unsaved data will be lost.</p>`;
-                    tk.cb('b1', 'Reboot', () => wd.reboot(), ok.main);
+            tk.cb('b1 b2', 'Location Settings', function () {
+                const ok = tk.mbw('Location Settings', '300px', 'auto', true, undefined, undefined);
+                tk.p(`<span class="bold">Location</span> ${sys.city}`, undefined, ok.main);
+                tk.p(`<span class="bold">Measurement </span> ${sys.unit} (${sys.unitsym})`, undefined, ok.main);
+                tk.cb('b1 b2', 'Disable Location', async function () {
+                    await fs.write('/user/info/location.json', [{ city: 'Paris, France', unit: 'Metric', lastupdate: Date.now(), default: true }]);
+                    wm.snack('Location disabled. Reboot WebDesk to finish.');
+                }, ok.main);
+                tk.cb('b1 b2', 'Update Location', async function () {
+                    const data = await wd.savecity();
+                    await fs.write('/user/info/location.json', [{ city: data.location, unit: data.unit, lastupdate: Date.now(), default: false }]);
+                    wm.snack(`New location: ${data.location}. Reboot WebDesk to finish changing.`);
                 }, ok.main);
             }, userPane);
             tk.cb('b1 b2', 'Change DeskID', function () {
@@ -199,6 +203,16 @@ var app = {
                         app.ach.unlock('Nevermind', 'Your dark reputation follows you.');
                     }
                 });
+            }, userPane);
+            tk.cb('b1 b2', 'Change Name', function () {
+                const ok = tk.mbw('Change Username', '300px', 'auto', true, undefined, undefined);
+                const inp = tk.c('input', ok.main, 'i1');
+                inp.placeholder = "New name here";
+                tk.cb('b1', 'Change name', async function () {
+                    await fs.write('/user/info/name', inp.value);
+                    ok.main.innerHTML = `<p>Reboot WebDesk to finish changing your username.</p><p>All unsaved data will be lost.</p>`;
+                    tk.cb('b1', 'Reboot', () => wd.reboot(), ok.main);
+                }, ok.main);
             }, userPane);
             tk.cb('b1', 'Back', () => ui.sw2(userPane, mainPane), userPane);
             // Access pane
@@ -386,15 +400,11 @@ var app = {
             const user = tk.c('div', main, 'setb hide');
             tk.img('./assets/img/setup/user.svg', 'setupi', user);
             tk.p('Create a User', 'h2', user);
-            tk.p(`Data is stored on your device only. You can optionally give your city's name for unit detection, weather info, etc.`, undefined, user);
+            tk.p(`Data is stored on your device only. WebDesk does not collect any data from you.`, undefined, user);
             const input = tk.c('input', user, 'i1');
             input.placeholder = "Enter a name to use with WebDesk";
-            const loc = tk.c('input', user, 'i1');
-            loc.placeholder = "The city you're in (not required)";
             tk.cb('b1', 'Done!', function () {
-                wd.finishsetup(input.value, user, sum); if (loc.value !== "") {
-                    fs.write('/user/info/city', loc.value);
-                }
+                wd.finishsetup(input.value, user, sum);
             }, user);
             // summary
             const sum = tk.c('div', main, 'setb hide');
@@ -1033,36 +1043,40 @@ var app = {
         runs: false,
         name: 'Lockscreen',
         init: async function () {
-            const div = tk.c('div', document.body, 'lockscreen');
-            const clock = tk.c('div', div, 'center');
-            ui.show(div, 400);
-            tk.img('./assets/img/icons/sleep.svg', 'setupi', clock);
-            const p = tk.p('--:--', 'time h2', clock);
-            p.style.color = "#fff";
-            const weather = tk.p(`Loading`, undefined, clock);
-            weather.style.color = "#fff";
-            async function skibidi() {
-                const response = await fetch(`https://weather.meower.xyz/json?city=${sys.city}&units=${sys.unit}`);
-                const info = await response.json();
-                weather.innerText = `${info.main.temp}°${sys.unitsym}`;
-            }
-            await skibidi();
-            setInterval(skibidi, 180000);
-            div.addEventListener('mousedown', async function () {
-                const windowHeight = window.innerHeight;
-                const transitionEndPromise = new Promise(resolve => {
-                    div.addEventListener('transitionend', function transitionEndHandler() {
-                        div.removeEventListener('transitionend', transitionEndHandler);
-                        resolve();
+            if (el.lock === undefined) {
+                el.lock = tk.c('div', document.body, 'lockscreen');
+                const clock = tk.c('div', el.lock, 'center');
+                ui.show(el.lock, 400);
+                const img = tk.img(`https://openweathermap.org/img/wn/10d@2x.png`, 'locki', clock);
+                const p = tk.p('--:--', 'time h2', clock);
+                p.style.color = "#fff";
+                const weather = tk.p(`Loading`, undefined, clock);
+                weather.style.color = "#fff";
+                async function skibidi() {
+                    const response = await fetch(`https://weather.meower.xyz/json?city=${sys.city}&units=${sys.unit}`);
+                    const info = await response.json();
+                    weather.innerText = `${info.main.temp}${sys.unitsym}`;
+                    img.src = `https://openweathermap.org/img/wn/${info.weather[0].icon}@2x.png`;
+                    console.log(info);
+                }
+                await skibidi();
+                const fucker = setInterval(skibidi, 300000);
+                el.lock.addEventListener('mousedown', async function () {
+                    const windowHeight = window.innerHeight;
+                    const transitionEndPromise = new Promise(resolve => {
+                        el.lock.addEventListener('transitionend', function transitionEndHandler() {
+                            el.lock.removeEventListener('transitionend', transitionEndHandler);
+                            clearInterval(fucker);
+                            el.lock = undefined;
+                            resolve();
+                        });
                     });
-                });
 
-                div.style.transition = `transform 0.4s ease`;
-                div.style.transform = `translateY(-${windowHeight}px)`;
-                await transitionEndPromise;
-                div.style.display = 'none';
-                div.style.transform = 'translateY(0)';
-            });
+                    el.lock.style.transition = `transform 0.4s ease`;
+                    el.lock.style.transform = `translateY(-${windowHeight}px)`;
+                    await transitionEndPromise;
+                });
+            }
         }
     },
     echoclient: {

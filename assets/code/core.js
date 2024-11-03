@@ -136,9 +136,11 @@ var wd = {
                 tk.p(`Controls`, 'h2', el.cc);
                 tk.p(`Your DeskID is ${sys.deskid}`, undefined, el.cc);
                 const ok = tk.c('div', el.cc, 'embed nest');
-                tk.cb('b3 b2', 'Settings', function () {
-                    app.settings.init();
-                    controlcenter();
+                tk.cb('b3 b2', 'Lock', function () {
+                    app.lockscreen.init();
+                }, ok);
+                tk.cb('b3 b2', 'Reboot WebDesk', function () {
+                    wd.reboot();
                 }, ok);
                 tk.cb('b3 b2', 'Toggle Fullscreen', function () {
                     wd.fullscreen();
@@ -192,15 +194,18 @@ var wd = {
         let hours = currentTime.getHours();
         const minutes = currentTime.getMinutes();
         const seconds = currentTime.getSeconds();
-        const formattedHours = hours < 10 ? `0${hours}` : hours;
+        const ampm = hours >= 12 ? 'PM' : 'AM';
+        hours = hours % 12;
+        hours = hours ? hours : 12;
+        const formattedHours = `${hours}`;
         const formattedMinutes = minutes < 10 ? `0${minutes}` : minutes;
         const formattedSeconds = seconds < 10 ? `0${seconds}` : seconds;
-        const formattedTime = `${formattedHours}:${formattedMinutes}:${formattedSeconds}`;
+        const formattedTime = `${formattedHours}:${formattedMinutes}:${formattedSeconds} ${ampm}`;
         const elements = document.getElementsByClassName("time");
         for (let i = 0; i < elements.length; i++) {
             elements[i].innerText = formattedTime;
         }
-    },
+    },     
     finishsetup: function (name, div1, div2) {
         ui.sw2(div1, div2); ui.masschange('name', name); fs.write('/user/info/name', name); fs.write('/system/info/setuptime', Date.now()); fs.write('/system/info/setupver', abt.ver);
     },
@@ -475,5 +480,11 @@ var wd = {
         }
     }
 }
+
+document.addEventListener('visibilitychange', function () {
+    if (document.hidden) {
+        app.lockscreen.init();
+    }
+});
 
 setInterval(wd.clock, 1000);
