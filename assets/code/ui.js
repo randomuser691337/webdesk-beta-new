@@ -181,11 +181,15 @@ var ui = {
     copy: function (text) {
         navigator.clipboard.writeText(text);
     },
-    truncater: function (inputString, size) {
+    truncater: function (inputString, size, dots) {
         if (inputString.length <= size) {
             return inputString;
         } else {
-            return inputString.slice(0, size - 3) + '..';
+            if (dots !== false) {
+                return inputString.slice(0, size - 2) + '..';
+            } else {
+                return inputString.slice(0, size);
+            }
         }
     },
     key: function (element, keycode, action) {

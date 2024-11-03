@@ -1029,6 +1029,42 @@ var app = {
             }
         }
     },
+    lockscreen: {
+        runs: false,
+        name: 'Lockscreen',
+        init: async function () {
+            const div = tk.c('div', document.body, 'lockscreen');
+            const clock = tk.c('div', div, 'center');
+            ui.show(div, 400);
+            tk.img('./assets/img/icons/sleep.svg', 'setupi', clock);
+            const p = tk.p('--:--', 'time h2', clock);
+            p.style.color = "#fff";
+            const weather = tk.p(`Loading`, undefined, clock);
+            weather.style.color = "#fff";
+            async function skibidi() {
+                const response = await fetch(`https://weather.meower.xyz/json?city=${sys.city}&units=${sys.unit}`);
+                const info = await response.json();
+                weather.innerText = `${info.main.temp}°${sys.unitsym}`;
+            }
+            await skibidi();
+            setInterval(skibidi, 180000);
+            div.addEventListener('mousedown', async function () {
+                const windowHeight = window.innerHeight;
+                const transitionEndPromise = new Promise(resolve => {
+                    div.addEventListener('transitionend', function transitionEndHandler() {
+                        div.removeEventListener('transitionend', transitionEndHandler);
+                        resolve();
+                    });
+                });
+
+                div.style.transition = `transform 0.4s ease`;
+                div.style.transform = `translateY(-${windowHeight}px)`;
+                await transitionEndPromise;
+                div.style.display = 'none';
+                div.style.transform = 'translateY(0)';
+            });
+        }
+    },
     echoclient: {
         runs: true,
         name: 'EchoDesk',
@@ -1159,43 +1195,6 @@ var app = {
 
             const win = tk.mbw('Achievements', '300px', 'auto', true, undefined, undefined);
             tk.p(`WebDesk Achievements`, 'h2', win.main);
-            tk.p(`Remember: These are jokes and don't actually do anything`, undefined, win.main);
-            tk.p(`Unlocked <span class="b achcount"></span> achievements`, undefined, win.main);
-            await load();
-        },
-        liltman: async function () {
-            async function load() {
-                try {
-                    const data = await fs.read('/system/apps.json');
-                    if (data) {
-                        const parsed = JSON.parse(data);
-                        let yeah = 0;
-
-                        parsed.forEach((entry) => {
-                            const notif = tk.c('div', win.main, 'notif2');
-                            tk.p(entry.name, 'bold', notif);
-                            tk.p(entry.appid, undefined, notif);
-                            tk.cb('b3', 'Remove', async function () {
-                                const updatedApps = parsed.filter(item => item.appid !== entry.appid);
-                                const updatedData = JSON.stringify(updatedApps);
-                                await fs.write('/system/apps.json', updatedData);
-                                delete app[entry.appid];
-                                ui.dest(notif);
-                                wm.notif('Removed ' + entry.name, `It's been removed, but a reboot is needed to clear it completely.`, function () {
-                                    wd.reboot();
-                                }, 'Reboot');
-                            }, notif);
-                            yeah++;
-                        });
-                    }
-                } catch (error) {
-                    console.log('<!> Achievements shat itself: ', error);
-                    return null;
-                }
-            }
-
-            const win = tk.mbw('Achievements', '300px', 'auto', true, undefined, undefined);
-            tk.p(`Apps`, 'h2', win.main);
             tk.p(`Remember: These are jokes and don't actually do anything`, undefined, win.main);
             tk.p(`Unlocked <span class="b achcount"></span> achievements`, undefined, win.main);
             await load();

@@ -460,6 +460,19 @@ var wd = {
         } else {
             ui.crtheme('#7A7AFF');
         }
+    },
+    savecity: async function () {
+        const ipinfoResponse = await fetch('https://ipinfo.io/json');
+        const ipinfoData = await ipinfoResponse.json();
+        const city = ipinfoData.city;
+        const region = ipinfoData.region;
+        const country = ipinfoData.country;
+        const unit = (country === 'US') ? 'Imperial' : 'Metric';
+
+        return {
+            location: `${city}, ${region}, ${country}`,
+            unit: unit
+        }
     }
 }
 
