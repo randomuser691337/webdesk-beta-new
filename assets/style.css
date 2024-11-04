@@ -17,7 +17,8 @@
     --rad3: 10px;
     --fz1: 15px;
     --fz2: 14px;
-    --fz3: 12px;
+    --fz3: 13px;
+    --fz4: 12px;
     --inv: 0;
     --wina: 0px;
 }
@@ -69,6 +70,10 @@ body {
 
 .med {
     font-family: "PoppinsM";
+}
+
+.smtxt {
+    font-size: var(--fz2);
 }
 
 html,
@@ -333,7 +338,7 @@ p {
     border-radius: 8px;
     background-color: rgba(var(--accent), 0.35);
     font-size: var(--fz1);
-    border: 1px solid transparent;
+    border: 2px solid transparent;
     cursor: pointer;
     transition: all 0.07s ease;
     margin: 1px;
@@ -341,7 +346,7 @@ p {
 
 .b3:hover {
     background-color: rgba(var(--accent), 0.45);
-    border: 1px solid rgba(var(--accent), 0.65);
+    border: 2px solid rgba(var(--accent), 0.65);
 }
 
 .b3:active {
@@ -365,7 +370,7 @@ p {
     padding: 1px 3px;
     border-radius: 8px;
     background-color: rgba(var(--accent), 0.25);
-    font-size: var(--fz3);
+    font-size: var(--fz4);
     border: 1px solid transparent;
     cursor: pointer;
     transition: all 0.05s ease-in-out;
@@ -665,6 +670,7 @@ p {
     width: 100%;
     box-sizing: border-box;
     margin-bottom: 5px;
+    margin: 1px;
 }
 
 .rb {
@@ -809,6 +815,7 @@ p {
 
 .embed {
     border-radius: var(--rad3);
+    max-width: 100%;
     width: 100%;
     box-sizing: border-box;
     resize: both;
@@ -957,18 +964,19 @@ a:active {
     right: 0px;
     top: 0px;
     bottom: 0px;
-    z-index: 9999;
+    z-index: 9998;
     background-color: #000;
     display: none;
+    cursor: none !important;
 }
 
 .locki {
-    width: 45px;
+    width: 50px;
     height: auto;
     border: none;
     margin: 0px;
     padding: 0px;
     border-radius: 14px;
-    background-color: #1a1a1a;
-    box-shadow: #1a1a1a 0px 0px 200px 40px;
+    background-color: #1f1f1f;
+    box-shadow: #4a4a4a 0px 0px 200px 40px;
 }

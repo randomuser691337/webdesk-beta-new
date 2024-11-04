@@ -136,10 +136,10 @@ var wd = {
                 tk.p(`Controls`, 'h2', el.cc);
                 tk.p(`Your DeskID is ${sys.deskid}`, undefined, el.cc);
                 const ok = tk.c('div', el.cc, 'embed nest');
-                tk.cb('b3 b2', 'Lock', function () {
+                tk.cb('b3 b2', 'Sleep', function () {
                     app.lockscreen.init();
                 }, ok);
-                tk.cb('b3 b2', 'Reboot WebDesk', function () {
+                tk.cb('b3 b2', 'Reboot/Reload', function () {
                     wd.reboot();
                 }, ok);
                 tk.cb('b3 b2', 'Toggle Fullscreen', function () {
@@ -193,19 +193,18 @@ var wd = {
         const currentTime = new Date();
         let hours = currentTime.getHours();
         const minutes = currentTime.getMinutes();
-        const seconds = currentTime.getSeconds();
         const ampm = hours >= 12 ? 'PM' : 'AM';
-        hours = hours % 12;
-        hours = hours ? hours : 12;
+        hours = hours % 12 || 12;
         const formattedHours = `${hours}`;
         const formattedMinutes = minutes < 10 ? `0${minutes}` : minutes;
-        const formattedSeconds = seconds < 10 ? `0${seconds}` : seconds;
-        const formattedTime = `${formattedHours}:${formattedMinutes}:${formattedSeconds} ${ampm}`;
+        const formattedTime = sys.seconds
+            ? `${formattedHours}:${formattedMinutes}:${currentTime.getSeconds().toString().padStart(2, '0')} ${ampm}`
+            : `${formattedHours}:${formattedMinutes} ${ampm}`;
         const elements = document.getElementsByClassName("time");
         for (let i = 0; i < elements.length; i++) {
             elements[i].innerText = formattedTime;
         }
-    },     
+    },
     finishsetup: function (name, div1, div2) {
         ui.sw2(div1, div2); ui.masschange('name', name); fs.write('/user/info/name', name); fs.write('/system/info/setuptime', Date.now()); fs.write('/system/info/setupver', abt.ver);
     },
@@ -220,7 +219,7 @@ var wd = {
         }, 200);
     },
     dark: function (fucker) {
-        ui.cv('ui1', 'rgb(44, 44, 44, 0.6)');
+        ui.cv('ui1', 'rgb(45, 45, 45, 0.6)');
         ui.cv('ui2', '#1b1b1b');
         ui.cv('ui3', '#2b2b2b');
         ui.cv('bc', 'rgb(60, 60, 60, 0.4)');
@@ -242,7 +241,7 @@ var wd = {
         ui.light = true;
     },
     clearm: function (fucker) {
-        ui.cv('ui1', 'rgb(255, 255, 255, 0)');
+        ui.cv('ui1', 'rgb(255, 255, 255, 0.2)');
         ui.cv('ui2', 'rgba(var(--accent), 0.1)');
         ui.cv('ui3', 'rgba(var(--accent) 0.2)');
         ui.cv('bc', 'rgb(255, 255, 255, 0)');
@@ -359,32 +358,45 @@ var wd = {
         }
     },
     download: function (file, fileName) {
-        let downloadLink = document.createElement('a')
-
+        let downloadLink = document.createElement('a');
+        let url;
+    
         if (typeof file === 'string' && file.startsWith('data:')) {
-            downloadLink.href = file
-            downloadLink.download = fileName
+            url = file;
         } else if (file instanceof File || file instanceof Blob) {
-            downloadLink.href = URL.createObjectURL(file)
-            downloadLink.download = file.name || fileName
+            url = URL.createObjectURL(file);
+        } else if (typeof file === 'string') {
+            const blob = new Blob([file], { type: 'text/plain' });
+            url = URL.createObjectURL(blob);
+        } else {
+            const blob = new Blob([JSON.stringify(file)], { type: 'application/json' });
+            url = URL.createObjectURL(blob);
         }
-
-        downloadLink.style.display = 'none'
-        document.body.appendChild(downloadLink)
-        downloadLink.click()
-        document.body.removeChild(downloadLink)
-    },
+    
+        downloadLink.href = url;
+        downloadLink.download = fileName || file.name || 'download';
+        downloadLink.style.display = 'none';
+        document.body.appendChild(downloadLink);
+        downloadLink.click();
+        document.body.removeChild(downloadLink);
+        if (file instanceof Blob || file instanceof File || url.startsWith('blob:')) {
+            setTimeout(() => URL.revokeObjectURL(url), 100);
+        }
+    },     
     smft: function () {
-        ui.cv('fz3', '10px');
+        ui.cv('fz4', '10px');
+        ui.cv('fz3', '11px');
         ui.cv('fz2', '12px');
         ui.cv('fz1', '13px');
     },
     meft: function () {
-        ui.cv('fz3', '12px');
+        ui.cv('fz4', '12px');
+        ui.cv('fz3', '13px');
         ui.cv('fz2', '14px');
         ui.cv('fz1', '15px');
     },
     bgft: function () {
+        ui.cv('fz4', '13px');
         ui.cv('fz3', '14px');
         ui.cv('fz2', '15px');
         ui.cv('fz1', '17px');

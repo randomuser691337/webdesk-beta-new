@@ -91,20 +91,22 @@ var app = {
                 wd.reboot();
             }, generalPane);
             tk.cb('b1 b2 red', 'Developer Mode', async function () {
-                const win = tk.mbw('Developer Mode', '340px');
+                const win = tk.c('div', document.body, 'cm');
                 const opt = await fs.read('/system/info/devmode');
-                const pane = tk.c('div', win.main);
+                const pane = tk.c('div', win);
                 if (opt !== "true") {
-                    tk.p(`Warning: Developer Mode lets you install third-party apps but removes security protections.`, undefined, pane);
+                    tk.p(`WARNING: Developer Mode lets you install third-party apps but removes security protections.`, undefined, pane);
                     tk.p(`Use caution, there's no support for issues relating to Developer Mode.`, undefined, pane);
-                    tk.cb(`b1 b2`, 'Enable (Will cause reboot)', async function () {
+                    tk.cb(`b1`, 'Cancel', () => ui.dest(win), pane);
+                    tk.cb(`b1`, 'Enable (reboot)', async function () {
                         await fs.write(`/system/info/devmode`, 'true');
                         await wd.reboot();
                     }, pane);
                 } else {
                     tk.p(`Developer Mode is enabled.`, undefined, pane);
                     tk.p(`Disabling it will re-enable protections, but all apps will be uninstalled. Their data will be saved.`, undefined, pane);
-                    tk.cb(`b1 b2`, 'Disable (Will cause reboot)', async function () {
+                    tk.cb(`b1`, 'Cancel', () => ui.dest(win), pane);
+                    tk.cb(`b1`, 'Disable (reboot)', async function () {
                         await fs.del(`/system/info/devmode`);
                         await fs.del(`/system/apps.json`);
                         await fs.delfold(`/system/apps`);
@@ -112,19 +114,17 @@ var app = {
                     }, pane);
                 }
             }, generalPane);
-            const earth = tk.cb('b1 b2', 'Enable Earthquake Mode (Restarting stops it)', function () {
-                const style = document.createElement('style');
-                style.innerHTML = `
-                    div, button, p {
-                        display: inline-block;
-                        animation: wiggle 0.26s infinite !important;
-                    }
-                `;
-                document.head.appendChild(style);
-                const sigma = ui.play('/assets/other/quake.mp3');
-                sigma.loop = true;
-                app.ach.unlock('Japan Simulator', `Maybe reconsider living there?`);
-            }, generalPane);
+            const p = tk.c('div', generalPane, 'list');
+            const ok = tk.c('span', p);
+            ok.innerText = "Clock seconds ";
+            tk.cb('b3', 'On', async function () {
+                sys.seconds = true;
+                await fs.write('/user/info/clocksec', 'true');
+            }, p);
+            tk.cb('b3', 'Off', async function () {
+                sys.seconds = false;
+                await fs.write('/user/info/clocksec', 'false');
+            }, p);
             tk.cb('b1', 'Back', () => ui.sw2(generalPane, mainPane), generalPane);
             // Appearance pane
             tk.p('Appearance', undefined, appearPane);
@@ -174,18 +174,7 @@ var app = {
                 app.webchat.runs = true;
             }, userPane);
             tk.cb('b1 b2', 'Location Settings', function () {
-                const ok = tk.mbw('Location Settings', '300px', 'auto', true, undefined, undefined);
-                tk.p(`<span class="bold">Location</span> ${sys.city}`, undefined, ok.main);
-                tk.p(`<span class="bold">Measurement </span> ${sys.unit} (${sys.unitsym})`, undefined, ok.main);
-                tk.cb('b1 b2', 'Disable Location', async function () {
-                    await fs.write('/user/info/location.json', [{ city: 'Paris, France', unit: 'Metric', lastupdate: Date.now(), default: true }]);
-                    wm.snack('Location disabled. Reboot WebDesk to finish.');
-                }, ok.main);
-                tk.cb('b1 b2', 'Update Location', async function () {
-                    const data = await wd.savecity();
-                    await fs.write('/user/info/location.json', [{ city: data.location, unit: data.unit, lastupdate: Date.now(), default: false }]);
-                    wm.snack(`New location: ${data.location}. Reboot WebDesk to finish changing.`);
-                }, ok.main);
+                app.locset.init();
             }, userPane);
             tk.cb('b1 b2', 'Change DeskID', function () {
                 const ok = tk.mbw('Change DeskID', '300px', 'auto', true, undefined, undefined);
@@ -244,6 +233,37 @@ var app = {
         init: function () {
             ui.play('./assets/other/error.ogg');
             wm.wal(`<p>Warning: Erasing this WebDesk will destroy all data stored on it, this cannot be undone!</p>`, () => fs.erase('reboot'), 'Erase');
+        }
+    },
+    locset: {
+        runs: false,
+        init: function () {
+            const ok = tk.mbw('Location Settings', '320px', 'auto', true, undefined, undefined);
+                tk.p(`<span class="bold">Location</span> ${sys.city}`, undefined, ok.main);
+                tk.p(`<span class="bold">Measurement </span> ${sys.unit} (${sys.unitsym})`, undefined, ok.main);
+                tk.cb('b1 b2', 'Disable Location', async function () {
+                    await fs.write('/user/info/location.json', [{ city: 'Paris, France', unit: 'Metric', lastupdate: Date.now(), default: true }]);
+                    sys.city = "Paris, France";
+                    sys.unit = "Metric";
+                    sys.unitsym = "°C";
+                    sys.defaultloc = true;
+                    ok.closebtn.click();
+                    wm.snack('Location set to Paris, France so that WebDesk has something to fall back on.');
+                }, ok.main);
+                tk.cb('b1 b2', 'Update Location', async function () {
+                    const data = await wd.savecity();
+                    await fs.write('/user/info/location.json', [{ city: data.location, unit: data.unit, lastupdate: Date.now(), default: false }]);
+                    sys.city = data.location;
+                    sys.unit = data.unit;
+                    sys.defaultloc = false;
+                    if (ok.unit === "Metric") {
+                        sys.unitsym = "°C";
+                    } else {
+                        sys.unitsym = "°F";
+                    }
+                    ok.closebtn.click();
+                    wm.snack(`New location: ${data.location}`);
+                }, ok.main);
         }
     },
     echodesk: {
@@ -494,10 +514,63 @@ var app = {
         runs: false,
         name: 'Iris',
         init: async function (contents) {
-            const win = tk.mbw('Iris Media Viewer', '550px', 'auto', undefined, undefined, undefined);
+            const win = tk.mbw('Iris Media Viewer', '400px', 'auto', undefined, undefined, undefined);
             if (contents.includes('data:image')) {
-                const img = tk.c('img', win.main, 'embed');
+                const container = tk.c('div', win.main);
+                container.style.marginBottom = "4px";
+                const img = tk.c('img', container, 'embed');
                 img.src = contents;
+                let cropperinstance = null;
+                function cropbtn() {
+                    const cropButton = tk.cb('b1', 'Crop', function () {
+                        if (!cropperinstance) {
+                            cropButton.innerText = "Cancel";
+                            cropperinstance = new Cropper(img);
+
+                            const preview = tk.cb('b1', 'Preview', async function () {
+                                const croppedimg = getCroppedImage();
+                                app.imgview.init(croppedimg);
+                            }, win.main);
+
+                            const savebutton = tk.cb('b1', 'Save', async function () {
+                                const croppedimg = getCroppedImage();
+                                const skibidi = await app.files.pick('new', 'Save crop as');
+                                await fs.write(skibidi + ".png", croppedimg);
+                                wm.snack('Saved as ' + skibidi + ".png");
+                                cropperinstance.destroy();
+                                cropperinstance = null;
+                                cropButton.innerText = "Crop";
+                                savebutton.remove();
+                                preview.remove();
+                            }, win.main);
+
+                            function getCroppedImage() {
+                                const croppedCanvas = cropperinstance.getCroppedCanvas();
+                                return croppedCanvas.toDataURL('image/png');
+                            }
+
+                        } else {
+                            cropperinstance.destroy();
+                            cropperinstance = null;
+                            cropButton.innerText = "Crop";
+
+                            const buttons = win.main.querySelectorAll('button');
+                            buttons.forEach(button => {
+                                if (button.innerText === "Save" || button.innerText === "Preview") {
+                                    button.remove();
+                                }
+                            });
+                        }
+                    }, win.main);
+                }
+
+                win.closebtn.addEventListener('click', () => {
+                    if (cropperinstance) {
+                        cropperinstance.destroy();
+                        cropperinstance = null;
+                    }
+                });
+                cropbtn();
             } else if (contents.includes('data:video')) {
                 const img = tk.c('video', win.main, 'embed');
                 const src = tk.c('source', img);
@@ -562,8 +635,11 @@ var app = {
             tk.cb('winb gre', '', function () {
                 wm.max(win.win);
             }, btnnest);
-            editor.setFontSize("var(--fz2)");
-            editor.session.setOption("wrap", true);
+            editor.setOptions({
+                fontFamily: "MonoS",
+                fontSize: "var(--fz3)",
+                wrap: true,
+            });
             function ok() {
                 if (ui.light === true) {
                     editor.setTheme(null);
@@ -909,7 +985,10 @@ var app = {
                 }, win.win);
 
                 if (type === "new") {
-                    tk.cb('b1', 'New File', function () {
+                    tk.cb('b1', 'Generate name', function () {
+                        inp.value = gen(8);
+                    }, win.win);
+                    tk.cb('b1', 'New file', function () {
                         if (inp.value === "") {
                             wm.snack('Enter a filename.');
                         } else {
@@ -925,7 +1004,7 @@ var app = {
     },
     webchat: {
         runs: false,
-        name: "WebChat (Beta)",
+        name: "WebChat (beta)",
         init: async function (deskid, chat) {
             if (el.webchat !== undefined) {
                 wd.win(el.webchat);
@@ -1003,7 +1082,7 @@ var app = {
             tk.p(`<span class="bold">Updated</span> ${abt.lastmod}`, undefined, info);
             tk.p(`<span class="bold">DeskID</span> ${sys.deskid}`, undefined, info);
             tk.p(`<span class="bold">Version</span> ${abt.ver}`, undefined, info);
-            tk.cb('b2 b4', 'Credits', function () {
+            tk.cb('b4', 'Creds', function () {
                 const ok = tk.c('div', document.body, 'cm');
                 ok.innerHTML = `<p class="bold">Credits</p>
                 <p>All the libraries or materials that helped create WebDesk.</p>
@@ -1013,6 +1092,26 @@ var app = {
                 <p><a href="https://ace.c9.io/" target="blank">Ace: TextEdit's engine</a></p>
                 <p><a href="https://jscolor.com/" target="blank">jscolor: Color picker</a></p>
                 <p><a href="https://ace.c9.io/" target="blank">jszip: ZIP file handling</a></p>`;
+                tk.cb('b1', 'Close', function () {
+                    ui.dest(ok, 200);
+                }, ok);
+            }, info);
+            tk.cb('b4', 'Discord', () => window.open('https://discord.gg/pCbG6hAxFe', '_blank'), info);
+            tk.cb('b4', 'More info', async function () {
+                const ok = tk.c('div', document.body, 'cm');
+                const setupon = await fs.read('/system/info/setuptime');
+                const ogver = await fs.read('/system/info/setupver');
+                const color = await fs.read('/user/info/color');
+                if (setupon) {
+                    const fucker = wd.timec(Number(setupon));
+                    tk.p(`<span class="bold">Set up on</span> ${fucker}`, undefined, ok);
+                }
+                if (ogver) {
+                    tk.p(`<span class="bold">Original version</span> ${ogver}`, undefined, ok);
+                }
+                if (color) {
+                    tk.p(`<span class="bold">Color</span> ${color}`, undefined, ok);
+                }
                 tk.cb('b1', 'Close', function () {
                     ui.dest(ok, 200);
                 }, ok);
@@ -1027,7 +1126,7 @@ var app = {
             const win = tk.mbw('Data Assistant', '300px', 'auto', true, undefined, undefined);
             if (sys.guest === false) {
                 tk.p(`Your apps will close, and unsaved data will be lost.`, undefined, win.main);
-                tk.cb('b1 b2', 'Migrate', async function () {
+                tk.cb('b1', 'Migrate', async function () {
                     await fs.write('/system/migval', 'down');
                     wd.reboot();
                 }, win.main);
@@ -1043,40 +1142,68 @@ var app = {
         runs: false,
         name: 'Lockscreen',
         init: async function () {
-            if (el.lock === undefined) {
+            if (!el.lock) {
                 el.lock = tk.c('div', document.body, 'lockscreen');
                 const clock = tk.c('div', el.lock, 'center');
                 ui.show(el.lock, 400);
                 const img = tk.img(`https://openweathermap.org/img/wn/10d@2x.png`, 'locki', clock);
                 const p = tk.p('--:--', 'time h2', clock);
-                p.style.color = "#fff";
-                const weather = tk.p(`Loading`, undefined, clock);
-                weather.style.color = "#fff";
-                async function skibidi() {
-                    const response = await fetch(`https://weather.meower.xyz/json?city=${sys.city}&units=${sys.unit}`);
-                    const info = await response.json();
-                    weather.innerText = `${info.main.temp}${sys.unitsym}`;
-                    img.src = `https://openweathermap.org/img/wn/${info.weather[0].icon}@2x.png`;
-                    console.log(info);
-                }
-                await skibidi();
-                const fucker = setInterval(skibidi, 300000);
-                el.lock.addEventListener('mousedown', async function () {
-                    const windowHeight = window.innerHeight;
-                    const transitionEndPromise = new Promise(resolve => {
-                        el.lock.addEventListener('transitionend', function transitionEndHandler() {
-                            el.lock.removeEventListener('transitionend', transitionEndHandler);
-                            clearInterval(fucker);
+                const weather = tk.p('Loading', 'smtxt', clock);
+                p.style.color = weather.style.color = "#fff";
+                const updateweather = async () => {
+                    try {
+                        const response = await fetch(`https://weather.meower.xyz/json?city=${sys.city}&units=${sys.unit}`);
+                        const info = await response.json();
+                        weather.innerText = `${info.weather[0].description}, ${info.main.temp}${sys.unitsym}`;
+                        img.src = `https://openweathermap.org/img/wn/${info.weather[0].icon}@2x.png`;
+                    } catch (error) {
+                        weather.innerText = "Error";
+                    }
+                };
+
+                await updateweather();
+                const interval = setInterval(updateweather, 300000);
+                el.lock.addEventListener('mousedown', async () => {
+                    const { innerHeight: windowHeight } = window;
+                    el.lock.style.transition = 'transform 0.4s ease';
+                    el.lock.style.transform = `translateY(-${windowHeight}px)`;
+                    await new Promise(resolve => {
+                        el.lock.addEventListener('transitionend', function onTransitionEnd() {
+                            el.lock.removeEventListener('transitionend', onTransitionEnd);
+                            clearInterval(interval);
+                            el.lock.remove();
                             el.lock = undefined;
                             resolve();
                         });
                     });
-
-                    el.lock.style.transition = `transform 0.4s ease`;
-                    el.lock.style.transform = `translateY(-${windowHeight}px)`;
-                    await transitionEndPromise;
                 });
             }
+        }
+    },
+    wetter: {
+        runs: true,
+        name: 'Weather',
+        init: async function () {
+            const win = tk.mbw('Weather', 'auto', 'auto', true, undefined, undefined);
+            win.win.style.minWidth = "200px;"
+            win.win.style.maxWidth = "330px";
+            win.main.innerHTML = "Loading";
+            async function refresh() {
+                const response = await fetch(`https://weather.meower.xyz/json?city=${sys.city}&units=${sys.unit}`);
+                const info = await response.json();
+                win.main.innerHTML = "";
+                const skibidi = tk.c('div', win.main);
+                skibidi.style.textAlign = "left";
+                tk.p(`${sys.city}`, 'bold', skibidi);
+                tk.p(`<span class="bold">Temperature</span> ${info.main.temp}${sys.unitsym}`, undefined, skibidi);
+                tk.p(`<span class="bold">Conditions</span> ${info.weather[0].description}`, undefined, skibidi);
+                tk.p(`<span class="bold">Sunset</span> ${wd.timecs(info.sys.sunset)}`, undefined, skibidi);
+                tk.cb('b1', 'Settings', () => app.locset.init(), skibidi);
+                tk.cb('b1', 'Refresh', function () {
+                    refresh(); wm.snack('Refreshed');
+                }, skibidi);
+            }
+            await refresh();
         }
     },
     echoclient: {
@@ -1237,7 +1364,7 @@ var app = {
     },
     browser: {
         runs: true,
-        name: 'Browser',
+        name: 'Browser (beta)',
         init: async function (path2) {
             tk.css('./assets/lib/browse.css');
             const win = tk.mbw('Browser', '80vw', '82vh', true);

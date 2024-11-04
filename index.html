@@ -4,6 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <link rel="stylesheet" href="./assets/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.2/cropper.css" integrity="sha512-087vysR/jM0N5cp13Vlp+ZF9wx6tKbvJLwPO8Iit6J7R+n7uIMMjg37dEgexOshDmDITHYY5useeSmfD1MYiQA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <meta name="mobile-web-app-capable" content="yes">
     <link rel="shortcut icon" href="./assets/img/favicon.png">
@@ -12,7 +13,7 @@
 </head>
 <script>
     var abt = {
-        lastmod: "Nov 3, 2024",
+        lastmod: "Nov 4, 2024",
         ver: "0.1.7",
     }
 
@@ -38,7 +39,8 @@
         city: "Paris, France",
         unit: "Metric",
         defaultloc: true,
-        unitsym: "C",
+        unitsym: "°C",
+        seconds: false,
     }
 
     var el = {
@@ -84,6 +86,7 @@
 <script src="./assets/code/ui.js"></script>
 <script src="./assets/code/fs.js"></script>
 <script src="./assets/code/apps.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.2/cropper.min.js" integrity="sha512-JyCZjCOZoyeQZSd5+YEAcFgz2fowJ1F1hyJOXgtKu4llIa0KneLcidn5bwfutiehUTiOuK87A986BZJMko0eWQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 <script>
     async function boot() {
         let boot = false;
@@ -118,13 +121,25 @@
                 await wd.newid();
                 window.location.reload();
             }
-            const darkpref = await fs.read('/user/info/lightdarkpref');
-            const lightdark = await fs.read('/user/info/lightdark');
-            const color = await fs.read('/user/info/color');
-            const font = await fs.read('/user/info/font');
-            const dev = await fs.read('/system/info/devmode');
-            const mob = await fs.read('/user/info/mobile');
-            const city = await fs.read('/user/info/location.json');
+            const [
+                darkpref, lightdark, color, font, dev, mob, city, clocksec
+            ] = await Promise.all([
+                fs.read('/user/info/lightdarkpref'),
+                fs.read('/user/info/lightdark'),
+                fs.read('/user/info/color'),
+                fs.read('/user/info/font'),
+                fs.read('/system/info/devmode'),
+                fs.read('/user/info/mobile'),
+                fs.read('/user/info/location.json'),
+                fs.read('/user/info/clocksec')
+            ]);
+
+            if (clocksec === "true") {
+                sys.seconds = true;
+            } else {
+                sys.seconds = false;
+            }
+
             if (city) {
                 const ok = JSON.parse(city)[0];
                 sys.city = ok.city;
