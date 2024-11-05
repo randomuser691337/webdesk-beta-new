@@ -838,7 +838,7 @@ p {
 
 @keyframes snack {
     0% {
-        bottom: 80px;
+        bottom: 90px;
         opacity: 0%
     }
 
@@ -964,7 +964,7 @@ a:active {
     right: 0px;
     top: 0px;
     bottom: 0px;
-    z-index: 9998;
+    z-index: 9999;
     background-color: #000;
     display: none;
     cursor: none !important;

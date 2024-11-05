@@ -1,5 +1,8 @@
 // WebDesk 0.1.4
 // Based on Rebuild 7 (wtf)
+console.log(`<!> You've unlocked the REAL developer mode!`);
+console.log(`<!> For the love of all that is holy, DO NOT, and I mean DO NOT, PASTE ANY CODE IN HERE.`);
+console.log(`<!> If you were told to paste here, you're probably getting scammed.`);
 
 function gen(length) {
     if (length <= 0) {

@@ -239,31 +239,31 @@ var app = {
         runs: false,
         init: function () {
             const ok = tk.mbw('Location Settings', '320px', 'auto', true, undefined, undefined);
-                tk.p(`<span class="bold">Location</span> ${sys.city}`, undefined, ok.main);
-                tk.p(`<span class="bold">Measurement </span> ${sys.unit} (${sys.unitsym})`, undefined, ok.main);
-                tk.cb('b1 b2', 'Disable Location', async function () {
-                    await fs.write('/user/info/location.json', [{ city: 'Paris, France', unit: 'Metric', lastupdate: Date.now(), default: true }]);
-                    sys.city = "Paris, France";
-                    sys.unit = "Metric";
+            tk.p(`<span class="bold">Location</span> ${sys.city}`, undefined, ok.main);
+            tk.p(`<span class="bold">Measurement </span> ${sys.unit} (${sys.unitsym})`, undefined, ok.main);
+            tk.cb('b1 b2', 'Disable Location', async function () {
+                await fs.write('/user/info/location.json', [{ city: 'Paris, France', unit: 'Metric', lastupdate: Date.now(), default: true }]);
+                sys.city = "Paris, France";
+                sys.unit = "Metric";
+                sys.unitsym = "°C";
+                sys.defaultloc = true;
+                ok.closebtn.click();
+                wm.snack('Location set to Paris, France so that WebDesk has something to fall back on.');
+            }, ok.main);
+            tk.cb('b1 b2', 'Update Location', async function () {
+                const data = await wd.savecity();
+                await fs.write('/user/info/location.json', [{ city: data.location, unit: data.unit, lastupdate: Date.now(), default: false }]);
+                sys.city = data.location;
+                sys.unit = data.unit;
+                sys.defaultloc = false;
+                if (ok.unit === "Metric") {
                     sys.unitsym = "°C";
-                    sys.defaultloc = true;
-                    ok.closebtn.click();
-                    wm.snack('Location set to Paris, France so that WebDesk has something to fall back on.');
-                }, ok.main);
-                tk.cb('b1 b2', 'Update Location', async function () {
-                    const data = await wd.savecity();
-                    await fs.write('/user/info/location.json', [{ city: data.location, unit: data.unit, lastupdate: Date.now(), default: false }]);
-                    sys.city = data.location;
-                    sys.unit = data.unit;
-                    sys.defaultloc = false;
-                    if (ok.unit === "Metric") {
-                        sys.unitsym = "°C";
-                    } else {
-                        sys.unitsym = "°F";
-                    }
-                    ok.closebtn.click();
-                    wm.snack(`New location: ${data.location}`);
-                }, ok.main);
+                } else {
+                    sys.unitsym = "°F";
+                }
+                ok.closebtn.click();
+                wm.snack(`New location: ${data.location}`);
+            }, ok.main);
         }
     },
     echodesk: {
@@ -687,12 +687,17 @@ var app = {
             }, btnnest);
             tk.cb('b4 browserbutton', 'Run', async function () {
                 const menu = tk.c('div', document.body, 'cm');
-                tk.p(`WAIT!!!`, 'h2', menu);
-                tk.p(`RUN THIS CODE CAREFULLY. It will have full access to your data. It's safer to use an incognito window, if possible. If you were told to copy/paste something here, you're probably getting scammed.`, undefined, menu);
-                tk.cb('b1 b2', 'I understand, run the code', function () {
-                    ui.dest(menu, 120);
-                    eval(editor.getValue());
-                }, menu);
+                if (sys.dev === true) {
+                    tk.p(`WAIT!!!`, 'h2', menu);
+                    tk.p(`RUN THIS CODE CAREFULLY. It will have full access to your data. It's safer to use an incognito window, if possible. If you were told to copy/paste something here, you're probably getting scammed.`, undefined, menu);
+                    tk.cb('b1 b2', 'I understand, run the code', function () {
+                        ui.dest(menu, 120);
+                        eval(editor.getValue());
+                    }, menu);
+                } else {
+                    tk.p(`Enable Developer Mode to run custom code.`, undefined, menu);
+                    tk.p(`WAIT!!!`, undefined, menu);
+                }
                 tk.cb('b1', 'Close', function () {
                     ui.dest(menu, 120);
                 }, menu);
@@ -713,71 +718,73 @@ var app = {
         runs: true,
         name: 'Files',
         init: async function () {
-            const win = tk.mbw(`Files`, '340px', '340px', undefined, undefined, undefined);
+            const win = tk.mbw(`Files`, '340px', 'auto', undefined, undefined, undefined);
             const breadcrumbs = tk.c('div', win.main);
             const items = tk.c('div', win.main);
-            var fuck = undefined;
+            var currentPath = undefined;
             let dragoverListener = null;
             let dropListener = null;
+    
             async function navto(path) {
                 items.innerHTML = "";
                 breadcrumbs.innerHTML = "";
                 let crumbs = path.split('/').filter(Boolean);
-                let currentPath = '/';
-
+                let tempPath = '/';
+    
                 tk.cb('flist', 'Root', () => navto('/'), breadcrumbs);
-
                 crumbs.forEach((crumb, index) => {
-                    currentPath += crumb + '/';
+                    tempPath += crumb + '/';
                     tk.cb('flists', '/', undefined, breadcrumbs);
                     tk.cb('flist', crumb, () => navto('/' + crumbs.slice(0, index + 1).join('/') + "/"), breadcrumbs);
                 });
-
-                fuck = currentPath;
-
+    
+                currentPath = tempPath;
+    
                 if (dragoverListener) items.removeEventListener('dragover', dragoverListener);
                 if (dropListener) items.removeEventListener('drop', dropListener);
-
+    
                 dragoverListener = e => e.preventDefault();
                 dropListener = async e => {
                     e.preventDefault();
                     const text = e.dataTransfer.getData('text/plain');
-                    const move1 = await fs.read(text);
+                    const fileData = await fs.read(text);
                     const relativePath = text.split('/').pop();
-                    await fs.write(currentPath + relativePath, move1);
+                    await fs.write(currentPath + relativePath, fileData);
                     setTimeout(() => navto(currentPath), 300);
                 };
-
+    
                 items.addEventListener('dragover', dragoverListener);
                 items.addEventListener('drop', dropListener);
-
-                const thing = await fs.ls(path);
-                thing.items.forEach(function (thing) {
-                    if (thing.type === "folder") {
-                        const target = tk.cb('flist width', "Folder: " + thing.name, () => navto(thing.path + "/"), items);
-                        let timer;
+    
+                const contents = await fs.ls(path);
+                contents.items.forEach(item => {
+                    if (item.type === "folder") {
+                        const folder = tk.cb('flist width', "Folder: " + item.name, () => navto(item.path + "/"), items);
                         let isLongPress = false;
-
+                        let timer;
+    
                         function openmenu() {
+                            if (item.path.includes('/system') && sys.dev === false) {
+                                wm.snack('Enable Developer Mode to modify the system folder.', 6000)
+                                return;
+                            }
                             const menu = tk.c('div', document.body, 'cm');
-                            tk.p(thing.path, 'bold', menu);
-                            if (thing.path.includes('/system')) {
+                            tk.p(item.path, 'bold', menu);
+                            if (item.path.includes('/system')) {
                                 tk.p('This is the system folder, modifying it will likely cause damage.', 'warn', menu);
                             }
-                            if (thing.path.includes('/user')) {
+                            if (item.path.includes('/user')) {
                                 tk.p('This is your user folder, modifying this could cause harm.', 'warn', menu);
                             }
-                            tk.cb('b1 b2', 'Delete folder', function () {
-                                fs.delfold(thing.path);
-                                ui.dest(target);
+                            tk.cb('b1 b2', 'Delete folder', () => {
+                                fs.delfold(item.path);
+                                ui.dest(folder);
                                 ui.dest(menu);
                             }, menu);
-                            tk.cb('b1', 'Close', function () {
-                                ui.dest(menu);
-                            }, menu);
+                            tk.cb('b1', 'Close', () => ui.dest(menu), menu);
                         }
-
-                        target.addEventListener('touchstart', function (e) {
+    
+                        folder.addEventListener('touchstart', e => {
                             e.preventDefault();
                             isLongPress = false;
                             timer = setTimeout(() => {
@@ -785,49 +792,45 @@ var app = {
                                 openmenu();
                             }, 500);
                         });
-
-                        target.addEventListener('touchend', function (e) {
+                        folder.addEventListener('touchend', () => {
                             clearTimeout(timer);
                             if (!isLongPress) {
-                                navto(thing.path + "/");
+                                navto(item.path + "/");
                             }
                         });
-
-                        target.addEventListener('touchmove', function (e) {
-                            clearTimeout(timer);
-                        });
-
-                        target.addEventListener('touchcancel', function (e) {
-                            clearTimeout(timer);
-                        });
-
-                        target.addEventListener('contextmenu', function (e) {
+                        folder.addEventListener('touchmove', () => clearTimeout(timer));
+                        folder.addEventListener('touchcancel', () => clearTimeout(timer));
+                        folder.addEventListener('contextmenu', e => {
                             e.preventDefault();
                             openmenu();
                         });
-
+    
                     } else {
-                        if (thing.name == "") {
-                            return;
-                        }
-                        const target = tk.cb('flist width', "File: " + thing.name, async function () {
+                        if (item.name === "") return;
+    
+                        const fileItem = tk.cb('flist width', "File: " + item.name, async function () {
+                            if (!sys.dev && item.path.includes('/system')) {
+                                wm.snack('Enable Developer Mode to modify system files.', 6000);
+                                return;
+                            }
+    
                             const skibidi = tk.c('div', document.body, 'cm');
-                            skibidi.innerText = `Loading ` + thing.name + ", this might take a bit";
-                            const yeah = await fs.read(thing.path);
+                            skibidi.innerText = `Loading ${item.name}, this might take a bit`;
+                            const filecontent = await fs.read(item.path);
                             const menu = tk.c('div', document.body, 'cm');
-                            tk.p(thing.path, 'bold', menu);
-                            if (thing.path.includes('/system')) {
+                            tk.p(item.path, 'bold', menu);
+    
+                            if (item.path.includes('/system')) {
                                 tk.p('This is a system file, modifying it will likely cause damage.', 'warn', menu);
                             }
-                            if (thing.path.includes('/user/info/name')) {
+                            if (item.path.includes('/user/info/name')) {
                                 tk.p('Deleting this file will erase your data on next restart.', 'warn', menu);
                             }
                             tk.cb('b1 b2', 'Open', async function () {
-                                const yeah = await fs.read(thing.path);
-                                if (yeah.includes('data:')) {
-                                    app.imgview.init(yeah);
+                                if (filecontent.includes('data:')) {
+                                    app.imgview.init(filecontent);
                                 } else {
-                                    app.textedit.init(yeah, thing.path);
+                                    app.textedit.init(filecontent, item.path);
                                 }
                                 ui.dest(menu);
                             }, menu);
@@ -835,87 +838,71 @@ var app = {
                                 ui.dest(menu);
                                 const menu2 = tk.c('div', document.body, 'cm');
                                 tk.cb('b1 b2', 'Iris Media Viewer', function () {
-                                    app.imgview.init(yeah);
+                                    app.imgview.init(filecontent);
                                     ui.dest(menu2);
                                 }, menu2);
                                 tk.cb('b1 b2', 'Text Editor', function () {
-                                    app.textedit.init(yeah, thing.path);
+                                    app.textedit.init(filecontent, item.path);
                                     ui.dest(menu2);
                                 }, menu2);
                                 tk.cb('b1 b2', 'console.log', function () {
-                                    console.log(yeah);
+                                    console.log(filecontent);
                                     ui.dest(menu2);
                                 }, menu2);
-                                tk.cb('b1', 'Cancel', function () {
-                                    ui.dest(menu2);
-                                }, menu2);
+                                tk.cb('b1', 'Cancel', () => ui.dest(menu2), menu2);
                             }, menu);
-                            tk.cb('b1 b2', 'Download', function () {
-                                wd.download(yeah, `WebDesk File ${gen(4)}`);
+                            tk.cb('b1 b2', 'Download', () => {
+                                wd.download(filecontent, `WebDesk File ${gen(4)}`);
                                 ui.dest(menu);
                             }, menu);
                             tk.cb('b1 b2', 'WebDrop', function () {
                                 ui.dest(menu);
                                 const menu2 = tk.c('div', document.body, 'cm');
-                                const inp = tk.c('input', menu2, 'i1');
-                                inp.placeholder = "Enter DeskID";
-                                tk.cb('b1', 'Cancel', function () {
-                                    ui.dest(menu2);
-                                }, menu2);
+                                const input = tk.c('input', menu2, 'i1');
+                                input.placeholder = "Enter DeskID";
+                                tk.cb('b1', 'Cancel', () => ui.dest(menu2), menu2);
                                 tk.cb('b1', 'WebDrop', async function () {
                                     menu2.innerHTML = `<p class="bold">Sending file</p><p>Depending on the size, this might take a bit</p>`;
-                                    tk.cb('b1', 'Close (No status updates)', function () {
-                                        ui.dest(menu2);
-                                    }, menu2);
-                                    await custf(inp.value, thing.name, yeah).then((check) => {
-                                        if (check === true) {
-                                            menu2.innerHTML = `<p class="bold">File sent</p><p>The other person can accept or deny</p>`;
-                                            tk.cb('b1', 'Close', function () {
-                                                ui.dest(menu2);
-                                            }, menu2);
-                                        } else {
-                                            menu2.innerHTML = `<p class="bold">An error occured</p><p>Make sure the ID is correct</p>`;
-                                            tk.cb('b1', 'Close', function () {
-                                                ui.dest(menu2);
-                                            }, menu2);
-                                        }
+                                    tk.cb('b1', 'Close (No status updates)', () => ui.dest(menu2), menu2);
+                                    await custf(input.value, item.name, filecontent).then(success => {
+                                        menu2.innerHTML = success
+                                            ? `<p class="bold">File sent</p><p>The other person can accept or deny</p>`
+                                            : `<p class="bold">An error occurred</p><p>Make sure the ID is correct</p>`;
+                                        tk.cb('b1', 'Close', () => ui.dest(menu2), menu2);
                                     });
                                 }, menu2);
                             }, menu);
                             tk.cb('b1 b2', 'Rename/Move', function () {
                                 ui.dest(menu);
                                 const menu2 = tk.c('div', document.body, 'cm');
-                                const inp = tk.c('input', menu2, 'i1');
-                                inp.placeholder = "Enter new path";
-                                inp.value = thing.path;
-                                tk.cb('b1', 'Cancel', function () {
-                                    ui.dest(menu2);
-                                }, menu2);
-                                tk.cb('b1', 'Rename/Move', function () {
-                                    fs.write(inp.value, yeah);
-                                    fs.del(thing.path, yeah);
+                                const input = tk.c('input', menu2, 'i1');
+                                input.placeholder = "Enter new path";
+                                input.value = item.path;
+                                tk.cb('b1', 'Cancel', () => ui.dest(menu2), menu2);
+                                tk.cb('b1', 'Rename/Move', () => {
+                                    fs.write(input.value, filecontent);
+                                    fs.del(item.path);
                                     navto(path);
                                     ui.dest(menu2);
                                 }, menu2);
                             }, menu);
-                            tk.cb('b1 b2', 'Delete file', function () {
-                                fs.del(thing.path);
-                                ui.dest(target);
+                            tk.cb('b1 b2', 'Delete file', () => {
+                                fs.del(item.path);
+                                ui.dest(fileItem);
                                 ui.dest(menu);
                             }, menu);
-                            tk.cb('b1', 'Cancel', function () {
-                                ui.dest(menu);
-                            }, menu);
+                            tk.cb('b1', 'Cancel', () => ui.dest(menu), menu);
                             ui.dest(skibidi);
                         }, items);
-                        target.addEventListener('dragstart', (e) => {
-                            e.dataTransfer.setData('text/plain', thing.path);
+    
+                        fileItem.addEventListener('dragstart', e => {
+                            e.dataTransfer.setData('text/plain', item.path);
                         });
-                        target.draggable = true;
+                        fileItem.draggable = true;
                     }
                 });
             }
-
+    
             navto('/user/files/');
         },
         pick: function (type, text) {
@@ -1087,9 +1074,10 @@ var app = {
                 ok.innerHTML = `<p class="bold">Credits</p>
                 <p>All the libraries or materials that helped create WebDesk.</p>
                 <p><a href="https://peerjs.com/" target="blank">PeerJS: DeskID/online services</a></p>
-                <p><a href="https://davidshimjs.github.io/qrcodejs/" target="blank">qrcode.js: Any WebDesk QR codes</a></p>
+                <p><a href="https://davidshimjs.github.io/qrcodejs/" target="blank">qrcode.js: WebDesk QR codes</a></p>
                 <p><a href="https://jquery.com/" target="blank">jQuery: WebDesk's UI</a></p>
                 <p><a href="https://ace.c9.io/" target="blank">Ace: TextEdit's engine</a></p>
+                <p><a href="https://fengyuanchen.github.io/cropperjs/" target="blank">cropper.js: Cropping tool</a></p>
                 <p><a href="https://jscolor.com/" target="blank">jscolor: Color picker</a></p>
                 <p><a href="https://ace.c9.io/" target="blank">jszip: ZIP file handling</a></p>`;
                 tk.cb('b1', 'Close', function () {
@@ -1186,7 +1174,9 @@ var app = {
         init: async function () {
             const win = tk.mbw('Weather', 'auto', 'auto', true, undefined, undefined);
             win.win.style.minWidth = "200px;"
-            win.win.style.maxWidth = "330px";
+            if (sys.mob === true) {
+                win.win.style.maxWidth = "330px";
+            }
             win.main.innerHTML = "Loading";
             async function refresh() {
                 const response = await fetch(`https://weather.meower.xyz/json?city=${sys.city}&units=${sys.unit}`);
@@ -1347,7 +1337,8 @@ var app = {
                     const newen = { name: name, cont: content, time: Date.now() };
                     const jsondata = JSON.parse(data);
                     const check = jsondata.some(entry => entry.name === newen.name);
-                    if (check !== true) {
+                    const check2 = jsondata.some(entry => entry.cont === newen.cont);
+                    if (check !== true && check2 !== true) {
                         wm.notif(`Achieved: ` + name, content, () => app.ach.init());
                         jsondata.push(newen);
                         fs.write('/user/info/achieve.json', jsondata);
@@ -1572,6 +1563,11 @@ var app = {
             }
 
             tk.cb('b1', 'Call', function () {
+                if (input.value === sys.deskid) {
+                    wm.snack(`You can't call yourself!`);
+                    app.ach.unlock(`So lonely...`, `So lonely, that you even tried calling yourself.`);
+                    return;
+                }
                 go();
             }, win.main);
         },
@@ -1584,7 +1580,7 @@ var app = {
             audioElement.controls = true;
 
             let isMuted = false;
-            const remoteAudioTrack = remoteStream.getAudioTracks()[0];
+            const remoteAudioTrack = fein.getAudioTracks()[0];
 
             const muteButton = tk.cb('b1', 'Mute', function () {
                 if (remoteAudioTrack) {

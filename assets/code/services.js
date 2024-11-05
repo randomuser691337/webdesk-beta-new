@@ -108,7 +108,7 @@ var ptp = {
                     try {
                         const parsedData = JSON.parse(data);
                         if (parsedData.response) {
-                            wm.notif(`Call from ${parsedData.response}`, function () {
+                            wm.notif(`Call from ${parsedData.response}`, undefined, function () {
                                 navigator.mediaDevices.getUserMedia({ audio: true })
                                     .then((stream) => {
                                         call.answer(stream);
