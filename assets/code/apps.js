@@ -695,8 +695,7 @@ var app = {
                         eval(editor.getValue());
                     }, menu);
                 } else {
-                    tk.p(`Enable Developer Mode to run custom code.`, undefined, menu);
-                    tk.p(`WAIT!!!`, undefined, menu);
+                    tk.p(`Enable Developer Mode in Settings -> General to run custom code.`, undefined, menu);
                 }
                 tk.cb('b1', 'Close', function () {
                     ui.dest(menu, 120);
@@ -1174,7 +1173,7 @@ var app = {
         init: async function () {
             const win = tk.mbw('Weather', 'auto', 'auto', true, undefined, undefined);
             win.win.style.minWidth = "200px;"
-            if (sys.mob === true) {
+            if (sys.mob === false) {
                 win.win.style.maxWidth = "330px";
             }
             win.main.innerHTML = "Loading";
@@ -1188,6 +1187,7 @@ var app = {
                 tk.p(`<span class="bold">Temperature</span> ${info.main.temp}${sys.unitsym}`, undefined, skibidi);
                 tk.p(`<span class="bold">Conditions</span> ${info.weather[0].description}`, undefined, skibidi);
                 tk.p(`<span class="bold">Sunset</span> ${wd.timecs(info.sys.sunset)}`, undefined, skibidi);
+                tk.p(`Weather data from <a href="https://openweathermap.org", target="_blank">OpenWeatherMap</a>, contact them about incorrect info.`, 'smtxt', skibidi);
                 tk.cb('b1', 'Settings', () => app.locset.init(), skibidi);
                 tk.cb('b1', 'Refresh', function () {
                     refresh(); wm.snack('Refreshed');
