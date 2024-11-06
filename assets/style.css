@@ -707,7 +707,7 @@ p {
 
 .taskbar button {
     padding: 3px 5px;
-    font-size: var(--fz2);
+    font-size: var(--fz2) !important;
 }
 
 @keyframes tb {

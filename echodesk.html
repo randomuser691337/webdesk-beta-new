@@ -2,8 +2,8 @@
 <html lang="en">
 
 <head>
-    <link rel="stylesheet" href="./assets/style.css"/>
-    <link rel="stylesheet" href="./assets/lib/crop/cropper.css"/>
+    <link rel="stylesheet" href="./assets/style.css" />
+    <link rel="stylesheet" href="./assets/lib/crop/cropper.css" />
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <meta name="mobile-web-app-capable" content="yes">
@@ -116,13 +116,25 @@
         const sd = await fs.read('/user/info/name');
         if (sd && !migcheck && boot === false) {
             boot = true;
-            const darkpref = await fs.read('/user/info/lightdarkpref');
-            const lightdark = await fs.read('/user/info/lightdark');
-            const color = await fs.read('/user/info/color');
-            const font = await fs.read('/user/info/font');
-            const dev = await fs.read('/system/info/devmode');
-            const mob = await fs.read('/user/info/mobile');
-            const city = await fs.read('/user/info/location.json');
+            const [
+                darkpref, lightdark, color, font, dev, mob, city, clocksec
+            ] = await Promise.all([
+                fs.read('/user/info/lightdarkpref'),
+                fs.read('/user/info/lightdark'),
+                fs.read('/user/info/color'),
+                fs.read('/user/info/font'),
+                fs.read('/system/info/devmode'),
+                fs.read('/user/info/mobile'),
+                fs.read('/user/info/location.json'),
+                fs.read('/user/info/clocksec')
+            ]);
+
+            if (clocksec === "true") {
+                sys.seconds = true;
+            } else {
+                sys.seconds = false;
+            }
+
             if (city) {
                 const ok = JSON.parse(city)[0];
                 sys.city = ok.city;
@@ -169,7 +181,7 @@
                 tk.cb('b1', 'Back', async function () {
                     ui.sw2(info, menu);
                 }, info);
-            } 
+            }
             if (dev === "true") {
                 sys.dev = true;
                 wm.notif(`Developer Mode is enabled.`);

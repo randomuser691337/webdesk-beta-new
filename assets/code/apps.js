@@ -96,7 +96,7 @@ var app = {
                 const pane = tk.c('div', win);
                 if (opt !== "true") {
                     tk.p(`WARNING: Developer Mode lets you install third-party apps but removes security protections.`, undefined, pane);
-                    tk.p(`Use caution, there's no support for issues relating to Developer Mode.`, undefined, pane);
+                    tk.p(`Use caution, there's no support for issues relating to Developer Mode. Disabling Developer Mode will erase WebDesk, but will keep your files.`, undefined, pane);
                     tk.cb(`b1`, 'Cancel', () => ui.dest(win), pane);
                     tk.cb(`b1`, 'Enable (reboot)', async function () {
                         await fs.write(`/system/info/devmode`, 'true');
@@ -104,12 +104,13 @@ var app = {
                     }, pane);
                 } else {
                     tk.p(`Developer Mode is enabled.`, undefined, pane);
-                    tk.p(`Disabling it will re-enable protections, but all apps will be uninstalled. Their data will be saved.`, undefined, pane);
+                    tk.p(`Disabling it will reset WebDesk, but will keep your files, along with your DeskID and name.`, undefined, pane);
                     tk.cb(`b1`, 'Cancel', () => ui.dest(win), pane);
                     tk.cb(`b1`, 'Disable (reboot)', async function () {
-                        await fs.del(`/system/info/devmode`);
-                        await fs.del(`/system/apps.json`);
-                        await fs.delfold(`/system/apps`);
+                        await fs.delfold('/system/');
+                        await fs.delfold('/user/info/');
+                        await fs.write('/user/info/name', sys.name);
+                        await fs.write('/system/deskid', sys.deskid);
                         await wd.reboot();
                     }, pane);
                 }
@@ -603,13 +604,15 @@ var app = {
     textedit: {
         runs: true,
         name: 'TextEdit',
-        init: async function (contents, path) {
-            if (!path) {
-                const path2 = await app.files.pick('new', 'Create new document/code');
-                if (path2 !== false) {
-                    app.textedit.init('', path2);
+        init: async function (contents, path, readonly) {
+            if (readonly !== true) {
+                if (!path) {
+                    const path2 = await app.files.pick('new', 'Create new document/code');
+                    if (path2 !== false) {
+                        app.textedit.init('', path2);
+                    }
+                    return;
                 }
-                return;
             }
             tk.css('./assets/lib/browse.css');
             const win = tk.mbw(`TextEdit`, '500px', '340px', true);
@@ -658,33 +661,51 @@ var app = {
                 await fs.write(path, newContents);
                 wm.snack('Saved');
             }
-            tk.cb('b4 browserbutton', 'Save', async function () {
-                await save();
-            }, btnnest);
+            if (readonly !== true) {
+                tk.cb('b4 browserbutton', 'Save', async function () {
+                    await save();
+                }, btnnest);
+            } else {
+                tk.cb('b4 browserbutton', 'Save As', async function () {
+                    const path = await app.files.pick('new', 'Save in new file');
+                    const newContents = editor.getValue();
+                    fs.write(path, newContents);
+                    wm.snack('Saved');
+                }, btnnest);
+                editor.setReadOnly(true);
+            }
             tk.cb('b4 browserbutton', 'Menu', async function () {
                 const menu = tk.c('div', document.body, 'cm');
-                tk.p('Editing ' + path, undefined, menu);
+                if (readonly !== true) {
+                    tk.p('Editing ' + path, undefined, menu);
+                } else {
+                    tk.p('Read-only text');
+                }
                 tk.cb('b1 b2', 'Select All', function () {
                     editor.selectAll();
                     ui.dest(menu, 120);
                 }, menu);
-                tk.cb('b1 b2', 'Replace', function () {
-                    editor.execCommand('replace');
-                    ui.dest(menu, 120);
-                }, menu);
-                tk.cb('b1 b2', 'Find', function () {
+                tk.cb('b1 b2', 'Find Text', function () {
                     editor.execCommand('find');
                     ui.dest(menu, 120);
                 }, menu);
-                tk.cb('b1', 'Undo', function () {
-                    editor.execCommand('undo');
-                }, menu);
+                if (readonly !== true) {
+                    tk.cb('b1 b2', 'Replace', function () {
+                        editor.execCommand('replace');
+                        ui.dest(menu, 120);
+                    }, menu);
+                    tk.cb('b1', 'Undo', function () {
+                        editor.execCommand('undo');
+                    }, menu);
+                }
                 tk.cb('b1', 'Close', function () {
                     ui.dest(menu, 120);
                 }, menu);
-                tk.cb('b1', 'Redo', function () {
-                    editor.execCommand('redo');
-                }, menu);
+                if (readonly !== true) {
+                    tk.cb('b1', 'Redo', function () {
+                        editor.execCommand('redo');
+                    }, menu);
+                }
             }, btnnest);
             tk.cb('b4 browserbutton', 'Run', async function () {
                 const menu = tk.c('div', document.body, 'cm');
@@ -703,12 +724,14 @@ var app = {
                 }, menu);
             }, btnnest);
             wd.win();
-            editor.container.addEventListener('keydown', async function (event) {
-                if ((event.ctrlKey || event.metaKey) && event.key === 's') {
-                    event.preventDefault();
-                    await save();
-                }
-            });
+            if (readonly !== true) {
+                editor.container.addEventListener('keydown', async function (event) {
+                    if ((event.ctrlKey || event.metaKey) && event.key === 's') {
+                        event.preventDefault();
+                        await save();
+                    }
+                });
+            }
             new ResizeObserver(() => {
                 editor.resize();
             }).observe(win.win);
@@ -724,25 +747,25 @@ var app = {
             var currentPath = undefined;
             let dragoverListener = null;
             let dropListener = null;
-    
+
             async function navto(path) {
                 items.innerHTML = "";
                 breadcrumbs.innerHTML = "";
                 let crumbs = path.split('/').filter(Boolean);
                 let tempPath = '/';
-    
+
                 tk.cb('flist', 'Root', () => navto('/'), breadcrumbs);
                 crumbs.forEach((crumb, index) => {
                     tempPath += crumb + '/';
                     tk.cb('flists', '/', undefined, breadcrumbs);
                     tk.cb('flist', crumb, () => navto('/' + crumbs.slice(0, index + 1).join('/') + "/"), breadcrumbs);
                 });
-    
+
                 currentPath = tempPath;
-    
+
                 if (dragoverListener) items.removeEventListener('dragover', dragoverListener);
                 if (dropListener) items.removeEventListener('drop', dropListener);
-    
+
                 dragoverListener = e => e.preventDefault();
                 dropListener = async e => {
                     e.preventDefault();
@@ -752,29 +775,26 @@ var app = {
                     await fs.write(currentPath + relativePath, fileData);
                     setTimeout(() => navto(currentPath), 300);
                 };
-    
+
                 items.addEventListener('dragover', dragoverListener);
                 items.addEventListener('drop', dropListener);
-    
+
                 const contents = await fs.ls(path);
                 contents.items.forEach(item => {
                     if (item.type === "folder") {
                         const folder = tk.cb('flist width', "Folder: " + item.name, () => navto(item.path + "/"), items);
                         let isLongPress = false;
                         let timer;
-    
+
                         function openmenu() {
-                            if (item.path.includes('/system') && sys.dev === false) {
-                                wm.snack('Enable Developer Mode to modify the system folder.', 6000)
+                            if (item.path.includes('/system') || item.path.includes('/user/info') && sys.dev === false) {
+                                wm.snack('Enable Developer Mode to modify this folder.', 6000)
                                 return;
                             }
                             const menu = tk.c('div', document.body, 'cm');
                             tk.p(item.path, 'bold', menu);
-                            if (item.path.includes('/system')) {
-                                tk.p('This is the system folder, modifying it will likely cause damage.', 'warn', menu);
-                            }
-                            if (item.path.includes('/user')) {
-                                tk.p('This is your user folder, modifying this could cause harm.', 'warn', menu);
+                            if (item.path.includes('/system') || item.path.includes('/user/info')) {
+                                tk.p('This is an important folder, modifying it will likely cause damage.', 'warn', menu);
                             }
                             tk.cb('b1 b2', 'Delete folder', () => {
                                 fs.delfold(item.path);
@@ -783,7 +803,7 @@ var app = {
                             }, menu);
                             tk.cb('b1', 'Close', () => ui.dest(menu), menu);
                         }
-    
+
                         folder.addEventListener('touchstart', e => {
                             e.preventDefault();
                             isLongPress = false;
@@ -804,24 +824,24 @@ var app = {
                             e.preventDefault();
                             openmenu();
                         });
-    
+
                     } else {
                         if (item.name === "") return;
-    
+
                         const fileItem = tk.cb('flist width', "File: " + item.name, async function () {
-                            if (!sys.dev && item.path.includes('/system')) {
+                            if (!sys.dev && item.path.includes('/system') || item.path.includes('/user/info')) {
                                 wm.snack('Enable Developer Mode to modify system files.', 6000);
                                 return;
                             }
-    
+
                             const skibidi = tk.c('div', document.body, 'cm');
                             skibidi.innerText = `Loading ${item.name}, this might take a bit`;
                             const filecontent = await fs.read(item.path);
                             const menu = tk.c('div', document.body, 'cm');
                             tk.p(item.path, 'bold', menu);
-    
-                            if (item.path.includes('/system')) {
-                                tk.p('This is a system file, modifying it will likely cause damage.', 'warn', menu);
+
+                            if (item.path.includes('/system') || item.path.includes('/user/info')) {
+                                tk.p('This is an important file, modifying it will likely cause damage.', 'warn', menu);
                             }
                             if (item.path.includes('/user/info/name')) {
                                 tk.p('Deleting this file will erase your data on next restart.', 'warn', menu);
@@ -894,7 +914,7 @@ var app = {
                             tk.cb('b1', 'Cancel', () => ui.dest(menu), menu);
                             ui.dest(skibidi);
                         }, items);
-    
+
                         fileItem.addEventListener('dragstart', e => {
                             e.dataTransfer.setData('text/plain', item.path);
                         });
@@ -902,7 +922,7 @@ var app = {
                     }
                 });
             }
-    
+
             navto('/user/files/');
         },
         pick: function (type, text) {
@@ -989,9 +1009,33 @@ var app = {
             });
         }
     },
+    webcomm: {
+        runs: true,
+        name: "WebComm",
+        init: async function () {
+            const win = tk.mbw('WebComm', '200px');
+            const inp = tk.c('input', win.main, 'i1');
+            inp.placeholder = "Enter a DeskID";
+            tk.cb('b1', 'Call', function () {
+                if (inp.value === sys.deskid) {
+                    wm.snack(`Type a DeskID that isn't yours.`);
+                    app.ach.unlock('So lonely...', 'So lonely, you tried calling yourself.');
+                } else {
+                    app.webcall.init(inp.value);
+                }
+            }, win.main);
+            tk.cb('b1', 'Chat', function () {
+                if (inp.value === sys.deskid) {
+                    wm.snack(`Type a DeskID that isn't yours.`);
+                    app.ach.unlock('So lonely...', 'So lonely, you tried messaging yourself.');
+                } else {
+                    app.webchat.init(inp.value);
+                }
+            }, win.main);
+        }
+    },
     webchat: {
         runs: false,
-        name: "WebChat (beta)",
         init: async function (deskid, chat) {
             if (el.webchat !== undefined) {
                 wd.win(el.webchat);
@@ -1002,18 +1046,15 @@ var app = {
                 wc.dms = tk.c('div', el.webchat.main);
                 wc.messaging = tk.c('div', el.webchat.main, 'hide');
                 wc.chatting = tk.c('div', wc.messaging, 'embed nest')
-                tk.p(`Chats are not saved`, undefined, wc.dms);
-                wc.deskidin = tk.c('input', wc.dms, 'i1');
-                wc.deskidin.placeholder = "Enter DeskID of other user";
                 wc.chatting.style.overflow = "auto";
                 wc.chatting.style.height = "400px";
                 el.currentid = deskid;
 
-                tk.cb('b1', 'Message', function () {
+                if (deskid && !chat) {
                     ui.sw2(wc.dms, wc.messaging);
-                    otherid = wc.deskidin.value;
-                    el.currentid = wc.deskidin.value;
-                }, wc.dms);
+                    otherid = deskid;
+                    el.currentid = deskid;
+                }
 
                 if (deskid) {
                     otherid = deskid;
@@ -1028,6 +1069,7 @@ var app = {
                         custf(otherid, 'Message-WebKey', msg);
                         wc.sendmsg = tk.c('div', wc.chatting, 'full msg mesent');
                         wc.sendmsg.innerText = `${sys.deskid}: ` + msg;
+                        wc.sendmsg.style.marginBottom = "3px";
                         wc.messagein.value = '';
                     }
                 }
@@ -1047,7 +1089,8 @@ var app = {
                     if (typeof deskid === "string" && typeof chat === "string") {
                         clearInterval(checkDeskAndChat);
                         ui.sw2(wc.dms, wc.messaging);
-                        const msg = tk.c('div', wc.chatting, 'msg full');
+                        const msg = tk.c('div', wc.chatting, 'flist full');
+                        msg.style.marginBottom = "3px";
                         msg.innerText = `${deskid}: ` + chat;
                         resolve();
                     }
@@ -1193,6 +1236,12 @@ var app = {
                 tk.cb('b1', 'Refresh', function () {
                     refresh(); wm.snack('Refreshed');
                 }, skibidi);
+                if (sys.dev === true) {
+                    tk.cb('b1', 'JSON', async function () {
+                        const ok = JSON.stringify(info);
+                        app.textedit.init(ok, undefined, true);
+                    }, skibidi);
+                }
             }
             await refresh();
         }
@@ -1513,64 +1562,54 @@ var app = {
         }
     },
     webcall: {
-        runs: true,
-        name: 'WebCall',
-        init: async function () {
+        runs: false,
+        init: async function (deskid) {
             const win = tk.mbw('WebCall', '260px', 'auto', true, undefined, undefined);
             const callStatus = tk.p(`Enter DeskID of person to call`, undefined, win.main);
-            const input = tk.c('input', win.main, 'i1');
-            input.placeholder = "DeskID here";
-
-            function go() {
-                let oncall = false;
-                navigator.mediaDevices.getUserMedia({ audio: true }).then((stream) => {
-                    remotePeerId = input.value;
-                    const call = sys.peer.call(remotePeerId, stream);
-                    callStatus.textContent = 'Waiting for answer...';
-                    const showyourself = sys.peer.connect(call.peer);
-                    showyourself.on('open', () => {
-                        showyourself.send(JSON.stringify({ type: 'request' }));
-                    });
-
-                    showyourself.on('data', (data) => {
-                        try {
-                            const parsedData = JSON.parse(data);
-                            if (parsedData.response) {
-                                setTimeout(() => {
-                                    if (!oncall) {
-                                        callStatus.textContent = `Other person didn't answer`;
-                                        call.close();
-                                    }
-                                }, 28000);
-
-                                call.on('stream', (remoteStream) => {
-                                    oncall = true;
-                                    ui.dest(win.tbn, 100);
-                                    ui.dest(win.win, 100);
-                                    app.webcall.answer(remoteStream, call, parsedData.response, stream);
-                                });
-
-                                call.on('error', (err) => {
-                                    callStatus.textContent = 'Call failed: ' + err.message;
-                                });
-                            }
-                        } catch (err) {
-                            console.error('Failed to parse data:', err);
-                        }
-                    });
-                }).catch((err) => {
-                    console.error(`<!> ${err}`);
+            let oncall = false;
+            navigator.mediaDevices.getUserMedia({ audio: true }).then((stream) => {
+                remotePeerId = deskid;
+                const call = sys.peer.call(remotePeerId, stream);
+                callStatus.textContent = 'Waiting for answer...';
+                const showyourself = sys.peer.connect(call.peer);
+                showyourself.on('open', () => {
+                    showyourself.send(JSON.stringify({ type: 'request' }));
                 });
-            }
 
-            tk.cb('b1', 'Call', function () {
-                if (input.value === sys.deskid) {
-                    wm.snack(`You can't call yourself!`);
-                    app.ach.unlock(`So lonely...`, `So lonely, that you even tried calling yourself.`);
-                    return;
-                }
-                go();
-            }, win.main);
+                showyourself.on('data', (data) => {
+                    try {
+                        const parsedData = JSON.parse(data);
+                        if (parsedData.response) {
+                            setTimeout(() => {
+                                if (!oncall) {
+                                    callStatus.textContent = `Other person didn't answer`;
+                                    call.close();
+                                }
+                            }, 28000);
+
+                            call.on('stream', (remoteStream) => {
+                                oncall = true;
+                                ui.dest(win.tbn, 100);
+                                ui.dest(win.win, 100);
+                                app.webcall.answer(remoteStream, call, parsedData.response, stream);
+                            });
+
+                            call.on('error', (err) => {
+                                callStatus.textContent = 'Call failed: ' + err.message;
+                            });
+                        }
+                    } catch (err) {
+                        console.error('Failed to parse data:', err);
+                    }
+                });
+
+                const selfkill = win.closebtn.addEventListener('mousedown', function () {
+                    call.close();
+                    selfkill.removeEventListener();
+                });
+            }).catch((err) => {
+                console.error(`<!> ${err}`);
+            });
         },
         answer: async function (remoteStream, call, name, fein) {
             const win = tk.mbw('WebCall', '250px', 'auto', true, undefined, undefined);
@@ -1616,8 +1655,9 @@ var app = {
 
             tk.cb('b1', 'End', () => crashout(), win.main);
 
-            win.closebtn.addEventListener('mousedown', function () {
+            const selfkill = win.closebtn.addEventListener('mousedown', function () {
                 crashout();
+                selfkill.removeEventListener();
             });
         }
     },
