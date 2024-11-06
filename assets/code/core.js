@@ -187,7 +187,7 @@ var wd = {
             }
         }
         if (waitopt === "wait") {
-            setTimeout(function () { desktopgo(); }, 300);
+            setTimeout(function () { desktopgo(); }, 360);
         } else {
             desktopgo();
         }
@@ -473,9 +473,11 @@ var wd = {
                 wd.light();
             }, 'Set defaults');
         } else if (today.getMonth() === 11 && today.getDate() === 25) {
+            ui.crtheme('#00412A');
+            wd.dark();
             wm.notif(`Merry Christmas!`, `To those who celebrate it. If you don't like the color, you can use the default.`, function () {
-                ui.crtheme('#00412A');
-                wd.dark();
+                ui.crtheme('#7A7AFF');
+                wd.light();
             }, 'Set defaults');
         } else {
             ui.crtheme('#7A7AFF');
@@ -491,7 +493,7 @@ var wd = {
 
         return {
             location: `${city}, ${region}, ${country}`,
-            unit: unit
+            unit: unit,
         }
     }
 }

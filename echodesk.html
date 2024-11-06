@@ -100,7 +100,7 @@
             sys.echoid = id;
             await ptp.go(id2);
         } else {
-            ui.hide(document.getElementById('death'), 200);
+            ui.hide(document.getElementById('death'), 180);
             wm.wal(`<p class="bold">Provide DeskID</p><p>You're trying to boot nothing. That doesn't really work, so make sure you've filled the DeskID field.</p><p>If you're visiting this file as a developer: append ?deskid=[the echodeskid here] to the URL to boot.`);
         }
     }
@@ -108,7 +108,7 @@
         let boot = false;
         setTimeout(function () {
             if (boot === false) {
-                ui.hide(document.getElementById('death'), 200);
+                ui.hide(document.getElementById('death'), 180);
                 wm.wal(`<p class="bold">EchoDesk failed to boot</p><p>Click "Try Again" if you want, otherwise check the other WebDesk, make sure your connection is OK, and disable your VPN if it's on.</p>`, () => reboot(), 'Try Again', 'noclose');
             }
         }, 8000);
@@ -249,7 +249,7 @@
         }
 
         wd.perfmon();
-        ui.hide(document.getElementById('death'), 200);
+        ui.hide(document.getElementById('death'), 180);
         wm.notif('Welcome to EchoDesk', `Your current DeskID is temporary, and some features are disabled.`);
         app.ach.unlock(`EchoDesk`, `Better than remote desktop in some cases?`);
         const dropZone = document.body;
