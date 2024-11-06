@@ -363,7 +363,7 @@ var wd = {
     download: function (file, fileName) {
         let downloadLink = document.createElement('a');
         let url;
-    
+
         if (typeof file === 'string' && file.startsWith('data:')) {
             url = file;
         } else if (file instanceof File || file instanceof Blob) {
@@ -375,7 +375,7 @@ var wd = {
             const blob = new Blob([JSON.stringify(file)], { type: 'application/json' });
             url = URL.createObjectURL(blob);
         }
-    
+
         downloadLink.href = url;
         downloadLink.download = fileName || file.name || 'download';
         downloadLink.style.display = 'none';
@@ -385,7 +385,7 @@ var wd = {
         if (file instanceof Blob || file instanceof File || url.startsWith('blob:')) {
             setTimeout(() => URL.revokeObjectURL(url), 100);
         }
-    },     
+    },
     smft: function () {
         ui.cv('fz4', '10px');
         ui.cv('fz3', '11px');
@@ -469,15 +469,13 @@ var wd = {
             ui.crtheme('#694700');
             wd.dark();
             wm.notif(`Happy Halloween!`, `To those who celebrate it. If you don't like the color, you can use the default.`, function () {
-                ui.crtheme('#7A7AFF');
-                wd.light();
+                wd.defaultcolor();
             }, 'Set defaults');
         } else if (today.getMonth() === 11 && today.getDate() === 25) {
             ui.crtheme('#00412A');
             wd.dark();
             wm.notif(`Merry Christmas!`, `To those who celebrate it. If you don't like the color, you can use the default.`, function () {
-                ui.crtheme('#7A7AFF');
-                wd.light();
+                wd.defaultcolor();
             }, 'Set defaults');
         } else {
             ui.crtheme('#7A7AFF');
@@ -495,6 +493,10 @@ var wd = {
             location: `${city}, ${region}, ${country}`,
             unit: unit,
         }
+    },
+    defaultcolor: function () {
+        ui.crtheme('#7A7AFF');
+        wd.light();
     }
 }
 

@@ -166,7 +166,8 @@ var app = {
                 fs.del('/user/info/color');
                 fs.del('/user/info/lightdark');
                 fs.del('/user/info/lightdarkpref');
-                wm.wal('Reboot to finish resetting colors.', () => wd.reboot(), 'Reboot');
+                wd.defaultcolor();
+                wm.snack('Reset colors');
             }, appearPane); tk.cb('b1', 'Back', () => ui.sw2(appearPane, mainPane), appearPane);
             // User pane
             tk.p('WebDesk User', undefined, userPane);
