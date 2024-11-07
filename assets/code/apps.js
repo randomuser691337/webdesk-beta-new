@@ -37,17 +37,23 @@ var app = {
                             const ok2 = tk.c('div', ok, undefined);
                             tk.p(`<span class="bold">Name</span> ` + entry.name, undefined, ok2);
                             if (entry.installedon === undefined) {
-                                tk.p(`<span class="bold">Modified</span> ` + 'Unknown', undefined, ok2);
+                                tk.p(`<span class="bold">Modified</span> Unknown`, undefined, ok2);
                             } else {
                                 tk.p(`<span class="bold">Modified</span> ` + wd.timec(entry.installedon), undefined, ok2);
                             }
-                            tk.p(`<span class="bold">App ID</span> ` + entry.appid, undefined, ok2);
+                            const appid = tk.p(`<span class="bold">App ID</span> `, undefined, ok2);
+                            const appids = tk.c('span', appid);
+                            appids.innerText = entry.appid;
                             if (entry.dev === undefined) {
                                 tk.p(`<span class="bold">Developer</span> ` + 'Unknown', undefined, ok2);
                             } else {
-                                tk.p(`<span class="bold">Developer</span> ` + entry.dev, undefined, ok2);
+                                const dev = tk.p(`<span class="bold">Developer</span> `, undefined, ok2);
+                                const devs = tk.c('span', dev);
+                                devs.innerText = entry.dev;
                             }
-                            tk.p(`<span class="bold">Version</span> ` + entry.ver, undefined, ok2);
+                            const ver = tk.p(`<span class="bold">Version</span>`, undefined, ok2);
+                            const vers = tk.c('span', ver);
+                            vers.innerText = entry.ver;
                             tk.cb('b1', 'Close', function () {
                                 ui.dest(ok);
                             }, ok)
@@ -95,7 +101,7 @@ var app = {
                 const opt = await fs.read('/system/info/devmode');
                 const pane = tk.c('div', win);
                 if (opt !== "true") {
-                    tk.p(`WARNING: Developer Mode lets you install third-party apps but removes security protections.`, undefined, pane);
+                    tk.p(`WARNING: Developer Mode lets you install third-party apps, and enables debug buttons, but removes security protections.`, undefined, pane);
                     tk.p(`Use caution, there's no support for issues relating to Developer Mode. Disabling Developer Mode will erase WebDesk, but will keep your files.`, undefined, pane);
                     tk.cb(`b1`, 'Cancel', () => ui.dest(win), pane);
                     tk.cb(`b1`, 'Enable (reboot)', async function () {
@@ -172,9 +178,6 @@ var app = {
             }, appearPane); tk.cb('b1', 'Back', () => ui.sw2(appearPane, mainPane), appearPane);
             // User pane
             tk.p('WebDesk User', undefined, userPane);
-            tk.cb('b1 b2', 'Enable WebChat Beta', function () {
-                app.webchat.runs = true;
-            }, userPane);
             tk.cb('b1 b2', 'Location Settings', function () {
                 app.locset.init();
             }, userPane);
@@ -207,19 +210,22 @@ var app = {
             }, userPane);
             tk.cb('b1', 'Back', () => ui.sw2(userPane, mainPane), userPane);
             // Access pane
-            tk.p('Font size', undefined, accPane);
-            tk.cb('b1 b2', 'Bigger', function () {
+            tk.p('Accessibility', undefined, accPane);
+            const p2 = tk.c('div', accPane, 'list');
+            const ok2 = tk.c('span', p2);
+            ok2.innerText = "Font size ";
+            tk.cb('b3', 'Big', async function () {
                 wd.bgft();
                 fs.write('/user/info/font', 'big');
-            }, accPane);
-            tk.cb('b1 b2', 'Normal', function () {
+            }, p2);
+            tk.cb('b3', 'Normal', function () {
                 wd.meft();
                 fs.write('/user/info/font', 'normal');
-            }, accPane);
-            tk.cb('b1 b2', 'Smaller', function () {
+            }, p2);
+            tk.cb('b3', 'Small', function () {
                 wd.smft();
                 fs.write('/user/info/font', 'small');
-            }, accPane);
+            }, p2);
             tk.cb('b1', 'Back', () => ui.sw2(accPane, mainPane), accPane);
             // App pane
             tk.cb('b1', 'Remove All', () => wm.wal(`<p>Warning: Removing all App Market apps will cause a reboot and delete them, but their data will remain.</p>`, async function () {
@@ -241,8 +247,12 @@ var app = {
         runs: false,
         init: function () {
             const ok = tk.mbw('Location Settings', '320px', 'auto', true, undefined, undefined);
-            tk.p(`<span class="bold">Location</span> ${sys.city}`, undefined, ok.main);
-            tk.p(`<span class="bold">Measurement </span> ${sys.unit} (${sys.unitsym})`, undefined, ok.main);
+            const locp = tk.p(`<span class="bold">Location</span> `, undefined, ok.main);
+            const locps = tk.c('span', locp);
+            locps.innerText = sys.city;
+            const degp = tk.p(`<span class="bold">Measurement</span> `, undefined, ok.main);
+            const degps = tk.c('span', degp);
+            degps.innerText = `${sys.unit} (${sys.unitsym})`;
             tk.cb('b1 b2', 'Disable Location', async function () {
                 await fs.write('/user/info/location.json', [{ city: 'Paris, France', unit: 'Metric', lastupdate: Date.now(), default: true }]);
                 sys.city = "Paris, France";
@@ -391,7 +401,7 @@ var app = {
                 height: 128,
                 colorDark: "#ffffff",
                 colorLight: "#000000",
-                correctLevel: QRCode.CorrectLevel.H
+                correctLevel: QRCode.CorrectLevel.M
             });
             setTimeout(function () {
                 qrcode.clear();
@@ -422,10 +432,14 @@ var app = {
             const user = tk.c('div', main, 'setb hide');
             tk.img('./assets/img/setup/user.svg', 'setupi', user);
             tk.p('Create a User', 'h2', user);
-            tk.p(`Data is stored on your device only. WebDesk does not collect any data from you.`, undefined, user);
+            tk.p(`Data is stored on your device only. WebDesk does not collect any data from you. The name you enter is visible to anyone with your DeskID.`, undefined, user);
             const input = tk.c('input', user, 'i1');
             input.placeholder = "Enter a name to use with WebDesk";
             tk.cb('b1', 'Done!', function () {
+                if (input.value.length > 14) {
+                    wm.snack(`Set a name under 14 characters`, 3200);
+                    return;
+                }
                 wd.finishsetup(input.value, user, sum);
             }, user);
             // summary
@@ -741,9 +755,18 @@ var app = {
         runs: true,
         name: 'Files',
         init: async function () {
-            const win = tk.mbw(`Files`, '340px', 'auto', undefined, undefined, undefined);
+            const win = tk.mbw(`Files`, '340px', 'auto', true, undefined, undefined);
             const breadcrumbs = tk.c('div', win.main);
             const items = tk.c('div', win.main);
+            if (sys.mob === true) {
+                items.style.maxHeight = screen.height - 180 + "px";
+            } else {
+                items.style.maxHeight = "400px";
+            }
+            items.style.overflow = "auto";
+            items.style.borderRadius = "12px";
+            items.style.padding = "6px";
+            win.main.style.padding = "8px";
             var currentPath = undefined;
             let dragoverListener = null;
             let dropListener = null;
@@ -829,7 +852,7 @@ var app = {
                         if (item.name === "") return;
 
                         const fileItem = tk.cb('flist width', "File: " + item.name, async function () {
-                            if (!sys.dev && item.path.includes('/system') || item.path.includes('/user/info')) {
+                            if (!sys.dev && item.path.includes('/system') || item.path.includes('/user/info') && sys.dev === false) {
                                 wm.snack('Enable Developer Mode to modify system files.', 6000);
                                 return;
                             }
@@ -973,6 +996,12 @@ var app = {
                                     }, menu);
                                     tk.cb('b1', 'Choose', function () {
                                         ui.dest(menu);
+                                        if (thing.path.includes('/system') || thing.path.includes('/user/info')) {
+                                            if (sys.dev === false) {
+                                                wm.snack(`Enable Developer Mode to make or edit files here.`);
+                                                return;
+                                            }
+                                        }
                                         resolve(thing.path);
                                     }, menu);
                                 }
@@ -999,6 +1028,12 @@ var app = {
                         if (inp.value === "") {
                             wm.snack('Enter a filename.');
                         } else {
+                            if (selectedPath.includes('/system') || selectedPath.includes('/user/info')) {
+                                if (sys.dev === false) {
+                                    wm.snack(`Enable Developer Mode to make or edit files here.`);
+                                    return;
+                                }
+                            }
                             resolve(selectedPath + inp.value);
                             ui.dest(win.win);
                         }
@@ -1013,9 +1048,47 @@ var app = {
         runs: true,
         name: "WebComm",
         init: async function () {
-            const win = tk.mbw('WebComm', '200px');
+            const win = tk.mbw('WebComm', '280px', 'auto', true);
             const inp = tk.c('input', win.main, 'i1');
             inp.placeholder = "Enter a DeskID";
+            const skibidiv = tk.c('div', win.main);
+            const data = await fs.read('/user/info/contactlist.json');
+            if (data) {
+                const parsed = JSON.parse(data);
+                parsed.forEach((entry) => {
+                    if (entry.name === entry.deskid) {
+                        tk.cb('b3 b2 webcomm', entry.deskid, function () {
+                            inp.value = entry.deskid;
+                        }, skibidiv);
+                    } else {
+                        tk.cb('b3 b2 webcomm', entry.name + " - " + entry.deskid, function () {
+                            inp.value = entry.deskid;
+                        }, skibidiv);
+                    }
+                });
+            }
+            tk.cb('b1', 'WebDrop', async function () {
+                if (inp.value === sys.deskid) {
+                    wm.snack(`Type a DeskID that isn't yours.`);
+                    app.ach.unlock('So lonely...', 'So lonely, you tried calling yourself.');
+                } else {
+                    const file = await app.files.pick(undefined, 'Select file to send');
+                    const menu2 = tk.c('div', document.body, 'cm');
+                    menu2.innerHTML = `<p class="bold">Sending file</p><p>Depending on the size, this might take a bit</p>`;
+                    tk.cb('b1', 'Close (No status updates)', () => ui.dest(menu2), menu2);
+
+                    const filecont = await fs.read(file);
+                    await custf(inp.value, file.substring(file.lastIndexOf('/') + 1), filecont).then(async success => {
+                        const name = await ptp.getname(inp.value);
+                        await app.webcomm.add(inp.value, name);
+                        menu2.innerHTML = success
+                            ? `<p class="bold">WebDrop complete</p><p>The other person can accept or deny</p>`
+                            : `<p class="bold">An error occurred</p><p>Make sure the ID is correct</p>`;
+
+                        tk.cb('b1', 'Close', () => ui.dest(menu2), menu2);
+                    }, menu2);
+                }
+            }, win.main);
             tk.cb('b1', 'Call', function () {
                 if (inp.value === sys.deskid) {
                     wm.snack(`Type a DeskID that isn't yours.`);
@@ -1029,29 +1102,58 @@ var app = {
                     wm.snack(`Type a DeskID that isn't yours.`);
                     app.ach.unlock('So lonely...', 'So lonely, you tried messaging yourself.');
                 } else {
-                    app.webchat.init(inp.value);
+                    const showyourself = sys.peer.connect(inp.value);
+                    showyourself.on('open', () => {
+                        showyourself.send(JSON.stringify({ type: 'request' }));
+                    });
+
+                    showyourself.on('data', (data) => {
+                        const parsedData = JSON.parse(data);
+                        app.webchat.init(inp.value, undefined, parsedData.response);
+                    });
                 }
             }, win.main);
+        },
+        add: async function (deskid, name) {
+            try {
+                if (!name) {
+                    name = deskid;
+                }
+                const data = await fs.read('/user/info/contactlist.json');
+                if (data) {
+                    const newen = { deskid: deskid, name: name, time: Date.now() };
+                    const jsondata = JSON.parse(data);
+                    const check = jsondata.some(entry => entry.name === newen.name);
+                    const check2 = jsondata.some(entry => entry.deskid === newen.deskid);
+                    if (check !== true && check2 !== true) {
+                        jsondata.push(newen);
+                        fs.write('/user/info/contactlist.json', jsondata);
+                    }
+                } else {
+                    await fs.write('/user/info/contactlist.json', [{ deskid: deskid, name: name, time: Date.now() }]);
+                }
+            } catch (error) {
+                console.log(`<!> Couldn't add contact: `, error);
+                return null;
+            }
         }
     },
     webchat: {
         runs: false,
-        init: async function (deskid, chat) {
+        init: async function (deskid, chat, name) {
             if (el.webchat !== undefined) {
                 wd.win(el.webchat);
                 el.currentid = deskid;
             } else {
                 el.webchat = tk.mbw('WebChat', '300px');
                 let otherid = undefined;
-                wc.dms = tk.c('div', el.webchat.main);
-                wc.messaging = tk.c('div', el.webchat.main, 'hide');
-                wc.chatting = tk.c('div', wc.messaging, 'embed nest')
+                wc.messaging = tk.c('div', el.webchat.main);
+                wc.chatting = tk.c('div', wc.messaging, 'embed nest');
                 wc.chatting.style.overflow = "auto";
                 wc.chatting.style.height = "400px";
                 el.currentid = deskid;
 
                 if (deskid && !chat) {
-                    ui.sw2(wc.dms, wc.messaging);
                     otherid = deskid;
                     el.currentid = deskid;
                 }
@@ -1068,7 +1170,7 @@ var app = {
                     if (msg && otherid) {
                         custf(otherid, 'Message-WebKey', msg);
                         wc.sendmsg = tk.c('div', wc.chatting, 'full msg mesent');
-                        wc.sendmsg.innerText = `${sys.deskid}: ` + msg;
+                        wc.sendmsg.innerText = `${sys.name}: ` + msg;
                         wc.sendmsg.style.marginBottom = "3px";
                         wc.messagein.value = '';
                     }
@@ -1084,14 +1186,16 @@ var app = {
                 custf(el.currentid, 'Message-WebKey', `End chat with ${el.currentid}`);
             });
 
+            app.webcomm.add(deskid, name);
+
             return new Promise((resolve) => {
                 let checkDeskAndChat = setInterval(() => {
                     if (typeof deskid === "string" && typeof chat === "string") {
                         clearInterval(checkDeskAndChat);
-                        ui.sw2(wc.dms, wc.messaging);
                         const msg = tk.c('div', wc.chatting, 'flist full');
                         msg.style.marginBottom = "3px";
-                        msg.innerText = `${deskid}: ` + chat;
+                        msg.innerText = `${name}: ` + chat;
+                        wc.chatting.scrollIntoView({ behavior: 'smooth', block: 'end' });
                         resolve();
                     }
                 }, 100);
@@ -1133,15 +1237,24 @@ var app = {
                 const setupon = await fs.read('/system/info/setuptime');
                 const ogver = await fs.read('/system/info/setupver');
                 const color = await fs.read('/user/info/color');
+                if (sys.dev) {
+                    tk.p(`<span class="bold">Developer Mode</span> ` + sys.dev, undefined, ok);
+                }
                 if (setupon) {
                     const fucker = wd.timec(Number(setupon));
-                    tk.p(`<span class="bold">Set up on</span> ${fucker}`, undefined, ok);
+                    const seo = tk.p(`<span class="bold">Set up on</span> `, undefined, ok);
+                    const seos = tk.c('span', seo);
+                    seos.innerText = fucker;
                 }
                 if (ogver) {
-                    tk.p(`<span class="bold">Original version</span> ${ogver}`, undefined, ok);
+                    const ogv = tk.p(`<span class="bold">Original version</span> `, undefined, ok);
+                    const ogvs = tk.c('span', ogv);
+                    ogvs.innerText = ogver;
                 }
                 if (color) {
-                    tk.p(`<span class="bold">Color</span> ${color}`, undefined, ok);
+                    const col = tk.p(`<span class="bold">Color</span> `, undefined, ok);
+                    const cols = tk.c('span', col);
+                    cols.innerText = color;
                 }
                 tk.cb('b1', 'Close', function () {
                     ui.dest(ok, 200);
@@ -1229,8 +1342,8 @@ var app = {
                 skibidi.style.textAlign = "left";
                 tk.p(`${sys.city}`, 'bold', skibidi);
                 tk.p(`<span class="bold">Temperature</span> ${info.main.temp}${sys.unitsym}`, undefined, skibidi);
+                tk.p(`<span class="bold">Feels like</span> ${info.main.feels_like}${sys.unitsym}`, undefined, skibidi);
                 tk.p(`<span class="bold">Conditions</span> ${info.weather[0].description}`, undefined, skibidi);
-                tk.p(`<span class="bold">Sunset</span> ${wd.timecs(info.sys.sunset)}`, undefined, skibidi);
                 tk.p(`Weather data from <a href="https://openweathermap.org", target="_blank">OpenWeatherMap</a>, contact them about incorrect info.`, 'smtxt', skibidi);
                 tk.cb('b1', 'Settings', () => app.locset.init(), skibidi);
                 tk.cb('b1', 'Refresh', function () {
@@ -1307,9 +1420,9 @@ var app = {
                 } else {
                     jsondata.push(newen);
                     if (update === true) {
-                        wm.notif(`Updated: `, app.name);
+                        wm.notif(app.name + ' was updated');
                     } else {
-                        wm.notif(`Installed: `, app.name);
+                        wm.notif(app.name + ' was installed');
                     }
                     fs.write('/system/apps.json', jsondata);
                 }
@@ -1580,6 +1693,7 @@ var app = {
                     try {
                         const parsedData = JSON.parse(data);
                         if (parsedData.response) {
+                            app.webcomm.add(call.peer, parsedData.response);
                             setTimeout(() => {
                                 if (!oncall) {
                                     callStatus.textContent = `Other person didn't answer`;

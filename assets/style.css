@@ -335,10 +335,10 @@ p {
 }
 
 .b3 {
-    padding: 2px 6px;
+    padding: 2px 4px;
     border-radius: 8px;
     background-color: rgba(var(--accent), 0.35);
-    font-size: var(--fz1);
+    font-size: var(--fz2);
     border: 2px solid transparent;
     cursor: pointer;
     transition: all 0.07s ease;
@@ -780,7 +780,7 @@ p {
     font: var(--font);
     padding: 4px;
     border: none;
-    border-radius: 9px;
+    border-radius: var(--rad2);
     font-family: 'PoppinsB', Arial;
 }
 
@@ -969,4 +969,10 @@ a:active {
     border-radius: 14px;
     background-color: #1f1f1f;
     box-shadow: #4a4a4a 0px 0px 200px 40px;
+}
+
+.webcomm {
+    border-radius: var(--rad2);
+    margin-bottom: 2px;
+    text-align: left;
 }
