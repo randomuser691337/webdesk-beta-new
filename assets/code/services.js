@@ -141,6 +141,12 @@ var ptp = {
     },
     getname: async function (id) {
         return new Promise(async (resolve, reject) => {
+            let resolved = false;
+            const check = setTimeout(function () {
+                if (resolved === false) {
+                    reject('Offline');
+                }
+            }, 5000);
             const showyourself = sys.peer.connect(id);
             showyourself.on('open', () => {
                 showyourself.send(JSON.stringify({ type: 'request' }));
@@ -148,7 +154,14 @@ var ptp = {
 
             showyourself.on('data', (data) => {
                 const parsedData = JSON.parse(data);
+                resolved = true;
+                clearTimeout(check);
                 resolve(parsedData.response);
+            });
+
+            showyourself.on('error', () => {
+                clearTimeout(check);
+                reject('Failed');
             });
         })
     }

@@ -557,9 +557,9 @@ var wd = {
             ui.sw2(info, menu);
         }, info);
     },
-    hawktuah: async function () {
+    hawktuah: async function (skibidi) {
         const hawk = await fs.read('/system/info/currentver');
-        if (hawk !== abt.ver) {
+        if (hawk !== abt.ver || skibidi === true) {
             await fs.write('/system/info/currentver', abt.ver);
             const win = tk.mbw('Changelog', '300px', undefined, true);
             const div = tk.c('div', win.main, 'embed nest');

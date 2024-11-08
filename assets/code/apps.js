@@ -204,6 +204,10 @@ var app = {
                 const inp = tk.c('input', ok.main, 'i1');
                 inp.placeholder = "New name here";
                 tk.cb('b1', 'Change name', async function () {
+                    if (inp.value.length > 14) {
+                        wm.snack(`Set a name under 14 characters`, 3200);
+                        return;
+                    }
                     await fs.write('/user/info/name', inp.value);
                     ok.main.innerHTML = `<p>Reboot WebDesk to finish changing your username.</p><p>All unsaved data will be lost.</p>`;
                     tk.cb('b1', 'Reboot', () => wd.reboot(), ok.main);
@@ -997,7 +1001,7 @@ var app = {
                                         ui.dest(menu);
                                     }, menu);
                                     tk.cb('b1', 'Choose', function () {
-                                        ui.dest(menu);
+                                        ui.dest(menu); ui.dest(win.win);
                                         if (thing.path.includes('/system') || thing.path.includes('/user/info')) {
                                             if (sys.dev === false) {
                                                 wm.snack(`Enable Developer Mode to make or edit files here.`);
@@ -1081,38 +1085,50 @@ var app = {
 
                     const filecont = await fs.read(file);
                     await custf(inp.value, file.substring(file.lastIndexOf('/') + 1), filecont).then(async success => {
-                        const name = await ptp.getname(inp.value);
-                        await app.webcomm.add(inp.value, name);
-                        menu2.innerHTML = success
-                            ? `<p class="bold">WebDrop complete</p><p>The other person can accept or deny</p>`
-                            : `<p class="bold">An error occurred</p><p>Make sure the ID is correct</p>`;
+                        await ptp.getname(inp.value)
+                            .then(name => {
+                                app.webcomm.add(inp.value, name);
+                                menu2.innerHTML = success
+                                    ? `<p class="bold">WebDrop complete</p><p>The other person can accept or deny</p>`
+                                    : `<p class="bold">An error occurred</p><p>Make sure the ID is correct</p>`;
 
-                        tk.cb('b1', 'Close', () => ui.dest(menu2), menu2);
+                                tk.cb('b1', 'Close', () => ui.dest(menu2), menu2);
+                            })
+                            .catch(error => {
+                                wm.snack(`User isn't online or your Internet isn't working`);
+                                console.log(error);
+                            });
                     }, menu2);
                 }
             }, win.main);
-            tk.cb('b1', 'Call', function () {
+            tk.cb('b1', 'Call', async function () {
                 if (inp.value === sys.deskid) {
                     wm.snack(`Type a DeskID that isn't yours.`);
                     app.ach.unlock('So lonely...', 'So lonely, you tried calling yourself.');
                 } else {
-                    app.webcall.init(inp.value);
+                    await ptp.getname(inp.value)
+                        .then(name => {
+                            app.webcall.init(inp.value, name);
+                        })
+                        .catch(error => {
+                            wm.snack(`User isn't online or your Internet isn't working`);
+                            console.log(error);
+                        });
                 }
             }, win.main);
-            tk.cb('b1', 'Chat', function () {
+            tk.cb('b1', 'Chat', async function () {
                 if (inp.value === sys.deskid) {
                     wm.snack(`Type a DeskID that isn't yours.`);
                     app.ach.unlock('So lonely...', 'So lonely, you tried messaging yourself.');
                 } else {
-                    const showyourself = sys.peer.connect(inp.value);
-                    showyourself.on('open', () => {
-                        showyourself.send(JSON.stringify({ type: 'request' }));
-                    });
-
-                    showyourself.on('data', (data) => {
-                        const parsedData = JSON.parse(data);
-                        app.webchat.init(inp.value, undefined, parsedData.response);
-                    });
+                    await ptp.getname(inp.value)
+                        .then(name => {
+                            app.webchat.init(inp.value, undefined, name);
+                        })
+                        .catch(error => {
+                            wm.snack(`User isn't online or your Internet isn't working`);
+                            console.log(error);
+                        });
                 }
             }, win.main);
         },
@@ -1214,11 +1230,9 @@ var app = {
             const side = tk.c('div', main, 'abtlogo');
             const info = tk.c('div', main, 'abtinfo');
             const logo = tk.img('./assets/img/favicon.png', 'abtimg', side);
-            tk.p('WebDesk', 'h2', info);
-            tk.p(`<span class="bold">Updated</span> ${abt.lastmod}`, undefined, info);
-            tk.p(`<span class="bold">DeskID</span> ${sys.deskid}`, undefined, info);
-            tk.p(`<span class="bold">Version</span> ${abt.ver}`, undefined, info);
-            tk.cb('b4', 'Creds', function () {
+            tk.cb('b4 b2', 'Changes', () => wd.hawktuah(true), side);
+            tk.cb('b4 b2', 'Discord', () => window.open('https://discord.gg/pCbG6hAxFe', '_blank'), side);
+            tk.cb('b4 b2', 'Creds', function () {
                 const ok = tk.c('div', document.body, 'cm');
                 ok.innerHTML = `<p class="bold">Credits</p>
                 <p>All the libraries or materials that helped create WebDesk.</p>
@@ -1232,36 +1246,32 @@ var app = {
                 tk.cb('b1', 'Close', function () {
                     ui.dest(ok, 200);
                 }, ok);
-            }, info);
-            tk.cb('b4', 'Discord', () => window.open('https://discord.gg/pCbG6hAxFe', '_blank'), info);
-            tk.cb('b4', 'More info', async function () {
-                const ok = tk.c('div', document.body, 'cm');
-                const setupon = await fs.read('/system/info/setuptime');
-                const ogver = await fs.read('/system/info/setupver');
-                const color = await fs.read('/user/info/color');
-                if (setupon) {
-                    const fucker = wd.timec(Number(setupon));
-                    const seo = tk.p(`<span class="bold">Set up on</span> `, undefined, ok);
-                    const seos = tk.c('span', seo);
-                    seos.innerText = fucker;
-                }
-                if (sys.dev) {
-                    tk.p(`<span class="bold">Developer Mode</span> ` + sys.dev, undefined, ok);
-                }
-                if (ogver) {
-                    const ogv = tk.p(`<span class="bold">Original version</span> `, undefined, ok);
-                    const ogvs = tk.c('span', ogv);
-                    ogvs.innerText = ogver;
-                }
-                if (color) {
-                    const col = tk.p(`<span class="bold">Color</span> `, undefined, ok);
-                    const cols = tk.c('span', col);
-                    cols.innerText = color;
-                }
-                tk.cb('b1', 'Close', function () {
-                    ui.dest(ok, 200);
-                }, ok);
-            }, info);
+            }, side);
+            const setupon = await fs.read('/system/info/setuptime');
+            const ogver = await fs.read('/system/info/setupver');
+            const color = await fs.read('/user/info/color');
+            tk.p(`WebDesk ${abt.ver}`, 'h2', info);
+            tk.p(`<span class="bold">Updated</span> ${abt.lastmod}`, undefined, info);
+            tk.p(`<span class="bold">DeskID</span> ${sys.deskid}`, undefined, info);
+            if (ogver) {
+                const ogv = tk.p(`<span class="bold">Set up with </span> `, undefined, info);
+                const ogvs = tk.c('span', ogv);
+                ogvs.innerText = ogver;
+            }
+            if (setupon) {
+                const fucker = wd.timec(Number(setupon));
+                const seo = tk.p(`<span class="bold">Creation </span> `, undefined, info);
+                const seos = tk.c('span', seo);
+                seos.innerText = fucker;
+            }
+            if (sys.dev) {
+                tk.p(`<span class="bold">Dev Mode</span> ` + sys.dev, undefined, info);
+            }
+            if (color) {
+                const col = tk.p(`<span class="bold">Color</span> `, undefined, info);
+                const cols = tk.c('span', col);
+                cols.innerText = color;
+            }
             win.win.style.resize = "none";
         }
     },
@@ -1678,53 +1688,37 @@ var app = {
     },
     webcall: {
         runs: false,
-        init: async function (deskid) {
+        init: async function (deskid, name) {
             const win = tk.mbw('WebCall', '260px', 'auto', true, undefined, undefined);
-            const callStatus = tk.p(`Enter DeskID of person to call`, undefined, win.main);
+            const callStatus = tk.p(`Connecting...`, undefined, win.main);
             let oncall = false;
             navigator.mediaDevices.getUserMedia({ audio: true }).then((stream) => {
                 remotePeerId = deskid;
                 const call = sys.peer.call(remotePeerId, stream);
                 callStatus.textContent = 'Waiting for answer...';
-                const showyourself = sys.peer.connect(call.peer);
-                showyourself.on('open', () => {
-                    showyourself.send(JSON.stringify({ type: 'request' }));
-                });
-
-                showyourself.on('data', (data) => {
-                    try {
-                        const parsedData = JSON.parse(data);
-                        if (parsedData.response) {
-                            app.webcomm.add(call.peer, parsedData.response);
-                            setTimeout(() => {
-                                if (!oncall) {
-                                    callStatus.textContent = `Other person didn't answer`;
-                                    call.close();
-                                }
-                            }, 28000);
-
-                            call.on('stream', (remoteStream) => {
-                                oncall = true;
-                                ui.dest(win.tbn, 100);
-                                ui.dest(win.win, 100);
-                                app.webcall.answer(remoteStream, call, parsedData.response, stream);
-                            });
-
-                            call.on('error', (err) => {
-                                callStatus.textContent = 'Call failed: ' + err.message;
-                            });
-                        }
-                    } catch (err) {
-                        console.error('Failed to parse data:', err);
+                app.webcomm.add(call.peer, name);
+                setTimeout(() => {
+                    if (!oncall) {
+                        callStatus.textContent = `Other person didn't answer`;
+                        call.close();
                     }
+                }, 28000);
+
+                call.on('stream', (remoteStream) => {
+                    oncall = true;
+                    ui.dest(win.tbn, 100);
+                    ui.dest(win.win, 100);
+                    app.webcall.answer(remoteStream, call, name, stream);
                 });
 
-                const selfkill = win.closebtn.addEventListener('mousedown', function () {
-                    call.close();
-                    selfkill.removeEventListener();
+                call.on('error', (err) => {
+                    callStatus.textContent = 'Call failed: ' + err.message;
                 });
-            }).catch((err) => {
-                console.error(`<!> ${err}`);
+            });
+            const selfkill = win.closebtn.addEventListener('mousedown', function () {
+                call.close();
+                stream.getTracks().forEach(track => track.stop());
+                selfkill.removeEventListener();
             });
         },
         answer: async function (remoteStream, call, name, fein) {
