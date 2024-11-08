@@ -817,7 +817,7 @@ p {
 }
 
 .embed {
-    border-radius: var(--rad3);
+    border-radius: var(--rad2);
     max-width: 100%;
     width: 100%;
     box-sizing: border-box;
@@ -975,4 +975,8 @@ a:active {
     border-radius: var(--rad2);
     margin-bottom: 2px;
     text-align: left;
+}
+
+.uul {
+    text-align: left !important; margin: 0px;
 }

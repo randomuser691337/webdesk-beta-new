@@ -556,7 +556,19 @@ var wd = {
         tk.cb('b1', 'Back', async function () {
             ui.sw2(info, menu);
         }, info);
-    }
+    },
+    hawktuah: async function () {
+        const hawk = await fs.read('/system/info/currentver');
+        if (hawk !== abt.ver) {
+            await fs.write('/system/info/currentver', abt.ver);
+            const win = tk.mbw('Changelog', '300px', undefined, true);
+            const div = tk.c('div', win.main, 'embed nest');
+            const response = await fetch('./assets/other/changelog.html');
+            const tuah = await response.text();
+            div.style.height = "300px";
+            div.innerHTML = tuah;
+        }
+    }    
 }
 
 document.addEventListener('visibilitychange', function () {

@@ -178,6 +178,7 @@ var app = {
             }, appearPane); tk.cb('b1', 'Back', () => ui.sw2(appearPane, mainPane), appearPane);
             // User pane
             tk.p('WebDesk User', undefined, userPane);
+            tk.p(`Keep your WebDesk open when possible. <span class="bold">When WebDesk isn't open, anyone's able to take your DeskID.</span>`, undefined, userPane);
             tk.cb('b1 b2', 'Location Settings', function () {
                 app.locset.init();
             }, userPane);
@@ -421,8 +422,9 @@ var app = {
             const warn = tk.c('div', main, 'setb hide');
             tk.img('./assets/img/noround.png', 'setupi', warn);
             tk.p(`WebDesk Online services`, 'h2', warn);
-            tk.p('WebDesk makes an ID called a DeskID for you. Others can use this ID to send you files or call you.', undefined, warn);
-            tk.p('To recieve calls and files from others, WebDesk needs to be open. When not in use, WebDesk uses less resources.', undefined, warn);
+            tk.p('WebDesk makes a DeskID for you. Others can use this ID to send you files or call you.', undefined, warn);
+            tk.p('To recieve from others, WebDesk needs to be open. When not in use, WebDesk uses less resources.', undefined, warn);
+            tk.p(`Keep your WebDesk open when possible. <span class="bold">When WebDesk isn't open, anyone's able to take your DeskID.</span>`, undefined, warn);
             tk.cb('b1', `What's my DeskID?`, function () {
                 const box = wm.cm();
                 tk.p(`Your DeskID is <span class="med">${sys.deskid}</span>. You'll need to finish setup to use it.`, undefined, box);
@@ -1237,14 +1239,14 @@ var app = {
                 const setupon = await fs.read('/system/info/setuptime');
                 const ogver = await fs.read('/system/info/setupver');
                 const color = await fs.read('/user/info/color');
-                if (sys.dev) {
-                    tk.p(`<span class="bold">Developer Mode</span> ` + sys.dev, undefined, ok);
-                }
                 if (setupon) {
                     const fucker = wd.timec(Number(setupon));
                     const seo = tk.p(`<span class="bold">Set up on</span> `, undefined, ok);
                     const seos = tk.c('span', seo);
                     seos.innerText = fucker;
+                }
+                if (sys.dev) {
+                    tk.p(`<span class="bold">Developer Mode</span> ` + sys.dev, undefined, ok);
                 }
                 if (ogver) {
                     const ogv = tk.p(`<span class="bold">Original version</span> `, undefined, ok);
