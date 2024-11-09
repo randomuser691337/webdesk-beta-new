@@ -142,6 +142,18 @@ var wd = {
                 tk.cb('b3 b2', 'Sleep', function () {
                     app.lockscreen.init();
                 }, ok);
+                if (sys.guest === false && sys.echodesk === false) {
+                    tk.cb('b3 b2', 'Deep Sleep', function () {
+                        const menu = tk.c('div', document.body, 'cm');
+                        // tk.img('./assets/img/icons/sleep.svg', 'setupi', menu);
+                        tk.p('Deep Sleep', 'bold', menu);
+                        tk.p(`Your DeskID will work as normal, and WebDesk will use little to no resources. Save your work before entering.`, undefined, menu);
+                        tk.cb('b1', 'Close', () => ui.dest(menu), menu); tk.cb('b1', 'Enter', async function () {
+                            await fs.write('/system/eepysleepy', 'true');
+                            await wd.reboot();
+                        }, menu);
+                    }, ok);
+                }
                 tk.cb('b3 b2', 'Reboot/Reload', function () {
                     wd.reboot();
                 }, ok);
@@ -568,7 +580,13 @@ var wd = {
             div.style.height = "300px";
             div.innerHTML = tuah;
         }
-    }    
+    },
+    chokehold: function () {
+        return new Promise(resolve => {
+            sys.resume = resolve;
+        });
+    }
+    
 }
 
 document.addEventListener('visibilitychange', function () {

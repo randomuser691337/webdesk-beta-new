@@ -146,7 +146,7 @@ var ptp = {
                 if (resolved === false) {
                     reject('Offline');
                 }
-            }, 5000);
+            }, 3000);
             const showyourself = sys.peer.connect(id);
             showyourself.on('open', () => {
                 showyourself.send(JSON.stringify({ type: 'request' }));

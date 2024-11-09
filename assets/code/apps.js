@@ -1054,26 +1054,12 @@ var app = {
         runs: true,
         name: "WebComm",
         init: async function () {
-            const win = tk.mbw('WebComm', '280px', 'auto', true);
+            const win = tk.mbw('WebComm', '320px', 'auto', true);
             const inp = tk.c('input', win.main, 'i1');
             inp.placeholder = "Enter a DeskID";
             const skibidiv = tk.c('div', win.main);
-            const data = await fs.read('/user/info/contactlist.json');
-            if (data) {
-                const parsed = JSON.parse(data);
-                parsed.forEach((entry) => {
-                    if (entry.name === entry.deskid) {
-                        tk.cb('b3 b2 webcomm', entry.deskid, function () {
-                            inp.value = entry.deskid;
-                        }, skibidiv);
-                    } else {
-                        tk.cb('b3 b2 webcomm', entry.name + " - " + entry.deskid, function () {
-                            inp.value = entry.deskid;
-                        }, skibidiv);
-                    }
-                });
-            }
-            tk.cb('b1', 'WebDrop', async function () {
+            let extraid = undefined;
+            const dropbtn = tk.cb('b1', 'WebDrop', async function () {
                 if (inp.value === sys.deskid) {
                     wm.snack(`Type a DeskID that isn't yours.`);
                     app.ach.unlock('So lonely...', 'So lonely, you tried calling yourself.');
@@ -1095,13 +1081,21 @@ var app = {
                                 tk.cb('b1', 'Close', () => ui.dest(menu2), menu2);
                             })
                             .catch(error => {
-                                wm.snack(`User isn't online or your Internet isn't working`);
-                                console.log(error);
+                                if (extraid) {
+                                    wm.snack(`First ID failed, trying their second ID...`);
+                                    inp.value = extraid;
+                                    dropbtn.click();
+                                    extraid = undefined;
+                                } else {
+                                    console.log(error);
+                                    wm.snack(`User isn't online or your Internet isn't working`);
+                                    inp.value = "";
+                                }
                             });
                     }, menu2);
                 }
             }, win.main);
-            tk.cb('b1', 'Call', async function () {
+            const callbtn = tk.cb('b1', 'Call', async function () {
                 if (inp.value === sys.deskid) {
                     wm.snack(`Type a DeskID that isn't yours.`);
                     app.ach.unlock('So lonely...', 'So lonely, you tried calling yourself.');
@@ -1111,12 +1105,20 @@ var app = {
                             app.webcall.init(inp.value, name);
                         })
                         .catch(error => {
-                            wm.snack(`User isn't online or your Internet isn't working`);
-                            console.log(error);
+                            if (extraid) {
+                                wm.snack(`First ID failed, trying their second ID...`);
+                                inp.value = extraid;
+                                callbtn.click();
+                                extraid = undefined;
+                            } else {
+                                console.log(error);
+                                wm.snack(`User isn't online or your Internet isn't working`);
+                                inp.value = "";
+                            }
                         });
                 }
             }, win.main);
-            tk.cb('b1', 'Chat', async function () {
+            const chatbtn = tk.cb('b1', 'Chat', async function () {
                 if (inp.value === sys.deskid) {
                     wm.snack(`Type a DeskID that isn't yours.`);
                     app.ach.unlock('So lonely...', 'So lonely, you tried messaging yourself.');
@@ -1126,11 +1128,69 @@ var app = {
                             app.webchat.init(inp.value, undefined, name);
                         })
                         .catch(error => {
-                            wm.snack(`User isn't online or your Internet isn't working`);
-                            console.log(error);
+                            if (extraid) {
+                                wm.snack(`First ID failed, trying their second ID...`);
+                                inp.value = extraid;
+                                chatbtn.click();
+                                extraid = undefined;
+                            } else {
+                                console.log(error);
+                                wm.snack(`User isn't online or your Internet isn't working`);
+                                inp.value = "";
+                            }
                         });
                 }
             }, win.main);
+            async function ok() {
+                const data = await fs.read('/user/info/contactlist.json');
+                skibidiv.innerHTML = "";
+                tk.cb('b3 b2 webcomm dash', 'Manage or edit contacts', () => app.contacts.init(), skibidiv);
+
+                if (data) {
+                    const parsed = JSON.parse(data);
+                    const buttons = [];
+
+                    for (const entry of parsed) {
+                        let btn;
+                        if (entry.name === entry.deskid) {
+                            btn = tk.cb('b3 b2 webcomm', entry.deskid, function () {
+                                inp.value = entry.deskid + " | Loading";
+                                if (entry.deskid2) extraid = entry.deskid2;
+                            }, skibidiv);
+                        } else {
+                            btn = tk.cb('b3 b2 webcomm', entry.name + " - " + entry.deskid + " | Loading", function () {
+                                inp.value = entry.deskid;
+                                if (entry.deskid2) extraid = entry.deskid2;
+                            }, skibidiv);
+                        }
+
+                        buttons.push({ btn, deskid: entry.deskid, deskid2: entry.deskid2 });
+                    }
+
+                    await Promise.all(
+                        buttons.map(async ({ btn, deskid, deskid2 }) => {
+                            try {
+                                await ptp.getname(deskid);
+                                btn.innerText = btn.innerText.slice(0, -11) + " | Online";
+                            } catch (error) {
+                                if (deskid2 !== undefined) {
+                                    try {
+                                        await ptp.getname(deskid);
+                                        btn.innerText = btn.innerText.slice(0, -11) + " | Online";
+                                    } catch (error) {
+                                        btn.innerText = btn.innerText.slice(0, -11) + " | Offline";
+                                    }
+                                } else {
+                                    btn.innerText = btn.innerText.slice(0, -11) + " | Offline";
+                                }
+                            }
+                        })
+                    );
+                }
+            }
+            const yeah = setInterval(() => ok(), 20000);
+            await ok();
+            win.closebtn.addEventListener('mousedown', () => clearInterval(yeah))
         },
         add: async function (deskid, name) {
             try {
@@ -1141,9 +1201,8 @@ var app = {
                 if (data) {
                     const newen = { deskid: deskid, name: name, time: Date.now() };
                     const jsondata = JSON.parse(data);
-                    const check = jsondata.some(entry => entry.name === newen.name);
-                    const check2 = jsondata.some(entry => entry.deskid === newen.deskid);
-                    if (check !== true && check2 !== true) {
+                    const check = jsondata.some(entry => entry.deskid === newen.deskid);
+                    if (check !== true) {
                         jsondata.push(newen);
                         fs.write('/user/info/contactlist.json', jsondata);
                     }
@@ -1319,20 +1378,46 @@ var app = {
 
                 await updateweather();
                 const interval = setInterval(updateweather, 300000);
-                el.lock.addEventListener('mousedown', async () => {
-                    const { innerHeight: windowHeight } = window;
-                    el.lock.style.transition = 'transform 0.4s ease';
-                    el.lock.style.transform = `translateY(-${windowHeight}px)`;
-                    await new Promise(resolve => {
-                        el.lock.addEventListener('transitionend', function onTransitionEnd() {
-                            el.lock.removeEventListener('transitionend', onTransitionEnd);
-                            clearInterval(interval);
-                            el.lock.remove();
-                            el.lock = undefined;
-                            resolve();
+                let menuo = false;
+                if (sys.setupd === "eepy") {
+                    el.lock.addEventListener('mousedown', async () => {
+                        if (menuo === false) {
+                            const menu = tk.c('div', el.lock, 'cm');
+                            el.lock.style.cursor = "default";
+                            menu.style.width = "130px";
+                            menuo = true;
+                            tk.p('Exit Deep Sleep', 'bold', menu);
+                            tk.cb('b1', 'Yes', async function () {
+                                await fs.del('/system/eepysleepy');
+                                sys.resume();
+                                clearInterval(interval);
+                                el.lock.remove();
+                                el.lock = undefined;
+                                ui.show(tk.g('contain'), 0);
+                            }, menu);
+                            tk.cb('b1', 'No', async function () {
+                                ui.dest(menu);
+                                el.lock.style.cursor = "none";
+                                menuo = false;
+                            }, menu);
+                        }
+                    });
+                } else {
+                    el.lock.addEventListener('mousedown', async () => {
+                        const { innerHeight: windowHeight } = window;
+                        el.lock.style.transition = 'transform 0.4s ease';
+                        el.lock.style.transform = `translateY(-${windowHeight}px)`;
+                        await new Promise(resolve => {
+                            el.lock.addEventListener('transitionend', function onTransitionEnd() {
+                                el.lock.removeEventListener('transitionend', onTransitionEnd);
+                                clearInterval(interval);
+                                el.lock.remove();
+                                el.lock = undefined;
+                                resolve();
+                            });
                         });
                     });
-                });
+                }
             }
         }
     },
@@ -1465,6 +1550,39 @@ var app = {
             }
             tk.p('Welcome to the App Market!', undefined, apps);
             tk.p(`Look for things you might want, all apps have <span class="bold">full access</span> to this WebDesk/it's files. Anything in this store is safe.`, undefined, apps);
+            if (sys.dev === true) {
+                tk.cb('b1 b2', 'Sideload', function () {
+                    const menu = tk.c('div', document.body, 'cm');
+                    let path2 = undefined;
+                    tk.p('Sideload', 'bold', menu);
+                    tk.p('Only sideload things you made.', undefined, menu);
+                    const name = tk.c('input', menu, 'i1');
+                    name.placeholder = "App name";
+                    const dev = tk.c('input', menu, 'i1');
+                    dev.placeholder = "App developer";
+                    const pathbtn = tk.cb('b1 b2 dash', `Choose JS file`, async function () {
+                        const path = await app.files.pick();
+                        pathbtn.innerText = path;
+                        path2 = path;
+                    }, menu);
+                    tk.cb('b1', `Cancel`, function () {
+                        ui.dest(menu);
+                    }, menu);
+                    tk.cb('b1', `Install`, async function () {
+                        if (name.value !== "" && dev.value !== "" && path2 !== undefined) {
+                            const newen = { name: name.value, ver: 1.0, installedon: Date.now(), dev: dev.value, appid: gen(12), exec: path2 };
+                            const apps = await fs.read('/system/apps.json');
+                            const jsondata = JSON.parse(apps);
+                            jsondata.push(newen);
+                            fs.write('/system/apps.json', jsondata);
+                            ui.dest(menu);
+                            wm.snack('Installed ' + name.value);
+                        } else {
+                            wm.snack('Fill out all inputs');
+                        }
+                    }, menu);
+                }, apps);
+            }
             await loadapps();
         },
     },
@@ -1527,6 +1645,104 @@ var app = {
                 return null;
             }
         }
+    },
+    contacts: {
+        runs: false,
+        name: 'Contacts',
+        init: async function () {
+            let ok;
+            function reload() {
+                ui.dest(win.win, 20);
+                ui.dest(win.tbn, 0);
+                app.contacts.init();
+            }
+            async function load() {
+                try {
+                    const data = await fs.read('/user/info/contactlist.json');
+                    if (data) {
+                        ok = JSON.parse(data);
+                        let yeah = 0;
+                        ok.forEach((entry) => {
+                            const notif = tk.c('div', win.main, 'notif2');
+                            tk.ps(entry.name, 'bold', notif);
+                            if (entry.deskid2) {
+                                tk.ps(`DeskID: ${entry.deskid} | DeskID 2: ${entry.deskid2}`, undefined, notif);
+                            } else {
+                                tk.ps(`DeskID: ${entry.deskid} | DeskID 2: Not set`, undefined, notif);
+                            }
+                            tk.cb('b4', 'Remove', async function () {
+                                const update = ok.filter(item => item.time !== entry.time);
+                                const updated = JSON.stringify(update);
+                                await fs.write('/user/info/contactlist.json', updated);
+                                reload();
+                            }, notif);
+                            tk.cb('b4', 'Edit', async function () {
+                                const update = ok.find(item => item.time === entry.time);
+                                const menu = tk.c('div', document.body, 'cm');
+                                tk.p(`Edit Contact`, 'bold', menu);
+                                const name = tk.c('input', menu, 'i1');
+                                name.placeholder = "User's username";
+                                if (update && update.name) name.value = update.name;
+                                const deskid = tk.c('input', menu, 'i1');
+                                deskid.placeholder = "User's default/main DeskID";
+                                if (update && update.deskid) deskid.value = update.deskid;
+                                const deskid2 = tk.c('input', menu, 'i1');
+                                deskid2.placeholder = "Second ID if first is offline";
+                                if (update && update.deskid2) deskid2.value = update.deskid2;
+                                tk.cb('b1', 'Close', () => ui.dest(menu), menu);
+                                tk.cb('b1', 'Save', async function () {
+                                    const updatedData = ok.filter(item => item.time !== entry.time);
+                                    const newEntry = {
+                                        deskid: deskid.value,
+                                        name: name.value,
+                                        time: Date.now()
+                                    };
+                                    if (deskid2.value) newEntry.deskid2 = deskid2.value;
+                                    updatedData.push(newEntry);
+                                    await fs.write('/user/info/contactlist.json', updatedData);
+                                    ui.dest(menu);
+                                    reload();
+                                }, menu);
+                            }, notif);
+                        });
+                    }
+                } catch (error) {
+                    console.log('<!> Contacts shat itself: ', error);
+                    return null;
+                }
+            }
+
+            const win = tk.mbw('Contacts', '300px', 'auto', true, undefined, undefined);
+            tk.cb('b1 b2', 'Add Contact', function () {
+                const menu = tk.c('div', document.body, 'cm');
+                const name = tk.c('input', menu, 'i1');
+                name.placeholder = "User's name";
+                const deskid = tk.c('input', menu, 'i1');
+                deskid.placeholder = "User's default DeskID";
+                const deskid2 = tk.c('input', menu, 'i1');
+                deskid2.placeholder = "User's second DeskID";
+                tk.cb('b1', 'Close', () => ui.dest(menu), menu);
+                tk.cb('b1', 'Save', async function () {
+                    const newEntry = {
+                        deskid: deskid.value,
+                        name: name.value,
+                        time: Date.now()
+                    };
+                    const update = ok.find(item => item.deskid === newEntry.deskid);
+                    console.log(update);
+                    if (update !== undefined) {
+                        wm.snack('Already saved that person');
+                    } else {
+                        if (deskid2.value) newEntry.deskid2 = deskid2.value;
+                        ok.push(newEntry);
+                        await fs.write('/user/info/contactlist.json', ok);
+                        ui.dest(menu);
+                        reload();
+                    }
+                }, menu);
+            }, win.main);
+            await load();
+        },
     },
     browser: {
         runs: true,

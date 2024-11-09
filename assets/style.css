@@ -957,7 +957,7 @@ a:active {
     z-index: 9999;
     background-color: #000;
     display: none;
-    cursor: none !important;
+    cursor: none;
 }
 
 .locki {
@@ -979,4 +979,8 @@ a:active {
 
 .uul {
     text-align: left !important; margin: 0px;
+}
+
+.dash {
+    border: 2px dotted rgba(var(--acc), 0.7) !important;
 }
