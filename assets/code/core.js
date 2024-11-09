@@ -586,7 +586,7 @@ var wd = {
             sys.resume = resolve;
         });
     }
-    
+
 }
 
 document.addEventListener('visibilitychange', function () {
@@ -594,5 +594,23 @@ document.addEventListener('visibilitychange', function () {
         app.lockscreen.init();
     }
 });
+
+let wakelocked = false;
+document.addEventListener('mousedown', async function () {
+    wakelockgo();
+});
+
+async function wakelockgo() {
+    if (wakelocked === false) {
+        wakelocked = true;
+        let wakeLock = null;
+        try {
+            wakeLock = await navigator.wakeLock.request("screen");
+            console.log('<i> WakeLock started');
+        } catch (err) {
+            wm.notif(`WebDesk wasn't able to wake-lock`, 'Your DeskID might disconnect if WebDesk is left inactive.');
+        }
+    }
+}
 
 setInterval(wd.clock, 1000);

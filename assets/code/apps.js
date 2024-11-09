@@ -1363,6 +1363,21 @@ var app = {
                 ui.show(el.lock, 400);
                 const img = tk.img(`https://openweathermap.org/img/wn/10d@2x.png`, 'locki', clock);
                 const p = tk.p('--:--', 'time h2', clock);
+                clock.style.maxWidth = "200px";
+                let ok = false;
+                if (sys.setupd === "eepy") {
+                    const selfdest = tk.p('Click anywhere to keep DeskID active and recieve notifications', undefined, clock);
+                    function yeah(e) {
+                        document.body.removeEventListener('mousedown', yeah);
+                        e.preventDefault();
+                        ui.dest(selfdest);
+                        ok = true;
+                    }
+
+                    document.body.addEventListener('mousedown', yeah);
+                } else {
+                    ok = true;
+                }
                 const weather = tk.p('Loading', 'smtxt', clock);
                 p.style.color = weather.style.color = "#fff";
                 const updateweather = async () => {
@@ -1381,7 +1396,7 @@ var app = {
                 let menuo = false;
                 if (sys.setupd === "eepy") {
                     el.lock.addEventListener('mousedown', async () => {
-                        if (menuo === false) {
+                        if (menuo === false && ok === true) {
                             const menu = tk.c('div', el.lock, 'cm');
                             el.lock.style.cursor = "default";
                             menu.style.width = "130px";
