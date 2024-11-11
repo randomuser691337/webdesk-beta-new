@@ -1,4 +1,4 @@
-// WebDesk 0.1.4
+// WebDesk 0.2.0
 // Based on Rebuild 7 (wtf)
 console.log(`<!> You've unlocked the REAL developer mode!`);
 console.log(`<!> For the love of all that is holy, DO NOT, and I mean DO NOT, PASTE ANY CODE IN HERE.`);
@@ -139,6 +139,8 @@ var wd = {
                 tk.p(`Controls`, 'h2', el.cc);
                 tk.p(`Your DeskID is ${sys.deskid}`, undefined, el.cc);
                 const ok = tk.c('div', el.cc, 'embed nest');
+                const addicon = tk.c('button', ok, 'conticon');
+                tk.img('/assets/img/icons/plus.svg', undefined, addicon);
                 tk.cb('b3 b2', 'Sleep', function () {
                     app.lockscreen.init();
                 }, ok);
@@ -147,7 +149,7 @@ var wd = {
                         const menu = tk.c('div', document.body, 'cm');
                         // tk.img('./assets/img/icons/sleep.svg', 'setupi', menu);
                         tk.p('Deep Sleep', 'bold', menu);
-                        tk.p(`Your DeskID will work as normal, and WebDesk will use little to no resources. Save your work before entering.`, undefined, menu);
+                        tk.p(`Your DeskID will work as normal, and WebDesk will use little resources. Save your work before entering.`, undefined, menu);
                         tk.cb('b1', 'Close', () => ui.dest(menu), menu); tk.cb('b1', 'Enter', async function () {
                             await fs.write('/system/eepysleepy', 'true');
                             await wd.reboot();
@@ -195,7 +197,7 @@ var wd = {
             el.tr = tk.c('div', lefttb);
             tk.cb('b1 time', '--:--', () => controlcenter(), titletb);
             if (sys.mob === true) {
-                el.tb.style.boxShadow = "none";
+                el.taskbar.style.boxShadow = "none";
             }
         }
         if (waitopt === "wait") {

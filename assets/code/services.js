@@ -31,11 +31,11 @@ var ptp = {
             });
 
             sys.peer.on('error', async (err) => {
-                console.log(`<!> whoops: ${err}`);
                 if (err.message.includes('Could not connect to')) {
                     return;
                 }
-
+                
+                console.log(`<!> whoops: ${err}`);
                 if (err.message.includes('Lost connection to server')) {
                     if (!notify) {
                         wm.notif('Connection Error', `Your connection was interrupted. WebDesk is trying to restore the connection.`);
@@ -146,7 +146,7 @@ var ptp = {
                 if (resolved === false) {
                     reject('Offline');
                 }
-            }, 3000);
+            }, 4000);
             const showyourself = sys.peer.connect(id);
             showyourself.on('open', () => {
                 showyourself.send(JSON.stringify({ type: 'request' }));

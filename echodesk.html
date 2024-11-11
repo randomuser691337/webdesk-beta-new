@@ -13,8 +13,8 @@
 </head>
 <script>
     var abt = {
-        lastmod: "Nov 9, 2024",
-        ver: "0.1.9",
+        lastmod: "Nov 11, 2024",
+        ver: "0.2.0",
     }
 
     var sys = {
@@ -42,6 +42,7 @@
         unitsym: "°C",
         seconds: false,
         echodesk: true,
+        appurl: `https://appmarket.meower.xyz/refresh`,
     }
     var el = {
         taskbar: undefined,
@@ -118,7 +119,7 @@
         if (sd && !migcheck && boot === false) {
             boot = true;
             const [
-                darkpref, lightdark, color, font, dev, mob, city, clocksec
+                darkpref, lightdark, color, font, dev, mob, city, clocksec, apprepo
             ] = await Promise.all([
                 fs.read('/user/info/lightdarkpref'),
                 fs.read('/user/info/lightdark'),
@@ -127,13 +128,18 @@
                 fs.read('/system/info/devmode'),
                 fs.read('/user/info/mobile'),
                 fs.read('/user/info/location.json'),
-                fs.read('/user/info/clocksec')
+                fs.read('/user/info/clocksec'),
+                fs.read('/system/appurl')
             ]);
 
             if (clocksec === "true") {
                 sys.seconds = true;
             } else {
                 sys.seconds = false;
+            }
+
+            if (apprepo) {
+                sys.appurl = apprepo;
             }
 
             if (city) {
@@ -190,11 +196,12 @@
             } else {
                 wd.seasonal();
             }
+            await wd.desktop(sd, sys.deskid, 'wait');
             const data = await fs.read('/system/apps.json');
             if (data) {
                 const apps = JSON.parse(data);
                 try {
-                    const response = await fetch('https://appmarket.meower.xyz/refresh');
+                    const response = await fetch(sys.appurl);
                     const onlineApps = await response.json();
                     for (const inapp of apps) {
                         await wd.loadapps(inapp, onlineApps, apps);
@@ -217,7 +224,6 @@
                     }
                 }
             }
-            await wd.desktop(sd, sys.deskid, 'wait');
         } else if (migcheck) {
             ui.crtheme('#010101', true);
             wd.dark('nosave');

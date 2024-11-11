@@ -51,7 +51,7 @@ var app = {
                                 const devs = tk.c('span', dev);
                                 devs.innerText = entry.dev;
                             }
-                            const ver = tk.p(`<span class="bold">Version</span>`, undefined, ok2);
+                            const ver = tk.p(`<span class="bold">Version</span> `, undefined, ok2);
                             const vers = tk.c('span', ver);
                             vers.innerText = entry.ver;
                             tk.cb('b1', 'Close', function () {
@@ -697,9 +697,9 @@ var app = {
             tk.cb('b4 browserbutton', 'Menu', async function () {
                 const menu = tk.c('div', document.body, 'cm');
                 if (readonly !== true) {
-                    tk.p('Editing ' + path, undefined, menu);
+                    tk.p('Editing ' + path, 'bold', menu);
                 } else {
-                    tk.p('Read-only text');
+                    tk.p('Read-only text', 'bold', menu);
                 }
                 tk.cb('b1 b2', 'Select All', function () {
                     editor.selectAll();
@@ -1154,7 +1154,7 @@ var app = {
                         let btn;
                         if (entry.name === entry.deskid) {
                             btn = tk.cb('b3 b2 webcomm', entry.deskid, function () {
-                                inp.value = entry.deskid + " | Loading";
+                                inp.value = entry.deskid;
                                 if (entry.deskid2) extraid = entry.deskid2;
                             }, skibidiv);
                         } else {
@@ -1171,17 +1171,17 @@ var app = {
                         buttons.map(async ({ btn, deskid, deskid2 }) => {
                             try {
                                 await ptp.getname(deskid);
-                                btn.innerText = btn.innerText.slice(0, -11) + " | Online";
+                                btn.innerText = btn.innerText.slice(0, -9) + " | Online";
                             } catch (error) {
                                 if (deskid2 !== undefined) {
                                     try {
                                         await ptp.getname(deskid);
-                                        btn.innerText = btn.innerText.slice(0, -11) + " | Online";
+                                        btn.innerText = btn.innerText.slice(0, -9) + " | Online";
                                     } catch (error) {
-                                        btn.innerText = btn.innerText.slice(0, -11) + " | Offline";
+                                        btn.innerText = btn.innerText.slice(0, -10) + " | Offline";
                                     }
                                 } else {
-                                    btn.innerText = btn.innerText.slice(0, -11) + " | Offline";
+                                    btn.innerText = btn.innerText.slice(0, -10) + " | Offline";
                                 }
                             }
                         })
@@ -1190,7 +1190,9 @@ var app = {
             }
             const yeah = setInterval(() => ok(), 20000);
             await ok();
-            win.closebtn.addEventListener('mousedown', () => clearInterval(yeah))
+            win.closebtn.addEventListener('mousedown', function () {
+                clearInterval(yeah);
+            });
         },
         add: async function (deskid, name) {
             try {
@@ -1222,13 +1224,14 @@ var app = {
                 wd.win(el.webchat);
                 el.currentid = deskid;
             } else {
-                el.webchat = tk.mbw('WebChat', '300px');
+                el.webchat = tk.mbw('WebChat', '300px', 'auto', true);
                 let otherid = undefined;
                 wc.messaging = tk.c('div', el.webchat.main);
                 wc.chatting = tk.c('div', wc.messaging, 'embed nest');
                 wc.chatting.style.overflow = "auto";
                 wc.chatting.style.height = "400px";
                 el.currentid = deskid;
+                tk.ps(`Talking with ${name} - ${deskid}`, 'smtxt', wc.chatting);
 
                 if (deskid && !chat) {
                     otherid = deskid;
@@ -1246,10 +1249,11 @@ var app = {
                     const msg = wc.messagein.value;
                     if (msg && otherid) {
                         custf(otherid, 'Message-WebKey', msg);
-                        wc.sendmsg = tk.c('div', wc.chatting, 'full msg mesent');
+                        wc.sendmsg = tk.c('div', wc.chatting, 'msg mesent');
                         wc.sendmsg.innerText = `${sys.name}: ` + msg;
                         wc.sendmsg.style.marginBottom = "3px";
                         wc.messagein.value = '';
+                        wc.chatting.scrollTop = wc.chatting.scrollHeight;
                     }
                 }
 
@@ -1269,10 +1273,10 @@ var app = {
                 let checkDeskAndChat = setInterval(() => {
                     if (typeof deskid === "string" && typeof chat === "string") {
                         clearInterval(checkDeskAndChat);
-                        const msg = tk.c('div', wc.chatting, 'flist full');
+                        const msg = tk.c('div', wc.chatting, 'flist othersent');
                         msg.style.marginBottom = "3px";
                         msg.innerText = `${name}: ` + chat;
-                        wc.chatting.scrollIntoView({ behavior: 'smooth', block: 'end' });
+                        wc.chatting.scrollTop = wc.chatting.scrollHeight;
                         resolve();
                     }
                 }, 100);
@@ -1497,6 +1501,10 @@ var app = {
             }, win.main);
         }
     },
+    // who made that mess
+    // YOU DID KING
+    // 🐦
+    // i made the mess!
     appmark: {
         runs: true,
         name: 'App Market',
@@ -1522,7 +1530,7 @@ var app = {
             console.log(`<i> Installing ${apploc}`);
             const apps = await fs.read('/system/apps.json');
             if (apps) {
-                const ok = await execute(`https://appmarket.meower.xyz` + apploc);
+                const ok = await execute(sys.appurl + apploc);
                 const newen = { name: app.name, ver: app.ver, installedon: Date.now(), dev: app.pub, appid: app.appid, exec: '/system/apps/' + app.appid + '.js' };
                 await fs.write('/system/apps/' + app.appid + '.js', ok);
                 const jsondata = JSON.parse(apps);
@@ -1539,7 +1547,7 @@ var app = {
                     fs.write('/system/apps.json', jsondata);
                 }
             } else {
-                const ok = await execute(`https://appmarket.meower.xyz` + apploc);
+                const ok = await execute(sys.appurl + apploc);
                 await fs.write('/system/apps.json', [{ name: app.name, ver: app.ver, installedon: Date.now(), dev: app.pub, appid: app.appid, exec: '/system/apps/' + app.appid + '.js' }]);
                 await fs.write('/system/apps/' + app.appid + '.js', ok);
                 wm.notif(`Installed: `, app.name);
@@ -1551,7 +1559,7 @@ var app = {
             const appinfo = tk.c('div', win.main, 'hide');
             async function loadapps() {
                 try {
-                    const response = await fetch(`https://appmarket.meower.xyz/refresh`);
+                    const response = await fetch(sys.appurl);
                     const apps = await response.json();
                     apps.forEach(function (app2) {
                         const notif = tk.c('div', win.main, 'notif2');
@@ -1595,6 +1603,37 @@ var app = {
                         } else {
                             wm.snack('Fill out all inputs');
                         }
+                    }, menu);
+                }, apps);
+                tk.cb('b1 b2', 'Settings', async function () {
+                    const menu = tk.c('div', document.body, 'cm');
+                    let path2 = undefined;
+                    tk.p('Settings', 'bold', menu);
+                    tk.p('Only type URLs you trust.', undefined, menu);
+                    const check = await fs.read('/system/appurl');
+                    const name = tk.c('input', menu, 'i1');
+                    name.placeholder = "Custom App Store repo";
+                    if (check) {
+                        name.value = check;
+                    }
+                    tk.cb('b1', `Cancel`, function () {
+                        ui.dest(menu);
+                    }, menu);
+                    tk.cb('b1', `Reset`, function () {
+                        sys.appurl = `https://appmarket.meower.xyz/refresh`;
+                        fs.del('/system/appurl');
+                        ui.dest(menu);
+                        wm.snack('Reset repo to defaults');
+                    }, menu);
+                    tk.cb('b1', `Save`, async function () {
+                        if (name.value !== "") {
+                            fs.write('/system/appurl', name.value);
+                            sys.appurl = name.value;
+                            wm.snack('Saved');
+                        } else {
+                            wm.snack('Fill out inputs');
+                        }
+                        ui.dest(menu);
                     }, menu);
                 }, apps);
             }

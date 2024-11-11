@@ -248,6 +248,15 @@ p {
     opacity: 50%;
 }
 
+.conticon {
+    width: 30px;
+    height: 30px;
+    margin: 1px;
+    border-radius: var(--rad3);
+    background-color: var(--ui3);
+    border: none;
+}
+
 .red {
     background-color: rgb(255, 59, 48);
 }
@@ -798,7 +807,11 @@ p {
 }
 
 .mesent {
-    background-color: rgba(var(--acc), 0.3);
+    text-align: right;
+}
+
+.othersent {
+    text-align: left;
 }
 
 .width {
@@ -968,7 +981,7 @@ a:active {
     padding: 0px;
     border-radius: 14px;
     background-color: #1f1f1f;
-    box-shadow: #4a4a4a 0px 0px 200px 40px;
+    box-shadow: #191919 0px 0px 400px 80px;
 }
 
 .webcomm {

@@ -341,6 +341,9 @@ var tk = {
                 maximizeButton.addEventListener('mousedown', function () {
                     wm.max(windowDiv);
                 });
+                titlebarDiv.addEventListener('dblclick', function () {
+                    wm.max(windowDiv);
+                });
             }
             winbtns.appendChild(maximizeButton);
         }
