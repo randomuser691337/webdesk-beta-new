@@ -120,7 +120,6 @@ p {
     margin: 3px;
     font-family: 'Poppins', Arial;
     font-size: var(--fz1);
-    filter: invert(var(--inv));
 }
 
 @media (max-width:400px) {
@@ -197,7 +196,7 @@ p {
 }
 
 .content {
-    padding: 10px;
+    padding: 11px;
 }
 
 .tb {
@@ -249,12 +248,28 @@ p {
 }
 
 .conticon {
-    width: 30px;
-    height: 30px;
+    width: 36px;
+    height: 36px;
     margin: 1px;
     border-radius: var(--rad3);
-    background-color: var(--ui3);
+    background-color: rgba(var(--acc), 0.4);
     border: none;
+    padding: 6px;
+    transition: 0.08s;
+}
+
+.conticon:hover {
+    box-shadow: rgba(0, 0, 0, 0.2) 0px 0px 20px 4px;
+    background-color: rgba(var(--acc), 0.6);
+}
+
+.conticon:active {
+    background-color: rgba(var(--acc), 0.45);
+    transform: scale(0.9);
+}
+
+.contimg {
+    filter: invert(var(--inv));
 }
 
 .red {
@@ -343,6 +358,29 @@ p {
     background-color: rgba(var(--acc), 0.5);
 }
 
+.b1t {
+    background-color: transparent;
+    border-radius: var(--rad2);
+    font-size: var(--fz1);
+    padding: 4px 7px;
+    margin: 1px;
+    transition: 0.06s ease-in-out;
+    cursor: pointer;
+    border: 2px solid transparent;
+    color: var(--font);
+}
+
+.b1t:hover {
+    box-shadow: rgba(0, 0, 0, 0.1) 0px 0px 20px 4px;
+    border: 2px solid rgba(var(--acc), 0.2);
+    background-color: rgba(var(--acc), 0.15);
+}
+
+.b1t:active {
+    transform: scale(0.9);
+    background-color: rgba(var(--acc), 0.25);
+}
+
 .b3 {
     padding: 2px 4px;
     border-radius: 8px;
@@ -403,6 +441,7 @@ p {
 }
 
 @media (max-width:1030px) {
+
     .circle,
     .circle2 {
         width: 35vw !important;
@@ -666,7 +705,7 @@ p {
     width: 100%;
     box-sizing: border-box;
     border: 1px solid var(--bordercolor);
-    padding: 7px;
+    padding: 8px;
     border-radius: var(--rad2);
     margin-bottom: 2px;
     margin-top: 2px;
@@ -675,13 +714,13 @@ p {
 }
 
 .list {
-    padding: 7px;
+    padding: 8px;
     background-color: var(--ui2);
     border-radius: var(--rad2);
     width: 100%;
     box-sizing: border-box;
-    margin-bottom: 5px;
-    margin: 1px;
+    margin-bottom: 3px;
+    margin-top: 3px;
 }
 
 .rb {
@@ -844,7 +883,7 @@ p {
 .nest {
     background-color: var(--ui2);
     resize: none !important;
-    padding: 6px;
+    padding: 7px;
     overflow: auto !important;
 }
 
@@ -963,7 +1002,7 @@ a:active {
 
 .lockscreen {
     position: fixed;
-    left: 0px; 
+    left: 0px;
     right: 0px;
     top: 0px;
     bottom: 0px;
@@ -991,7 +1030,8 @@ a:active {
 }
 
 .uul {
-    text-align: left !important; margin: 0px;
+    text-align: left !important;
+    margin: 0px;
 }
 
 .dash {

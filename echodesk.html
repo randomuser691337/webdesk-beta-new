@@ -119,7 +119,7 @@
         if (sd && !migcheck && boot === false) {
             boot = true;
             const [
-                darkpref, lightdark, color, font, dev, mob, city, clocksec, apprepo
+                darkpref, lightdark, color, font, dev, mob, city, clocksec, apprepo, filtering
             ] = await Promise.all([
                 fs.read('/user/info/lightdarkpref'),
                 fs.read('/user/info/lightdark'),
@@ -129,7 +129,8 @@
                 fs.read('/user/info/mobile'),
                 fs.read('/user/info/location.json'),
                 fs.read('/user/info/clocksec'),
-                fs.read('/system/appurl')
+                fs.read('/system/appurl'),
+                fs.read('/user/info/filter')
             ]);
 
             if (clocksec === "true") {
@@ -159,6 +160,11 @@
             } else {
                 wd.wetter();
             }
+
+            if (filtering === "true") {
+                sys.filter = true;
+            }
+
             if (dev === "true") {
                 sys.dev = true;
                 wm.notif(`Developer Mode is enabled.`);

@@ -231,6 +231,19 @@ var app = {
                 wd.smft();
                 fs.write('/user/info/font', 'small');
             }, p2);
+            const p3 = tk.c('div', accPane, 'list');
+            const ok3 = tk.c('span', p3);
+            ok3.innerHTML = `SFW mode (Filters text before it's seen to help stop things like <a href="https://www.gaggle.net/" target="_blank">this</a>)`;
+            tk.cb('b3', 'On', async function () {
+                sys.filter = true;
+                fs.write('/user/info/filter', 'true');
+                wm.notif('SFW mode on!', `WebDesk browser isn't filtered, along with anything that isn't text. Already shown text won't be filtered.`);
+            }, p3);
+            tk.cb('b3', 'Off', function () {
+                sys.filter = false;
+                fs.del('/user/info/filter');
+                wm.snack('SFW mode turned off');
+            }, p3);
             tk.cb('b1', 'Back', () => ui.sw2(accPane, mainPane), accPane);
             // App pane
             tk.cb('b1', 'Remove All', () => wm.wal(`<p>Warning: Removing all App Market apps will cause a reboot and delete them, but their data will remain.</p>`, async function () {
@@ -1171,17 +1184,17 @@ var app = {
                         buttons.map(async ({ btn, deskid, deskid2 }) => {
                             try {
                                 await ptp.getname(deskid);
-                                btn.innerText = btn.innerText.slice(0, -9) + " | Online";
+                                btn.innerText = ui.filter(btn.innerText.slice(0, -9) + " | Online");
                             } catch (error) {
                                 if (deskid2 !== undefined) {
                                     try {
                                         await ptp.getname(deskid);
-                                        btn.innerText = btn.innerText.slice(0, -9) + " | Online";
+                                        btn.innerText = ui.filter(btn.innerText.slice(0, -9) + " | Online");
                                     } catch (error) {
-                                        btn.innerText = btn.innerText.slice(0, -10) + " | Offline";
+                                        btn.innerText = ui.filter(btn.innerText.slice(0, -10) + " | Offline");
                                     }
                                 } else {
-                                    btn.innerText = btn.innerText.slice(0, -10) + " | Offline";
+                                    btn.innerText = ui.filter(btn.innerText.slice(0, -10) + " | Offline");
                                 }
                             }
                         })
@@ -1250,7 +1263,7 @@ var app = {
                     if (msg && otherid) {
                         custf(otherid, 'Message-WebKey', msg);
                         wc.sendmsg = tk.c('div', wc.chatting, 'msg mesent');
-                        wc.sendmsg.innerText = `${sys.name}: ` + msg;
+                        wc.sendmsg.innerText = ui.filter(`${sys.name}: ` + msg);
                         wc.sendmsg.style.marginBottom = "3px";
                         wc.messagein.value = '';
                         wc.chatting.scrollTop = wc.chatting.scrollHeight;
@@ -1275,7 +1288,7 @@ var app = {
                         clearInterval(checkDeskAndChat);
                         const msg = tk.c('div', wc.chatting, 'flist othersent');
                         msg.style.marginBottom = "3px";
-                        msg.innerText = `${name}: ` + chat;
+                        msg.innerText = ui.filter(`${name}: ` + chat);
                         wc.chatting.scrollTop = wc.chatting.scrollHeight;
                         resolve();
                     }

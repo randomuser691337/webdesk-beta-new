@@ -139,31 +139,7 @@ var wd = {
                 tk.p(`Controls`, 'h2', el.cc);
                 tk.p(`Your DeskID is ${sys.deskid}`, undefined, el.cc);
                 const ok = tk.c('div', el.cc, 'embed nest');
-                const addicon = tk.c('button', ok, 'conticon');
-                tk.img('/assets/img/icons/plus.svg', undefined, addicon);
-                tk.cb('b3 b2', 'Sleep', function () {
-                    app.lockscreen.init();
-                }, ok);
-                if (sys.guest === false && sys.echodesk === false) {
-                    tk.cb('b3 b2', 'Deep Sleep', function () {
-                        const menu = tk.c('div', document.body, 'cm');
-                        // tk.img('./assets/img/icons/sleep.svg', 'setupi', menu);
-                        tk.p('Deep Sleep', 'bold', menu);
-                        tk.p(`Your DeskID will work as normal, and WebDesk will use little resources. Save your work before entering.`, undefined, menu);
-                        tk.cb('b1', 'Close', () => ui.dest(menu), menu); tk.cb('b1', 'Enter', async function () {
-                            await fs.write('/system/eepysleepy', 'true');
-                            await wd.reboot();
-                        }, menu);
-                    }, ok);
-                }
-                tk.cb('b3 b2', 'Reboot/Reload', function () {
-                    wd.reboot();
-                }, ok);
-                tk.cb('b3 b2', 'Toggle Fullscreen', function () {
-                    wd.fullscreen();
-                    controlcenter();
-                }, ok);
-                tk.cb('b3 b2', 'Add File', function () {
+                const addicon = tk.cb('conticon', '', function () {
                     const input = document.createElement('input');
                     input.type = 'file';
                     input.style.display = 'none';
@@ -184,6 +160,36 @@ var wd = {
                     input.click();
                     controlcenter();
                 }, ok);
+                tk.img('/assets/img/icons/plus.svg', 'contimg', addicon, false);
+                const sleepicon = tk.cb('conticon', '', function () {
+                    app.lockscreen.init();
+                    controlcenter();
+                }, ok);
+                tk.img('/assets/img/icons/moon.svg', 'contimg', sleepicon, false);
+                const screenicon = tk.cb('conticon', '', function () {
+                    wd.fullscreen();
+                }, ok);
+                tk.img('/assets/img/icons/fs.svg', 'contimg', screenicon, false);
+                const setticon = tk.cb('conticon', '', function () {
+                    app.settings.init();
+                    controlcenter();
+                }, ok);
+                tk.img('/assets/img/icons/settings.svg', 'contimg', setticon, false);
+                if (sys.guest === false && sys.echodesk === false) {
+                    const yeah = tk.cb('b3 b2', 'Deep Sleep', function () {
+                        const menu = tk.c('div', document.body, 'cm');
+                        tk.p('Deep Sleep', 'bold', menu);
+                        tk.p(`Your DeskID will work as normal, and WebDesk will use little resources. Save your work before entering.`, undefined, menu);
+                        tk.cb('b1', 'Close', () => ui.dest(menu), menu); tk.cb('b1', 'Enter', async function () {
+                            await fs.write('/system/eepysleepy', 'true');
+                            await wd.reboot();
+                        }, menu);
+                    }, ok);
+                    yeah.style.marginTop = "3px";
+                }
+                tk.cb('b3 b2', 'Reboot/Reload', function () {
+                    wd.reboot();
+                }, ok);
             } else {
                 ui.dest(el.cc, 150);
                 el.cc = undefined;
@@ -195,7 +201,7 @@ var wd = {
             const titletb = tk.c('div', el.taskbar, 'title');
             const start = tk.cb('b1', 'Apps', () => startmenu(), lefttb);
             el.tr = tk.c('div', lefttb);
-            tk.cb('b1 time', '--:--', () => controlcenter(), titletb);
+            tk.cb('b1t time', '--:--', () => controlcenter(), titletb);
             if (sys.mob === true) {
                 el.taskbar.style.boxShadow = "none";
             }
@@ -241,6 +247,7 @@ var wd = {
         ui.cv('ui3', '#2b2b2b');
         ui.cv('bc', 'rgb(60, 60, 60, 0.4)');
         ui.cv('font', '#fff');
+        ui.cv('inv', '1.0');
         if (fucker !== "nosave") {
             fs.write('/user/info/lightdark', 'dark');
         }
@@ -252,6 +259,7 @@ var wd = {
         ui.cv('ui3', '#ededed');
         ui.cv('bc', 'rgb(220, 220, 220, 0.4)');
         ui.cv('font', '#000');
+        ui.cv('inv', '0');
         if (fucker !== "nosave") {
             fs.write('/user/info/lightdark', 'light');
         }
@@ -263,6 +271,7 @@ var wd = {
         ui.cv('ui3', 'rgba(var(--accent) 0.2)');
         ui.cv('bc', 'rgb(255, 255, 255, 0)');
         ui.cv('font', '#000');
+        ui.cv('inv', '0');
         if (fucker !== "nosave") {
             fs.write('/user/info/lightdark', 'clear');
         }

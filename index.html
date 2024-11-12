@@ -44,6 +44,7 @@
         echodesk: false,
         resume: undefined,
         appurl: `https://appmarket.meower.xyz/refresh`,
+        filter: false,
     }
 
     var el = {
@@ -129,7 +130,7 @@
                 window.location.reload();
             }
             const [
-                darkpref, lightdark, color, font, dev, mob, city, clocksec, apprepo
+                darkpref, lightdark, color, font, dev, mob, city, clocksec, apprepo, filtering
             ] = await Promise.all([
                 fs.read('/user/info/lightdarkpref'),
                 fs.read('/user/info/lightdark'),
@@ -139,7 +140,8 @@
                 fs.read('/user/info/mobile'),
                 fs.read('/user/info/location.json'),
                 fs.read('/user/info/clocksec'),
-                fs.read('/system/appurl')
+                fs.read('/system/appurl'),
+                fs.read('/user/info/filter')
             ]);
 
             if (clocksec === "true") {
@@ -182,6 +184,10 @@
                 app.lockscreen.init();
                 await wd.chokehold();
                 wakelockgo();
+            }
+
+            if (filtering === "true") {
+                sys.filter = true;
             }
 
             if (dev === "true") {
@@ -311,7 +317,6 @@
                 const reader = new FileReader();
                 reader.onload = async function (e) {
                     const contents = e.target.result;
-                    console.log(file.name);
                     await fs.write(`/user/files/${file.name}`, contents);
                     app.files.init('/user/files/');
                 };
