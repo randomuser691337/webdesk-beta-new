@@ -268,6 +268,9 @@ var app = {
             const locp = tk.p(`<span class="bold">Location</span> `, undefined, ok.main);
             const locps = tk.c('span', locp);
             locps.innerText = sys.city;
+            const upp = tk.p(`<span class="bold">Updated </span> `, undefined, ok.main);
+            const upps = tk.c('span', upp);
+            upps.innerText = wd.timec(sys.loclast);
             const degp = tk.p(`<span class="bold">Measurement</span> `, undefined, ok.main);
             const degps = tk.c('span', degp);
             degps.innerText = `${sys.unit} (${sys.unitsym})`;

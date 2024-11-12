@@ -185,7 +185,7 @@ var wd = {
                             await wd.reboot();
                         }, menu);
                     }, ok);
-                    yeah.style.marginTop = "3px";
+                    yeah.style.marginTop = "2px";
                 }
                 tk.cb('b3 b2', 'Reboot/Reload', function () {
                     wd.reboot();

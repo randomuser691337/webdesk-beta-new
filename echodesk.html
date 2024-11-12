@@ -13,7 +13,7 @@
 </head>
 <script>
     var abt = {
-        lastmod: "Nov 11, 2024",
+        lastmod: "Nov 12, 2024",
         ver: "0.2.0",
     }
 
@@ -43,6 +43,7 @@
         seconds: false,
         echodesk: true,
         appurl: `https://appmarket.meower.xyz/refresh`,
+        loclast: Date.now(),
     }
     var el = {
         taskbar: undefined,
@@ -157,6 +158,7 @@
                 } else {
                     sys.defaultloc = false;
                 }
+                sys.loclast = ok.lastupdate;
             } else {
                 wd.wetter();
             }
