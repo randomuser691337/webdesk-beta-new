@@ -75,6 +75,39 @@ var wm = {
             }
         }
     },
+    min: function (wid, btn) {
+        if (wid) {
+            const $animatedDiv = $(wid);
+            const $button = $(btn);
+            if (!$animatedDiv.data('originalPosition')) {
+                $animatedDiv.data('originalPosition', {
+                    top: $animatedDiv.offset().top,
+                    left: $animatedDiv.offset().left,
+                });
+            }
+            const isMinimized = wid.classList.toggle('minimized');
+            if (isMinimized) {
+                const endOffset = $button.offset();
+                $animatedDiv.animate({
+                    top: endOffset.top,
+                    left: endOffset.left,
+                    opacity: 0,
+                }, 150, function () {
+                    $animatedDiv.hide();
+                });
+                
+            } else {
+                const original = $animatedDiv.data('originalPosition');
+                $animatedDiv.show().css({
+                    top: original.top,
+                    left: original.left,
+                    opacity: 0,
+                }).animate({
+                    opacity: 1
+                }, 150);
+            }
+        }
+    },         
     mini: function (window) {
         hidef(window, 120);
     },

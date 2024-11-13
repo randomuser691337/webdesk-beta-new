@@ -10,8 +10,8 @@
     --ui3: #ededed;
     --bc: rgb(220, 220, 220, 0.4);
     --font: #000;
-    --bl1: 10px;
-    --bl2: 7px;
+    --bl1: 8px;
+    --bl2: 5px;
     --rad1: 16px;
     --rad2: 12px;
     --rad3: 10px;
@@ -63,6 +63,7 @@ body {
     font-family: 'Poppins', Arial;
     text-align: center;
     font-size: var(--fz1);
+    overflow: hidden;
 }
 
 .bold {

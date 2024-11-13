@@ -1331,17 +1331,17 @@ var app = {
             const color = await fs.read('/user/info/color');
             tk.p(`WebDesk ${abt.ver}`, 'h2', info);
             tk.p(`<span class="bold">Updated</span> ${abt.lastmod}`, undefined, info);
+            if (setupon) {
+                const fucker = wd.timed(Number(setupon));
+                const seo = tk.p(`<span class="bold">Set up on</span> `, undefined, info);
+                const seos = tk.c('span', seo);
+                seos.innerText = fucker;
+            }
             tk.p(`<span class="bold">DeskID</span> ${sys.deskid}`, undefined, info);
             if (ogver) {
                 const ogv = tk.p(`<span class="bold">Set up with </span> `, undefined, info);
                 const ogvs = tk.c('span', ogv);
                 ogvs.innerText = ogver;
-            }
-            if (setupon) {
-                const fucker = wd.timec(Number(setupon));
-                const seo = tk.p(`<span class="bold">Creation </span> `, undefined, info);
-                const seos = tk.c('span', seo);
-                seos.innerText = fucker;
             }
             if (sys.dev) {
                 tk.p(`<span class="bold">Dev Mode</span> ` + sys.dev, undefined, info);

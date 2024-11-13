@@ -344,8 +344,7 @@ var tk = {
             shortened = ui.truncater(title, 10);
         }
         const tbn = tk.cb('b1', shortened, function () {
-            ui.show(windowDiv, 120);
-            wd.win(windowDiv);
+            wm.min(windowDiv, tbn);
         }, el.tr);
         if (quit === undefined) {
             closeButton.classList.add('red');
@@ -365,7 +364,7 @@ var tk = {
         if (min === undefined) {
             minimizeButton.classList.add('yel');
             minimizeButton.addEventListener('mousedown', function () {
-                ui.hide(windowDiv, 100);
+                wm.min(windowDiv, tbn);
             });
         }
 
@@ -401,7 +400,7 @@ var tk = {
             wd.win(windowDiv);
         });
         if (sys.mob !== true) {
-            setTimeout(function () { ui.center(windowDiv); }, 15);
+            setTimeout(function () { ui.center(windowDiv); }, 30);
         }
         return { win: windowDiv, main: contentDiv, tbn, title: titlebarDiv, closebtn: closeButton };
     }

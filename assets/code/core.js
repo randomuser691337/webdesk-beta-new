@@ -311,6 +311,29 @@ var wd = {
 
         return `${month} ${day}, ${year}, ${hour}:${minute}${ampm}`;
     },
+    timed: function (id) {
+        const timeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+        const date = new Date(id);
+
+        const options = {
+            year: 'numeric',
+            month: 'short',
+            day: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit',
+            hour12: true,
+            timeZone: timeZone
+        };
+
+        const formatter = new Intl.DateTimeFormat('en-US', options);
+        const formattedParts = formatter.formatToParts(date);
+
+        const month = formattedParts.find(part => part.type === 'month').value;
+        const day = formattedParts.find(part => part.type === 'day').value;
+        const year = formattedParts.find(part => part.type === 'year').value;
+
+        return `${month} ${day}, ${year}`;
+    },
     timecs: function (id) {
         const timeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
         const date = new Date(id);
