@@ -1462,6 +1462,13 @@ var app = {
         init: async function () {
             const win = tk.mbw('Weather', 'auto', 'auto', true, undefined, undefined);
             win.win.style.minWidth = "200px;"
+            /* const canvas = tk.c('canvas', document.body);
+            canvases.snow(canvas);
+            canvas.style.width = "100%";
+            canvas.style.display = "block";
+            win.closebtn.addEventListener('mousedown', function () {
+                ui.dest(canvas);
+            }); */
             if (sys.mob === false) {
                 win.win.style.maxWidth = "330px";
             }
@@ -1475,6 +1482,7 @@ var app = {
                 tk.p(`${sys.city}`, 'bold', skibidi);
                 tk.p(`<span class="bold">Temperature</span> ${info.main.temp}${sys.unitsym}`, undefined, skibidi);
                 tk.p(`<span class="bold">Feels like</span> ${info.main.feels_like}${sys.unitsym}`, undefined, skibidi);
+                tk.p(`<span class="bold">Humidity</span> ${info.main.humidity}%`, undefined, skibidi);
                 tk.p(`<span class="bold">Conditions</span> ${info.weather[0].description}`, undefined, skibidi);
                 tk.p(`Weather data from <a href="https://openweathermap.org", target="_blank">OpenWeatherMap</a>, contact them about incorrect info.`, 'smtxt', skibidi);
                 tk.cb('b1', 'Settings', () => app.locset.init(), skibidi);
@@ -1488,6 +1496,7 @@ var app = {
                     }, skibidi);
                 }
             }
+        
             await refresh();
         }
     },

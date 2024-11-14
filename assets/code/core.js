@@ -301,7 +301,6 @@ var wd = {
 
         const formatter = new Intl.DateTimeFormat('en-US', options);
         const formattedParts = formatter.formatToParts(date);
-
         const month = formattedParts.find(part => part.type === 'month').value;
         const day = formattedParts.find(part => part.type === 'day').value;
         const year = formattedParts.find(part => part.type === 'year').value;
