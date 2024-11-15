@@ -13,7 +13,7 @@
 </head>
 <script>
     var abt = {
-        lastmod: "Nov 14, 2024",
+        lastmod: "Nov 15, 2024",
         ver: "0.2.0",
     }
 
@@ -189,6 +189,12 @@
                 wakelockgo();
             }
 
+            if (mob !== "false") {
+                if (/Mobi|Android/i.test(navigator.userAgent) || mob === "true") {
+                    sys.mob = true;
+                }
+            }
+
             if (filtering === "true") {
                 sys.filter = true;
             }
@@ -197,11 +203,7 @@
                 sys.dev = true;
                 wm.notif(`Developer Mode is enabled.`);
             }
-            if (mob !== "false") {
-                if (/Mobi|Android/i.test(navigator.userAgent) || mob === "true") {
-                    sys.mob = true;
-                }
-            }
+
             if (font === "big") {
                 wd.bgft();
             } else if (font === "small") {

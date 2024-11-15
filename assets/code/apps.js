@@ -233,7 +233,7 @@ var app = {
             }, p2);
             const p3 = tk.c('div', accPane, 'list');
             const ok3 = tk.c('span', p3);
-            ok3.innerHTML = `SFW mode (Filters text before it's seen to help stop things like <a href="https://www.gaggle.net/" target="_blank">this</a>)`;
+            ok3.innerHTML = `SFW mode (Filters text before it's seen to help stop things like <a href="https://www.gaggle.net/" target="_blank">this</a>) `;
             tk.cb('b3', 'On', async function () {
                 sys.filter = true;
                 fs.write('/user/info/filter', 'true');
@@ -651,10 +651,16 @@ var app = {
                 }
             }
             tk.css('./assets/lib/browse.css');
-            const win = tk.mbw(`TextEdit`, '500px', '340px', true);
-            ui.dest(win.title, 0);
-            const tabs = tk.c('div', win.main, 'tabbar d');
-            const btnnest = tk.c('div', tabs, 'tnav');
+            let name;
+            if (readonly === true) {
+                name = "Read-only";
+            } else {
+                name = ui.truncater(path, 24, false);
+            }
+            const win = tk.mbw(name, '500px', '340px');
+            const tabs = tk.c('div', win.main, 'd');
+            tabs.style.flex = "0 0 auto";
+            tabs.appendChild(win.title);
             const editdiv = tk.c('div', win.main, 'browsertab');
             editdiv.style.display = "block";
             editdiv.style.borderRadius = "0px";
@@ -662,19 +668,6 @@ var app = {
             const genit = gen(8);
             editdiv.id = genit;
             const editor = ace.edit(`${genit}`);
-            const fucker = tk.cb('winb red', '', function () {
-                editor.destroy();
-                ui.dest(win.win, 150);
-                ui.dest(win.tbn, 150);
-                clearInterval(colorch);
-            }, btnnest);
-            fucker.style.marginLeft = "6px";
-            tk.cb('winb yel', '', function () {
-                ui.hide(win.win, 150);
-            }, btnnest);
-            tk.cb('winb gre', '', function () {
-                wm.max(win.win);
-            }, btnnest);
             editor.setOptions({
                 fontFamily: "MonoS",
                 fontSize: "var(--fz3)",
@@ -700,14 +693,14 @@ var app = {
             if (readonly !== true) {
                 tk.cb('b4 browserbutton', 'Save', async function () {
                     await save();
-                }, btnnest);
+                }, win.winbtns);
             } else {
                 tk.cb('b4 browserbutton', 'Save As', async function () {
                     const path = await app.files.pick('new', 'Save in new file');
                     const newContents = editor.getValue();
                     fs.write(path, newContents);
                     wm.snack('Saved');
-                }, btnnest);
+                }, win.winbtns);
                 editor.setReadOnly(true);
             }
             tk.cb('b4 browserbutton', 'Menu', async function () {
@@ -742,7 +735,7 @@ var app = {
                         editor.execCommand('redo');
                     }, menu);
                 }
-            }, btnnest);
+            }, win.winbtns);
             tk.cb('b4 browserbutton', 'Run', async function () {
                 const menu = tk.c('div', document.body, 'cm');
                 if (sys.dev === true) {
@@ -758,7 +751,7 @@ var app = {
                 tk.cb('b1', 'Close', function () {
                     ui.dest(menu, 120);
                 }, menu);
-            }, btnnest);
+            }, win.winbtns);
             wd.win();
             if (readonly !== true) {
                 editor.container.addEventListener('keydown', async function (event) {
@@ -1380,7 +1373,7 @@ var app = {
             if (!el.lock) {
                 el.lock = tk.c('div', document.body, 'lockscreen');
                 const clock = tk.c('div', el.lock, 'center');
-                ui.show(el.lock, 400);
+                ui.show(el.lock, 300);
                 const img = tk.img(`https://openweathermap.org/img/wn/10d@2x.png`, 'locki', clock);
                 const p = tk.p('--:--', 'time h2', clock);
                 clock.style.maxWidth = "200px";
@@ -1440,7 +1433,7 @@ var app = {
                 } else {
                     el.lock.addEventListener('mousedown', async () => {
                         const { innerHeight: windowHeight } = window;
-                        el.lock.style.transition = 'transform 0.4s ease';
+                        el.lock.style.transition = 'transform 0.3s ease';
                         el.lock.style.transform = `translateY(-${windowHeight}px)`;
                         await new Promise(resolve => {
                             el.lock.addEventListener('transitionend', function onTransitionEnd() {
@@ -1697,9 +1690,10 @@ var app = {
             }
 
             const win = tk.mbw('Achievements', '300px', 'auto', true, undefined, undefined);
+            win.win.style.maxHeight = "60%";
             tk.p(`WebDesk Achievements`, 'h2', win.main);
             tk.p(`Remember: These are jokes and don't actually do anything`, undefined, win.main);
-            tk.p(`Unlocked <span class="b achcount"></span> achievements`, undefined, win.main);
+            tk.p(`Unlocked <span class="bold achcount"></span> achievements`, undefined, win.main);
             await load();
         },
         unlock: async function (name, content) {

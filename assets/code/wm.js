@@ -75,39 +75,41 @@ var wm = {
             }
         }
     },
-    min: function (wid, btn) {
+    min: async function (wid, btn) {
         if (wid) {
             const $animatedDiv = $(wid);
             const $button = $(btn);
-            if (!$animatedDiv.data('originalPosition')) {
-                $animatedDiv.data('originalPosition', {
+            const isMinimized = wid.classList.toggle('minimized');
+            if (isMinimized) {
+                $animatedDiv.data('originalPOS', {
                     top: $animatedDiv.offset().top,
                     left: $animatedDiv.offset().left,
                 });
-            }
-            const isMinimized = wid.classList.toggle('minimized');
-            if (isMinimized) {
+                const yeah = await ughfine(wid);
+                const mousedownevent = new MouseEvent('mousedown');
+                if (yeah) {
+                    yeah.dispatchEvent(mousedownevent);
+                }
                 const endOffset = $button.offset();
+                $animatedDiv.addClass("windowanim");
                 $animatedDiv.animate({
                     top: endOffset.top,
                     left: endOffset.left,
                     opacity: 0,
-                }, 150, function () {
+                }, 220, function () {
                     $animatedDiv.hide();
                 });
-                
             } else {
-                const original = $animatedDiv.data('originalPosition');
-                $animatedDiv.show().css({
+                const original = $animatedDiv.data('originalPOS');
+                $animatedDiv.removeClass("windowanim");
+                $animatedDiv.show().animate({
                     top: original.top,
                     left: original.left,
-                    opacity: 0,
-                }).animate({
-                    opacity: 1
-                }, 150);
+                    opacity: 1,
+                }, 220);
             }
         }
-    },         
+    },
     mini: function (window) {
         hidef(window, 120);
     },

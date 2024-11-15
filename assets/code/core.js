@@ -32,9 +32,53 @@ async function gens(length) {
     return result.slice(0, length);
 }
 
+var focused = {
+    closebtn: undefined,
+    window: undefined,
+}
+
+function ughfine(targetElement) {
+    const targetZIndex = parseInt(window.getComputedStyle(targetElement).zIndex, 10);
+    if (isNaN(targetZIndex)) return null;
+
+    const elements = document.querySelectorAll(`.window`);
+    let closestElement = null, closestDifference = Infinity;
+
+    elements.forEach((element) => {
+        if (element === targetElement) return;
+        const elementZIndex = parseInt(window.getComputedStyle(element).zIndex, 10);
+        if (isNaN(elementZIndex)) return;
+        const difference = Math.abs(targetZIndex - elementZIndex);
+        if (difference < closestDifference) {
+            closestDifference = difference;
+            closestElement = element;
+        }
+    });
+
+    return closestElement;
+}
+
+document.addEventListener('keydown', async function (event) {
+    if (event.altKey && event.key.toLowerCase() === 'q' && focused.closebtn !== undefined) {
+        event.preventDefault();
+        const yeah = await ughfine(focused.window);
+        if (focused.closebtn) {
+            const mousedownevent = new MouseEvent('mousedown');
+            focused.closebtn.dispatchEvent(mousedownevent);
+            if (yeah) {
+                yeah.dispatchEvent(mousedownevent);
+            }
+        }
+    }
+});
+
 var wd = {
-    win: function (winfocus) {
+    win: function (winfocus, closebtn) {
         if (winfocus) {
+            if (closebtn) {
+                focused.closebtn = closebtn;
+                focused.window = winfocus;
+            }
             var $winfocus = $(winfocus);
             if ($winfocus.length) {
                 var windows = $('.window');
@@ -103,6 +147,10 @@ var wd = {
         ui.dest(tk.g('setuparea'));
         function startmenu() {
             if (el.sm == undefined) {
+                if (el.cc) {
+                    ui.dest(el.cc, 150);
+                    el.cc = undefined;
+                }
                 el.sm = tk.c('div', document.body, 'tbmenu');
                 el.sm.style.width = "200px";
                 el.sm.style.left = "5px";
@@ -131,6 +179,10 @@ var wd = {
         }
         function controlcenter() {
             if (el.cc == undefined) {
+                if (el.sm) {
+                    ui.dest(el.sm, 150);
+                    el.sm = undefined;
+                }
                 el.cc = tk.c('div', document.body, 'tbmenu');
                 el.cc.style.width = "200px";
                 el.cc.style.right = "5px";

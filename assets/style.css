@@ -191,13 +191,22 @@ p {
     -webkit-backdrop-filter: blur(var(--bl1));
     backdrop-filter: blur(var(--bl1));
     resize: both;
-    animation: winanim 0.3s ease;
+    animation: winanim 0.22s ease;
     min-width: 80px;
     min-height: 50px;
 }
 
 .content {
     padding: 11px;
+}
+
+@keyframes scalething {
+    0% { transform: scale(1); }
+    100% { transform: scale(0); }
+}
+
+.windowanim {
+    animation: scalething 0.5s;
 }
 
 .tb {
@@ -804,7 +813,7 @@ p {
     max-width: 360px;
     max-height: 70%;
     z-index: 9998;
-    animation: tb2 0.2s ease-out;
+    animation: tb2 0.2s ease;
     overflow-y: auto !important;
 }
 
