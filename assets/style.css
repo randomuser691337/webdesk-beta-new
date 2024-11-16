@@ -10,8 +10,8 @@
     --ui3: #ededed;
     --bc: rgb(220, 220, 220, 0.4);
     --font: #000;
-    --bl1: 8px;
-    --bl2: 5px;
+    --bl1: 10px;
+    --bl2: 6px;
     --rad1: 16px;
     --rad2: 12px;
     --rad3: 10px;
@@ -181,7 +181,7 @@ p {
 .window {
     position: absolute;
     border-radius: var(--rad1);
-    box-shadow: rgba(0, 0, 0, 0.3) 0px 0px 150px 30px;
+    box-shadow: rgba(0, 0, 0, 0.2) 0px 0px 150px 30px;
     border: 1px solid var(--bc);
     width: auto;
     height: auto;
@@ -191,9 +191,13 @@ p {
     -webkit-backdrop-filter: blur(var(--bl1));
     backdrop-filter: blur(var(--bl1));
     resize: both;
-    animation: winanim 0.22s ease;
+    animation: winanim 0.25s ease;
     min-width: 80px;
     min-height: 50px;
+}
+
+.winf {
+    box-shadow: rgba(0, 0, 0, 0.32) 0px 0px 150px 30px;
 }
 
 .content {
@@ -206,7 +210,7 @@ p {
 }
 
 .windowanim {
-    animation: scalething 0.5s;
+    animation: scalething 0.45s;
 }
 
 .tb {
@@ -798,6 +802,20 @@ p {
     max-width: 85%;
     max-height: 85%;
     overflow: auto !important;
+}
+
+.tooltip {
+    position: fixed;
+    left: 50%;
+    top: 50%;
+    padding: 8px 12px;
+    border-radius: var(--rad1);
+    background-color: var(--ui2);
+    border: 1px solid var(--bc);
+    transform: translate(-50%, -50%);
+    box-shadow: rgba(0, 0, 0, 0.3) 0px 0px 75px 15px;
+    z-index: 9998;
+    max-width: 85%;
 }
 
 .tbmenu {

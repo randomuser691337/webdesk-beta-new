@@ -255,6 +255,27 @@ var ui = {
         } else {
             return inputText;
         }
+    },
+    tooltip: function(element, text) {
+        // Should I tip him, or should I give him my tip?
+        element.addEventListener('mouseover', function () {
+            let stillwater = true;
+            let el = undefined;
+            setTimeout(() => {
+                if (stillwater) {
+                    el = tk.c('div', document.body, 'tooltip');
+                    el.innerText = ui.filter(text);
+                }
+            }, 500);
+            element.addEventListener('mouseout', function handleMouseOut() {
+                stillwater = false;
+                element.removeEventListener('mouseout', handleMouseOut);
+                if (el) {
+                    el.remove();
+                    el = undefined;
+                }
+            });
+        });     
     }
 }
 
@@ -417,9 +438,9 @@ var tk = {
         windowDiv.appendChild(contentDiv);
         document.body.appendChild(windowDiv);
         wd.win();
-        wd.win(windowDiv, closeButton);
+        wd.win(windowDiv, closeButton, minimizeButton);
         windowDiv.addEventListener('mousedown', function () {
-            wd.win(windowDiv, closeButton);
+            wd.win(windowDiv, closeButton, minimizeButton);
         });
         if (sys.mob !== true) {
             setTimeout(function () { ui.center(windowDiv); }, 30);

@@ -651,16 +651,11 @@ var app = {
                 }
             }
             tk.css('./assets/lib/browse.css');
-            let name;
-            if (readonly === true) {
-                name = "Read-only";
-            } else {
-                name = ui.truncater(path, 24, false);
-            }
-            const win = tk.mbw(name, '500px', '340px');
+            const win = tk.mbw('TextEdit', '500px', '340px');
             const tabs = tk.c('div', win.main, 'd');
             tabs.style.flex = "0 0 auto";
             tabs.appendChild(win.title);
+            win.closebtn.style.marginLeft = "2px";
             const editdiv = tk.c('div', win.main, 'browsertab');
             editdiv.style.display = "block";
             editdiv.style.borderRadius = "0px";
@@ -1489,7 +1484,7 @@ var app = {
                     }, skibidi);
                 }
             }
-        
+
             await refresh();
         }
     },
@@ -1520,7 +1515,7 @@ var app = {
         }
     },
     // who made that mess
-    // YOU DID KING
+    // YOU DID KING!
     // 🐦
     // i made the mess!
     appmark: {
@@ -1547,28 +1542,21 @@ var app = {
 
             console.log(`<i> Installing ${apploc}`);
             const apps = await fs.read('/system/apps.json');
-            if (apps) {
-                const ok = await execute(sys.appurl + apploc);
-                const newen = { name: app.name, ver: app.ver, installedon: Date.now(), dev: app.pub, appid: app.appid, exec: '/system/apps/' + app.appid + '.js' };
-                await fs.write('/system/apps/' + app.appid + '.js', ok);
-                const jsondata = JSON.parse(apps);
-                const check = jsondata.some(entry => entry.appid === newen.appid);
-                if (check === true) {
-                    wm.snack('Already installed');
-                } else {
-                    jsondata.push(newen);
-                    if (update === true) {
-                        wm.notif(app.name + ' was updated');
-                    } else {
-                        wm.notif(app.name + ' was installed');
-                    }
-                    fs.write('/system/apps.json', jsondata);
-                }
+            const ok = await execute(sys.appurl + apploc);
+            const newen = { name: app.name, ver: app.ver, installedon: Date.now(), dev: app.pub, appid: app.appid, exec: '/system/apps/' + app.appid + '.js' };
+            await fs.write('/system/apps/' + app.appid + '.js', ok);
+            const jsondata = JSON.parse(apps);
+            const check = jsondata.some(entry => entry.appid === newen.appid);
+            if (check === true) {
+                wm.snack('Already installed');
             } else {
-                const ok = await execute(sys.appurl + apploc);
-                await fs.write('/system/apps.json', [{ name: app.name, ver: app.ver, installedon: Date.now(), dev: app.pub, appid: app.appid, exec: '/system/apps/' + app.appid + '.js' }]);
-                await fs.write('/system/apps/' + app.appid + '.js', ok);
-                wm.notif(`Installed: `, app.name);
+                jsondata.push(newen);
+                if (update === true) {
+                    wm.notif(app.name + ' was updated');
+                } else {
+                    wm.notif(app.name + ' was installed');
+                }
+                fs.write('/system/apps.json', jsondata);
             }
         },
         init: async function () {
@@ -1592,7 +1580,7 @@ var app = {
             tk.p('Welcome to the App Market!', undefined, apps);
             tk.p(`Look for things you might want, all apps have <span class="bold">full access</span> to this WebDesk/it's files. Anything in this store is safe.`, undefined, apps);
             if (sys.dev === true) {
-                tk.cb('b1 b2', 'Sideload', function () {
+                tk.cb('b1', 'Sideload', function () {
                     const menu = tk.c('div', document.body, 'cm');
                     let path2 = undefined;
                     tk.p('Sideload', 'bold', menu);
@@ -1623,7 +1611,7 @@ var app = {
                         }
                     }, menu);
                 }, apps);
-                tk.cb('b1 b2', 'Settings', async function () {
+                tk.cb('b1', 'Settings', async function () {
                     const menu = tk.c('div', document.body, 'cm');
                     let path2 = undefined;
                     tk.p('Settings', 'bold', menu);
@@ -1778,6 +1766,9 @@ var app = {
                                 }, menu);
                             }, notif);
                         });
+                    } else {
+                        await fs.write('/user/info/contactlist.json', '[]');
+                        await load();
                     }
                 } catch (error) {
                     console.log('<!> Contacts shat itself: ', error);
@@ -1822,16 +1813,15 @@ var app = {
         name: 'Browser (beta)',
         init: async function (path2) {
             tk.css('./assets/lib/browse.css');
-            const win = tk.mbw('Browser', '80vw', '82vh', true);
-            ui.dest(win.title, 0);
-
+            const win = tk.mbw('Browser', '70vw', '74vh');
             const tabs = tk.c('div', win.main, 'tabbar d');
             const btnnest = tk.c('div', tabs, 'tnav');
             const okiedokie = tk.c('div', tabs, 'browsertitle');
             const searchbtns = tk.c('div', okiedokie, 'tnav');
-            const searchnest = tk.c('div', tabs, 'title');
+            btnnest.appendChild(win.winbtns);
+            win.closebtn.style.marginLeft = "4px";
+            win.title.remove();
             let thing = [];
-
             let currentTab = tk.c('div', win.main, 'hide');
             let currentBtn = tk.c('div', win.main, 'hide');
             let currentName = tk.c('div', win.main, 'hide');
@@ -1855,7 +1845,7 @@ var app = {
                     currentTab = tab;
                     currentBtn = tabTitle;
                     thing = [...urls];
-                }, btnnest);
+                }, win.winbtns);
                 const tabTitle = tk.c('span', tabBtn);
                 if (ok) {
                     tabTitle.innerText = ok;
@@ -1882,17 +1872,6 @@ var app = {
             }
 
             tk.cb('b4 browserbutton', '+', () => addtab(), searchbtns);
-            const fucker = tk.cb('winb red', '', function () {
-                ui.dest(win.win, 150);
-                ui.dest(win.tbn, 150);
-            }, btnnest);
-            fucker.style.marginLeft = "6px";
-            tk.cb('winb yel', '', function () {
-                ui.hide(win.win, 150);
-            }, btnnest);
-            tk.cb('winb gre', '', function () {
-                wm.max(win.win);
-            }, btnnest);
             tk.cb('b4 browserbutton', '⟳', function () {
                 currentTab.src = currentTab.src;
             }, searchbtns);

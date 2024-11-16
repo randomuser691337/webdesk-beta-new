@@ -391,6 +391,7 @@ async function custf(id, fname2, fblob2) {
 }
 
 // Buggy, do NOT run unless you're testing
+sys.deskidnotif = true;
 async function refreshfriends() {
     if (sys.deskidnotif === true) {
         let data;

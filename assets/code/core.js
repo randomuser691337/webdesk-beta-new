@@ -1,5 +1,22 @@
 // WebDesk 0.2.0
 // Based on Rebuild 7 (wtf)
+(function() {
+    const minimumVersions = { Chrome: 100, Firefox: 100, Safari: 15, Edge: 100, "Internet Explorer": 11 };
+    const ua = navigator.userAgent;
+
+    const browser = 
+        /Chrome\/(\d+)/.exec(ua) ? { name: "Chrome", version: +RegExp.$1 } :
+        /Firefox\/(\d+)/.exec(ua) ? { name: "Firefox", version: +RegExp.$1 } :
+        /Safari\/(\d+)/.exec(ua) && !/Chrome/.test(ua) ? { name: "Safari", version: +RegExp.$1 } :
+        /Edg\/(\d+)/.exec(ua) ? { name: "Edge", version: +RegExp.$1 } :
+        /MSIE (\d+)|rv:(\d+)/.exec(ua) ? { name: "Internet Explorer", version: +(RegExp.$1 || RegExp.$2) } :
+        { name: "Unknown", version: 0 };
+
+    if (minimumVersions[browser.name] && browser.version < minimumVersions[browser.name]) {
+        alert(`Your browser (${browser.name} ${browser.version}) is outdated. Update it, or else WebDesk might experience faults.`);
+    }
+})();
+
 console.log(`<!> You've unlocked the REAL developer mode!`);
 console.log(`<!> For the love of all that is holy, DO NOT, and I mean DO NOT, PASTE ANY CODE IN HERE.`);
 console.log(`<!> If you were told to paste here, you're probably getting scammed.`);
@@ -35,6 +52,7 @@ async function gens(length) {
 var focused = {
     closebtn: undefined,
     window: undefined,
+    minbtn: undefined,
 }
 
 function ughfine(targetElement) {
@@ -45,7 +63,7 @@ function ughfine(targetElement) {
     let closestElement = null, closestDifference = Infinity;
 
     elements.forEach((element) => {
-        if (element === targetElement) return;
+        if (element === targetElement || element.classList.contains('windowanim')) return;
         const elementZIndex = parseInt(window.getComputedStyle(element).zIndex, 10);
         if (isNaN(elementZIndex)) return;
         const difference = Math.abs(targetZIndex - elementZIndex);
@@ -62,22 +80,35 @@ document.addEventListener('keydown', async function (event) {
     if (event.altKey && event.key.toLowerCase() === 'q' && focused.closebtn !== undefined) {
         event.preventDefault();
         const yeah = await ughfine(focused.window);
-        if (focused.closebtn) {
-            const mousedownevent = new MouseEvent('mousedown');
-            focused.closebtn.dispatchEvent(mousedownevent);
-            if (yeah) {
-                yeah.dispatchEvent(mousedownevent);
-            }
+        const mousedownevent = new MouseEvent('mousedown');
+        focused.closebtn.dispatchEvent(mousedownevent);
+        if (yeah) {
+            yeah.dispatchEvent(mousedownevent);
+        }
+    }
+});
+
+document.addEventListener('keydown', async function (event) {
+    if (event.altKey && event.key.toLowerCase() === 'm' && focused.minbtn !== undefined) {
+        event.preventDefault();
+        const yeah = await ughfine(focused.window);
+        const mousedownevent = new MouseEvent('mousedown');
+        focused.minbtn.dispatchEvent(mousedownevent);
+        if (yeah) {
+            yeah.dispatchEvent(mousedownevent);
         }
     }
 });
 
 var wd = {
-    win: function (winfocus, closebtn) {
+    win: function (winfocus, closebtn, minbtn) {
         if (winfocus) {
             if (closebtn) {
                 focused.closebtn = closebtn;
                 focused.window = winfocus;
+            }
+            if (minbtn) {
+                focused.minbtn = minbtn;
             }
             var $winfocus = $(winfocus);
             if ($winfocus.length) {
@@ -213,19 +244,23 @@ var wd = {
                     controlcenter();
                 }, ok);
                 tk.img('/assets/img/icons/plus.svg', 'contimg', addicon, false);
+                ui.tooltip(addicon, 'Add file to WebDesk');
                 const sleepicon = tk.cb('conticon', '', function () {
                     app.lockscreen.init();
                     controlcenter();
                 }, ok);
+                ui.tooltip(sleepicon, 'Puts WebDesk to sleep; apps keep running');
                 tk.img('/assets/img/icons/moon.svg', 'contimg', sleepicon, false);
                 const screenicon = tk.cb('conticon', '', function () {
                     wd.fullscreen();
                 }, ok);
+                ui.tooltip(screenicon, 'Fullscreen toggle');
                 tk.img('/assets/img/icons/fs.svg', 'contimg', screenicon, false);
                 const setticon = tk.cb('conticon', '', function () {
                     app.settings.init();
                     controlcenter();
                 }, ok);
+                ui.tooltip(setticon, 'Opens Settings app');
                 tk.img('/assets/img/icons/settings.svg', 'contimg', setticon, false);
                 if (sys.guest === false && sys.echodesk === false) {
                     const yeah = tk.cb('b3 b2', 'Deep Sleep', function () {
@@ -253,7 +288,8 @@ var wd = {
             const titletb = tk.c('div', el.taskbar, 'title');
             const start = tk.cb('b1', 'Apps', () => startmenu(), lefttb);
             el.tr = tk.c('div', lefttb);
-            tk.cb('b1t time', '--:--', () => controlcenter(), titletb);
+            const contbtn = tk.cb('b1t time', '--:--', () => controlcenter(), titletb);
+            ui.tooltip(contbtn, 'Controls/Control Center');
             if (sys.mob === true) {
                 el.taskbar.style.boxShadow = "none";
             }
@@ -662,7 +698,7 @@ var wd = {
             const div = tk.c('div', win.main, 'embed nest');
             const response = await fetch('./assets/other/changelog.html');
             const tuah = await response.text();
-            div.style.height = "300px";
+            div.style.height = "350px";
             div.innerHTML = tuah;
         }
     },
