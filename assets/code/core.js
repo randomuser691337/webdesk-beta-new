@@ -289,7 +289,6 @@ var wd = {
             const start = tk.cb('b1', 'Apps', () => startmenu(), lefttb);
             el.tr = tk.c('div', lefttb);
             const contbtn = tk.cb('b1t time', '--:--', () => controlcenter(), titletb);
-            ui.tooltip(contbtn, 'Controls/Control Center');
             if (sys.mob === true) {
                 el.taskbar.style.boxShadow = "none";
             }

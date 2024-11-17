@@ -857,7 +857,6 @@ var app = {
                             e.preventDefault();
                             openmenu();
                         });
-
                     } else {
                         if (item.name === "") return;
 

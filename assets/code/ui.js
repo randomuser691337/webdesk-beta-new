@@ -215,7 +215,7 @@ var ui = {
                     'fag', 'faggot', 'dyke', 'tranny', 'shemale', 'homo',
 
                     // Terms related to self-harm or violence
-                    'kill', 'murder', 'suici', 'selfharm', 'cutting', 'worthless', 'hopeless', 'die', 'death', 'harm', 'enditall', 'end it all', 'depress',
+                    'kill', 'murder', 'suici', 'selfharm', 'cutting', 'worthless', 'hopeless', 'die', 'death', 'harm', 'enditall', 'end it all', 'depress', 'sh', 'jump',
 
                     // Sexual harassment and assault
                     'rape', 'rapist', 'molest', 'molester', 'incest', 'pedophile', 'pedo', 'sa', 'philia',
@@ -246,7 +246,7 @@ var ui = {
                             stillwater = false;
                             element.removeEventListener('mouseout', handleMouseOut);
                         });
-                    });                    
+                    });
                     return `[Failed to filter, hover to view at your risk]`;
                 } else {
                     return `[Failed to filter]`
@@ -256,26 +256,60 @@ var ui = {
             return inputText;
         }
     },
-    tooltip: function(element, text) {
+    tooltip: function (element, text) {
         // Should I tip him, or should I give him my tip?
-        element.addEventListener('mouseover', function () {
-            let stillwater = true;
-            let el = undefined;
-            setTimeout(() => {
-                if (stillwater) {
+        let stillwater = true;
+        let el = undefined;
+        if (sys.mob === true) {
+            let isLongPress = false;
+            let timer;
+            element.addEventListener('touchstart', e => {
+                e.preventDefault();
+                isLongPress = false;
+                timer = setTimeout(() => {
+                    isLongPress = true;
                     el = tk.c('div', document.body, 'tooltip');
                     el.innerText = ui.filter(text);
-                }
-            }, 500);
-            element.addEventListener('mouseout', function handleMouseOut() {
-                stillwater = false;
-                element.removeEventListener('mouseout', handleMouseOut);
-                if (el) {
-                    el.remove();
-                    el = undefined;
+                    el.addEventListener('mouseover', function () {
+                        stillwater = false;
+                        el.remove();
+                        el = undefined;
+                    });
+                }, 500);
+            });
+            element.addEventListener('touchend', () => {
+                clearTimeout(timer);
+                if (!isLongPress) {
+                    stillwater = false;
+                    clearTimeout(timer);
+                    element.click();
                 }
             });
-        });     
+            element.addEventListener('touchmove', () => clearTimeout(timer));
+            element.addEventListener('touchcancel', () => clearTimeout(timer));
+        } else {
+            element.addEventListener('mouseover', function () {
+                element.addEventListener('mouseout', function handleMouseOut() {
+                    stillwater = false;
+                    element.removeEventListener('mouseout', handleMouseOut);
+                    if (el) {
+                        el.remove();
+                        el = undefined;
+                    }
+                });
+                setTimeout(() => {
+                    if (stillwater) {
+                        el = tk.c('div', document.body, 'tooltip');
+                        el.innerText = ui.filter(text);
+                        el.addEventListener('mouseover', function () {
+                            stillwater = false;
+                            el.remove();
+                            el = undefined;
+                        });
+                    }
+                }, 500);
+            });
+        }
     }
 }
 
