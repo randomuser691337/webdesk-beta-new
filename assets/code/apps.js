@@ -1521,7 +1521,9 @@ var app = {
         runs: true,
         name: 'App Market',
         create: async function (apploc, app, update) {
+            console.log(apploc, app, update);
             async function execute(url2) {
+                console.log(url2);
                 try {
                     const response = await fetch(url2);
                     if (!response.ok) {

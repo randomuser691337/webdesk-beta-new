@@ -229,6 +229,7 @@ p {
     border-bottom: 1px solid var(--bc);
     transition: 0.05s;
     z-index: 9999;
+    cursor: default !important;
 }
 
 .tnav {
@@ -246,8 +247,8 @@ p {
 }
 
 .winb {
-    width: 14px;
-    height: 14px;
+    width: 13px;
+    height: 13px;
     padding: 0px !important;
     border: none;
     margin-right: 7px;
@@ -287,15 +288,18 @@ p {
 }
 
 .red {
-    background-color: rgb(255, 59, 48);
+    background-color: rgb(237, 106, 95);
+    border: 0.5px solid rgba(164, 74, 65, 0.3);
 }
 
 .yel {
-    background-color: rgb(255, 204, 0);
+    background-color: rgb(245, 191, 79);
+    border: 0.5px solid rgba(169, 132, 54, 0.3);
 }
 
 .gre {
-    background-color: rgb(52, 199, 89);
+    background-color: rgb(98, 198, 84);
+    border: 0.5px solid rgba(68, 137, 58, 0.3);
 }
 
 .setupbar {
