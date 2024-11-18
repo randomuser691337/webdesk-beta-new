@@ -1,16 +1,16 @@
 // WebDesk 0.2.0
 // Based on Rebuild 7 (wtf)
-(function() {
+(function () {
     const minimumVersions = { Chrome: 100, Firefox: 100, Safari: 15, Edge: 100, "Internet Explorer": 11 };
     const ua = navigator.userAgent;
 
-    const browser = 
+    const browser =
         /Chrome\/(\d+)/.exec(ua) ? { name: "Chrome", version: +RegExp.$1 } :
-        /Firefox\/(\d+)/.exec(ua) ? { name: "Firefox", version: +RegExp.$1 } :
-        /Safari\/(\d+)/.exec(ua) && !/Chrome/.test(ua) ? { name: "Safari", version: +RegExp.$1 } :
-        /Edg\/(\d+)/.exec(ua) ? { name: "Edge", version: +RegExp.$1 } :
-        /MSIE (\d+)|rv:(\d+)/.exec(ua) ? { name: "Internet Explorer", version: +(RegExp.$1 || RegExp.$2) } :
-        { name: "Unknown", version: 0 };
+            /Firefox\/(\d+)/.exec(ua) ? { name: "Firefox", version: +RegExp.$1 } :
+                /Safari\/(\d+)/.exec(ua) && !/Chrome/.test(ua) ? { name: "Safari", version: +RegExp.$1 } :
+                    /Edg\/(\d+)/.exec(ua) ? { name: "Edge", version: +RegExp.$1 } :
+                        /MSIE (\d+)|rv:(\d+)/.exec(ua) ? { name: "Internet Explorer", version: +(RegExp.$1 || RegExp.$2) } :
+                            { name: "Unknown", version: 0 };
 
     if (minimumVersions[browser.name] && browser.version < minimumVersions[browser.name]) {
         alert(`Your browser (${browser.name} ${browser.version}) is outdated. Update it, or else WebDesk might experience faults.`);
@@ -705,8 +705,38 @@ var wd = {
         return new Promise(resolve => {
             sys.resume = resolve;
         });
-    }
+    },
+    fontsw: function (normal, medium, bold, mono) {
+        const existingStyle = document.getElementById('dynamic-font');
+        if (existingStyle) {
+            existingStyle.remove();
+        }
 
+        const style = document.createElement('style');
+        style.id = 'dynamic-font';
+        style.innerHTML = `
+        @font-face {
+            font-family: 'Font';
+            src: url(${normal});
+        }
+        
+        @font-face {
+            font-family: 'FontB';
+            src: url(${bold});
+        }
+        
+        @font-face {
+            font-family: 'FontM';
+            src: url(${medium});
+        }
+        
+        @font-face {
+            font-family: 'MonoS';
+            src: url(${mono});
+        }
+        `;
+        document.head.appendChild(style);
+    }
 }
 
 document.addEventListener('visibilitychange', function () {

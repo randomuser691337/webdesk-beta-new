@@ -21,6 +21,7 @@
     --fz4: 12px;
     --inv: 0;
     --wina: 0px;
+    --fontreg: 
 }
 
 #background {
@@ -36,42 +37,22 @@
     transition: 0.02s;
 }
 
-@font-face {
-    font-family: 'Poppins';
-    src: url(./fonts/Poppins-Regular.ttf);
-}
-
-@font-face {
-    font-family: 'PoppinsB';
-    src: url(./fonts/Poppins-Bold.ttf);
-}
-
-@font-face {
-    font-family: 'PoppinsM';
-    src: url(./fonts/Poppins-Medium.ttf);
-}
-
-@font-face {
-    font-family: 'MonoS';
-    src: url(./fonts/mono.ttf);
-}
-
 body {
     background-color: #000;
     animation: fade 0.7s;
     color: var(--font);
-    font-family: 'Poppins', Arial;
+    font-family: 'Font', Arial;
     text-align: center;
     font-size: var(--fz1);
     overflow: hidden;
 }
 
 .bold {
-    font-family: "PoppinsB";
+    font-family: "FontB";
 }
 
 .med {
-    font-family: "PoppinsM";
+    font-family: "FontM";
 }
 
 .smtxt {
@@ -85,7 +66,7 @@ body {
 
 button {
     cursor: pointer;
-    font-family: 'PoppinsM', Arial;
+    font-family: 'FontM', Arial;
     color: var(--font);
 }
 
@@ -119,7 +100,7 @@ button {
 p {
     padding: 0px;
     margin: 3px;
-    font-family: 'Poppins', Arial;
+    font-family: 'Font', Arial;
     font-size: var(--fz1);
 }
 
@@ -344,7 +325,7 @@ p {
 
 .h2 {
     font-size: 20px;
-    font-family: 'PoppinsM', Arial;
+    font-family: 'FontM', Arial;
 }
 
 .b2 {
@@ -643,7 +624,7 @@ p {
     max-width: 100%;
     min-width: 100%;
     box-sizing: border-box;
-    font-family: 'PoppinsM', Arial;
+    font-family: 'FontM', Arial;
     margin-bottom: 2px;
     outline: none;
 }
@@ -657,7 +638,7 @@ p {
     color: var(--fontc);
     width: 100%;
     box-sizing: border-box;
-    font-family: 'PoppinsM', Arial;
+    font-family: 'FontM', Arial;
     margin-bottom: 2px;
     transition: 0.05s;
     outline: none;
@@ -861,7 +842,7 @@ p {
     padding: 4px;
     border: none;
     border-radius: var(--rad2);
-    font-family: 'PoppinsB', Arial;
+    font-family: 'FontB', Arial;
 }
 
 .flist:hover {
@@ -874,7 +855,7 @@ p {
     padding: 4px;
     border: none;
     border-radius: 9px;
-    font-family: 'PoppinsB', Arial;
+    font-family: 'FontB', Arial;
 }
 
 .mesent {
@@ -888,7 +869,7 @@ p {
 .width {
     width: 100%;
     box-sizing: border-box;
-    font-family: 'Poppins', Arial !important;
+    font-family: 'Font', Arial !important;
 }
 
 .flists {
@@ -897,7 +878,7 @@ p {
     padding: 1px;
     border: none;
     border-radius: 9px;
-    font-family: 'PoppinsB', Arial;
+    font-family: 'FontB', Arial;
 }
 
 .embed {

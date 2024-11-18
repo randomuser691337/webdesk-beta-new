@@ -249,7 +249,7 @@ var ui = {
                     });
                     return `[Failed to filter, hover to view at your risk]`;
                 } else {
-                    return `[Failed to filter]`
+                    return `[Failed to filter]`;
                 }
             }
         } else {
@@ -260,9 +260,11 @@ var ui = {
         // Should I tip him, or should I give him my tip?
         let stillwater = true;
         let el = undefined;
+        
         if (sys.mob === true) {
             let isLongPress = false;
             let timer;
+            
             element.addEventListener('touchstart', e => {
                 e.preventDefault();
                 isLongPress = false;
@@ -277,6 +279,7 @@ var ui = {
                     });
                 }, 500);
             });
+            
             element.addEventListener('touchend', () => {
                 clearTimeout(timer);
                 if (!isLongPress) {
@@ -285,34 +288,28 @@ var ui = {
                     element.click();
                 }
             });
+            
             element.addEventListener('touchmove', () => clearTimeout(timer));
             element.addEventListener('touchcancel', () => clearTimeout(timer));
         } else {
-            element.addEventListener('mouseover', function () {
-                element.addEventListener('mouseout', function handleMouseOut() {
-                    stillwater = false;
-                    element.removeEventListener('mouseout', handleMouseOut);
-                    if (el) {
+            element.addEventListener('contextmenu', function (e) {
+                if (stillwater === true) {
+                    e.preventDefault();
+                    function bye() {
+                        el.removeEventListener('mouseover', bye);
+                        element.removeEventListener('mousemove', bye);
                         el.remove();
                         el = undefined;
                     }
-                });
-                setTimeout(() => {
-                    if (stillwater) {
-                        el = tk.c('div', document.body, 'tooltip');
-                        el.innerText = ui.filter(text);
-                        el.addEventListener('mouseover', function () {
-                            stillwater = false;
-                            el.remove();
-                            el = undefined;
-                        });
-                    }
-                }, 500);
+                    el = tk.c('div', document.body, 'tooltip');
+                    el.innerText = ui.filter(text);
+                    el.addEventListener('mouseover', bye);
+                    element.addEventListener('mousemove', bye);
+                }
             });
         }
-    }
+    }    
 }
-
 var tk = {
     c: function (type, ele, classn) {
         const ok = document.createElement(type);
