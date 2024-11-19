@@ -45,6 +45,7 @@
         resume: undefined,
         appurl: `https://appmarket.meower.xyz/refresh`,
         filter: false,
+        nc: false,
         loclast: Date.now(),
     }
 
@@ -198,6 +199,9 @@
 
             if (filtering === "true") {
                 sys.filter = true;
+            } else if (filtering === "nc") {
+                sys.filter = true;
+                sys.nc = true;
             }
 
             if (dev === "true") {

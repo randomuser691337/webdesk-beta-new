@@ -733,8 +733,7 @@ var wd = {
         @font-face {
             font-family: 'MonoS';
             src: url(${mono});
-        }
-        `;
+        }`;
         document.head.appendChild(style);
     }
 }

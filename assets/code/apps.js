@@ -30,7 +30,7 @@ var app = {
                     parsed.forEach((entry) => {
                         const notif = tk.c('div', shitStain, 'notif2');
                         tk.p(entry.name, 'bold', notif);
-                        tk.p(entry.appid, undefined, notif);
+                        tk.ps(`${entry.dev} - Ver ${entry.ver}`, undefined, notif);
                         tk.cb('b3', 'App info', async function () {
                             const ok = tk.c('div', document.body, 'cm');
                             tk.p('App Info', 'h2', ok);
@@ -234,13 +234,21 @@ var app = {
             const p3 = tk.c('div', accPane, 'list');
             const ok3 = tk.c('span', p3);
             ok3.innerHTML = `SFW mode (Filters text before it's seen to help stop things like <a href="https://www.gaggle.net/" target="_blank">this</a>) `;
-            tk.cb('b3', 'On', async function () {
+            tk.cb('b3', 'No chances', async function () {
                 sys.filter = true;
+                sys.nc = true;
+                fs.write('/user/info/filter', 'nc');
+                wm.notif('No chances mode on!', `Text with filtered items simply won't be shown. WebDesk browser isn't filtered, along with anything that's not text. Already shown text won't be filtered.`);
+            }, p3);
+            tk.cb('b3', 'Filter', async function () {
+                sys.filter = true;
+                sys.nc = false;
                 fs.write('/user/info/filter', 'true');
-                wm.notif('SFW mode on!', `WebDesk browser isn't filtered, along with anything that isn't text. Already shown text won't be filtered.`);
+                wm.notif('SFW mode on!', `WebDesk browser isn't filtered, along with anything that's not text. Already shown text won't be filtered.`);
             }, p3);
             tk.cb('b3', 'Off', function () {
                 sys.filter = false;
+                sys.nc = false;
                 fs.del('/user/info/filter');
                 wm.snack('SFW mode turned off');
             }, p3);
@@ -1235,6 +1243,9 @@ var app = {
                 wc.chatting.style.height = "400px";
                 el.currentid = deskid;
                 tk.ps(`Talking with ${name} - ${deskid}`, 'smtxt', wc.chatting);
+                if (sys.filter === true) {
+                    tk.ps(`PLEASE NOTE: Some filters can detect things YOU send, as they monitor what you type.`, 'smtxt', wc.chatting);
+                }
 
                 if (deskid && !chat) {
                     otherid = deskid;
