@@ -94,6 +94,11 @@ var app = {
                     wm.notif('Reboot to apply changes', undefined, () => wd.reboot(), 'Reboot');
                 }, generalPane);
             }
+            if (window.navigator.standalone === true) {
+                tk.cb('b1 b2 red', 'Recalibrate App Bar', function () {
+                    wd.tbcal();
+                }, generalPane);
+            }
             tk.cb('b1 b2 red', 'Enter Recovery Mode', function () {
                 fs.write('/system/migval', 'rec');
                 wd.reboot();
@@ -791,17 +796,55 @@ var app = {
         name: 'Files',
         init: async function () {
             const win = tk.mbw(`Files`, '340px', 'auto', true, undefined, undefined);
-            const breadcrumbs = tk.c('div', win.main);
+            const search = tk.c('input', win.main, 'i1');
+            win.name.innerHTML = "";
+            const breadcrumbs = tk.c('div', win.name);
+            search.style.marginBottom = "5px";
             const items = tk.c('div', win.main);
             if (sys.mobui === true) {
                 items.style.maxHeight = screen.height - 180 + "px";
             } else {
-                items.style.maxHeight = "400px";
+                items.style.maxHeight = "370px";
             }
             items.style.overflow = "auto";
             items.style.borderRadius = "12px";
             items.style.padding = "6px";
             win.main.style.padding = "8px";
+            let items2;
+            search.placeholder = "Search for a file...";
+            search.addEventListener('input', function (event) {
+                const searchText = search.value.toLowerCase();
+                items2.forEach(item => {
+                    const itemText = item.textContent.toLowerCase();
+                    if (itemText.includes(searchText)) {
+                        item.style.display = 'block';
+                    } else {
+                        item.style.display = 'none';
+                    }
+                });
+            });
+            function clr() {
+                items2.forEach(item => {
+                    item.style.display = 'block';
+                });
+                search.value = "";
+            }
+            search.addEventListener('blur', () => {
+                clr();
+            });
+            search.addEventListener('keydown', function (e) {
+                if (e.key === 'Escape') {
+                    clr();
+                }
+            });
+            search.addEventListener('keydown', function (e) {
+                if (e.key === 'Enter') {
+                    const visible = Array.from(items2).filter(item => item.style.display !== 'none');
+                    if (visible.length === 1) {
+                        visible[0].click();
+                    }
+                }
+            });
             var currentPath = undefined;
             let dragoverListener = null;
             let dropListener = null;
@@ -979,6 +1022,7 @@ var app = {
                         fileItem.draggable = true;
                     }
                 });
+                items2 = items.querySelectorAll('.flist');
             }
 
             navto('/user/files/');

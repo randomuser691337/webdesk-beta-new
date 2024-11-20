@@ -274,34 +274,24 @@
                 if (city) {
                     setTimeout(async function () {
                         if (window.navigator.standalone === true) {
-                            el.taskbar.style.borderRadius = "var(--rad1)";
-                            const ok = await readf('/system/standalonepx');
+                            const ok = await fs.read('/system/standalonepx');
+                            let px = 0;
                             if (!ok) {
-                                let px = 0;
-                                const div = tk.c('div', document.body, 'cm');
-                                tk.p('Calibrate WebDesk', 'bold', div);
-                                tk.p('Some devices have rounded screen corners that cut off the app bar.', undefined, div);
-                                tk.p('This tool lets you adjust the positioning of the taskbar.', undefined, div);
-                                tk.p('Tap the Increase or Decrease buttons to move the app bar.', undefined, div);
-                                tk.cb('b1', 'Increase', function () {
-                                    px += 2;
-                                    el.taskbar.style.bottom = px + "px";
-                                    el.taskbar.style.left = px + "px";
-                                    el.taskbar.style.right = px + "px";
-                                }, div);
-                                tk.cb('b1', 'Decrease', function () {
-                                    if (px !== 0) {
-                                        px -= 2;
-                                        el.taskbar.style.bottom = px + "px";
-                                        el.taskbar.style.left = px + "px";
-                                        el.taskbar.style.right = px + "px";
-                                    }
-                                }, div);
+                                wd.tbcal();
+                            } else {
+                                px = ok;
+                                if (px !== 0) {
+                                    el.taskbar.style.borderRadius = "var(--rad1)";
+                                }
+                                el.taskbar.style.bottom = px + "px";
+                                el.taskbar.style.left = px + "px";
+                                el.taskbar.style.right = px + "px";
                             }
+                        } else {
+                            setTimeout(wd.hawktuah, 200);
                         }
                     }, 300);
                 }
-                setTimeout(wd.hawktuah, 200);
             } else {
                 await fs.write('/system/apps.json', '[]');
             }

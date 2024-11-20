@@ -99,10 +99,15 @@ document.addEventListener('keydown', async function (event) {
         event.preventDefault();
         app.lockscreen.init();
     }
+    if (event.altKey && event.key.toLowerCase() === 'r' && focused.window !== undefined) {
+        event.preventDefault();
+        ui.center(focused.window);
+    }
     if (event.altKey && event.key.toLowerCase() === '/') {
         event.preventDefault();
         const keys = tk.c('div', document.body, 'cm');
         tk.p('Keybinds', 'bold', keys);
+        tk.p('<span class="bold">Alt+R</span> Center focused window', undefined, keys);
         tk.p('<span class="bold">Alt+Q</span> Closes focused window', undefined, keys);
         tk.p('<span class="bold">Alt+M</span> Hides focused window', undefined, keys);
         tk.p('<span class="bold">Alt+L</span> Locks/sleeps WebDesk', undefined, keys);
@@ -746,6 +751,36 @@ var wd = {
             src: url(${mono});
         }`;
         document.head.appendChild(style);
+    },
+    tbcal: function () {
+        let px = 0;
+        const div = tk.c('div', document.body, 'cm');
+        tk.p('Calibrate app bar', 'bold', div);
+        tk.p('Some devices have rounded corners that cut off the app bar.', undefined, div);
+        tk.p('This tool lets you adjust the positioning of the taskbar.', undefined, div);
+        tk.p('Tap the Increase or Decrease buttons to move the app bar.', undefined, div);
+        tk.cb('b1 b2', 'Done', async function () {
+            ui.dest(div);
+            if (ui.px !== 0) {
+                el.taskbar.style.borderRadius = "var(--rad1)";
+            }
+        }, div);
+        tk.cb('b1', 'Increase', async function () {
+            px += 2;
+            el.taskbar.style.bottom = px + "px";
+            el.taskbar.style.left = px + "px";
+            el.taskbar.style.right = px + "px";
+            await fs.write('/system/standalonepx', px);
+        }, div);
+        tk.cb('b1', 'Decrease', async function () {
+            if (px !== 0) {
+                px -= 2;
+                el.taskbar.style.bottom = px + "px";
+                el.taskbar.style.left = px + "px";
+                el.taskbar.style.right = px + "px";
+                await fs.write('/system/standalonepx', px);
+            }
+        }, div);
     }
 }
 
