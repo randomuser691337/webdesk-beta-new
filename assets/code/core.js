@@ -13,7 +13,7 @@
                             { name: "Unknown", version: 0 };
 
     if (minimumVersions[browser.name] && browser.version < minimumVersions[browser.name]) {
-        alert(`Your browser (${browser.name} ${browser.version}) is outdated. Update it, or else WebDesk might experience faults.`);
+        alert(`Your browser (${browser.name} ${browser.version}) is outdated. Update it, or else WebDesk might not work right.`);
     }
 })();
 
@@ -86,9 +86,6 @@ document.addEventListener('keydown', async function (event) {
             yeah.dispatchEvent(mousedownevent);
         }
     }
-});
-
-document.addEventListener('keydown', async function (event) {
     if (event.altKey && event.key.toLowerCase() === 'm' && focused.minbtn !== undefined) {
         event.preventDefault();
         const yeah = await ughfine(focused.window);
@@ -97,6 +94,20 @@ document.addEventListener('keydown', async function (event) {
         if (yeah) {
             yeah.dispatchEvent(mousedownevent);
         }
+    }
+    if (event.altKey && event.key.toLowerCase() === 'l') {
+        event.preventDefault();
+        app.lockscreen.init();
+    }
+    if (event.altKey && event.key.toLowerCase() === '/') {
+        event.preventDefault();
+        const keys = tk.c('div', document.body, 'cm');
+        tk.p('Keybinds', 'bold', keys);
+        tk.p('<span class="bold">Alt+Q</span> Closes focused window', undefined, keys);
+        tk.p('<span class="bold">Alt+M</span> Hides focused window', undefined, keys);
+        tk.p('<span class="bold">Alt+L</span> Locks/sleeps WebDesk', undefined, keys);
+        tk.p('<span class="bold">Alt+/</span> View keybinds', undefined, keys);
+        tk.cb('b1', 'Close', () => ui.dest(keys), keys);
     }
 });
 
@@ -126,7 +137,7 @@ var wd = {
 
         $('.d').not('.dragged').on('mousedown touchstart', function (event) {
             var $window = $(this).closest('.window');
-            if (!$window.hasClass('max') && sys.mob !== true) {
+            if (!$window.hasClass('max') && sys.mobui !== true) {
                 var offsetX, offsetY;
                 var windows = $('.window');
                 var highestZIndex = Math.max.apply(null, windows.map(function () {
@@ -289,7 +300,7 @@ var wd = {
             const start = tk.cb('b1', 'Apps', () => startmenu(), lefttb);
             el.tr = tk.c('div', lefttb);
             const contbtn = tk.cb('b1t time', '--:--', () => controlcenter(), titletb);
-            if (sys.mob === true) {
+            if (sys.mobui === true) {
                 el.taskbar.style.boxShadow = "none";
             }
         }
@@ -329,10 +340,10 @@ var wd = {
         }, 200);
     },
     dark: function (fucker) {
-        ui.cv('ui1', 'rgb(45, 45, 45, 0.6)');
+        ui.cv('ui1', 'rgb(45, 45, 45, 0.5)');
         ui.cv('ui2', '#1b1b1b');
         ui.cv('ui3', '#2b2b2b');
-        ui.cv('bc', 'rgb(60, 60, 60, 0.4)');
+        ui.cv('bc', 'rgb(52, 52, 52, 0.4)');
         ui.cv('font', '#fff');
         ui.cv('inv', '1.0');
         if (fucker !== "nosave") {
@@ -341,7 +352,7 @@ var wd = {
         ui.light = false;
     },
     light: function (fucker) {
-        ui.cv('ui1', 'rgb(255, 255, 255, 0.6)');
+        ui.cv('ui1', 'rgb(255, 255, 255, 0.5)');
         ui.cv('ui2', '#ffffff');
         ui.cv('ui3', '#ededed');
         ui.cv('bc', 'rgb(220, 220, 220, 0.4)');

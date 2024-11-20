@@ -5,7 +5,7 @@
     --bg2: #aaccff;
     --accent: 0, 60, 255;
     --acc: var(--accent);
-    --ui1: rgb(255, 255, 255, 0.6);
+    --ui1: rgb(255, 255, 255, 0.4);
     --ui2: #ffffff;
     --ui3: #ededed;
     --bc: rgb(220, 220, 220, 0.4);
@@ -269,18 +269,18 @@ p {
 }
 
 .red {
-    background-color: rgb(237, 106, 95);
-    border: 0.5px solid rgba(164, 74, 65, 0.3);
+    background-color: rgb(255, 59, 48);
+    border: 1px solid rgba(204, 47, 38, 0.4);
 }
 
 .yel {
-    background-color: rgb(245, 191, 79);
-    border: 0.5px solid rgba(169, 132, 54, 0.3);
+    background-color: rgb(255, 204, 0);
+    border: 1px solid rgba(204, 163, 0, 0.4);
 }
 
 .gre {
-    background-color: rgb(98, 198, 84);
-    border: 0.5px solid rgba(68, 137, 58, 0.3);
+    background-color: rgb(52, 199, 89);
+     border: 1px solid rgba(41, 159, 71, 0.4);
 }
 
 .setupbar {
@@ -383,7 +383,7 @@ p {
 .b3 {
     padding: 2px 4px;
     border-radius: 8px;
-    background-color: rgba(var(--accent), 0.35);
+    background-color: rgba(var(--accent), 0.38);
     font-size: var(--fz2);
     border: 2px solid transparent;
     cursor: pointer;
@@ -416,7 +416,7 @@ p {
 .b4 {
     padding: 1px 3px;
     border-radius: 8px;
-    background-color: rgba(var(--accent), 0.25);
+    background-color: rgba(var(--accent), 0.28);
     font-size: var(--fz4);
     border: 1px solid transparent;
     cursor: pointer;
@@ -425,7 +425,7 @@ p {
 }
 
 .b4:hover {
-    border: 1px solid rgba(var(--accent), 0.35);
+    border: 1px solid rgba(var(--accent), 0.38);
 }
 
 .b4:active {
@@ -746,7 +746,7 @@ p {
     animation: tb 0.6s ease;
     backdrop-filter: blur(var(--bl2));
     -webkit-backdrop-filter: blur(var(--bl2));
-    z-index: 3;
+    z-index: 9990;
     overflow-x: auto !important;
     white-space: nowrap;
     border-top: 1px solid var(--bc);
@@ -930,7 +930,7 @@ p {
     border-radius: var(--rad1);
     background-color: var(--ui2);
     z-index: 9999;
-    animation: snack 0.5s ease-in-out;
+    animation: snack 0.4s ease-in-out;
     box-shadow: rgba(0, 0, 0, 0.2) 0px 0px 75px 15px;
 }
 
@@ -1033,7 +1033,7 @@ a:active {
     margin: 0px;
     padding: 0px;
     border-radius: 14px;
-    background-color: #1f1f1f;
+    background-color: #1d1d1d;
     box-shadow: #191919 0px 0px 400px 80px;
 }
 

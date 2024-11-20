@@ -414,7 +414,7 @@ var tk = {
         var windowDiv = document.createElement('div');
         windowDiv.classList.add('window');
         var titlebarDiv = tk.c('div', undefined, 'd tb');
-        if (sys.mob !== true) {
+        if (sys.mobui !== true) {
             windowDiv.style.width = wid;
             windowDiv.style.height = hei;
             windowDiv.style.maxWidth = "80vw";
@@ -430,7 +430,7 @@ var tk = {
         }
         var winbtns = tk.c('div', undefined, 'tnav');
         var closeButton = document.createElement('button');
-        if (sys.mob === true) {
+        if (sys.mobui === true) {
             closeButton.classList.add('b3');
             closeButton.innerText = "Quit";
         } else {
@@ -454,7 +454,7 @@ var tk = {
         }
 
         var minimizeButton = document.createElement('button');
-        if (sys.mob === true) {
+        if (sys.mobui === true) {
             minimizeButton.classList.add('b3');
             minimizeButton.innerText = "Hide";
         } else {
@@ -469,7 +469,7 @@ var tk = {
 
         winbtns.appendChild(closeButton);
         winbtns.appendChild(minimizeButton);
-        if (sys.mob !== true) {
+        if (sys.mobui !== true) {
             var maximizeButton = document.createElement('button');
             maximizeButton.classList.add('winb');
             if (full === undefined) {
@@ -498,7 +498,7 @@ var tk = {
         windowDiv.addEventListener('mousedown', function () {
             wd.win(windowDiv, closeButton, minimizeButton);
         });
-        if (sys.mob !== true) {
+        if (sys.mobui !== true) {
             setTimeout(function () { ui.center(windowDiv); }, 30);
         }
         return { win: windowDiv, main: contentDiv, tbn, title: titlebarDiv, closebtn: closeButton, winbtns };

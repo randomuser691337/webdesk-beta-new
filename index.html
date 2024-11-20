@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
-    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="mobile-web-app-capable" content="yes">
     <link rel="stylesheet" href="./assets/style.css" />
     <link rel="stylesheet" href="./assets/lib/crop/cropper.css" />
     <link rel="shortcut icon" href="./assets/img/favicon.png">
@@ -13,7 +13,7 @@
 </head>
 <script>
     var abt = {
-        lastmod: "Nov 19, 2024",
+        lastmod: "Nov 20, 2024",
         ver: "0.2.1",
     }
 
@@ -36,6 +36,7 @@
         clip: undefined,
         dev: false,
         mob: false,
+        mobui: false,
         city: "Paris, France",
         unit: "Metric",
         defaultloc: true,
@@ -190,9 +191,10 @@
                 wakelockgo();
             }
 
-            if (mob !== "false") {
-                if (/Mobi|Android/i.test(navigator.userAgent) || mob === "true") {
-                    sys.mob = true;
+            if (/Mobi|Android/i.test(navigator.userAgent)) {
+                sys.mob = true;
+                if (mob !== "false") {
+                    sys.mobui = true;
                 }
             }
 
@@ -269,8 +271,38 @@
                         }
                     }
                 }
+                if (city) {
+                    setTimeout(async function () {
+                        if (window.navigator.standalone === true) {
+                            el.taskbar.style.borderRadius = "var(--rad1)";
+                            const ok = await readf('/system/standalonepx');
+                            if (!ok) {
+                                let px = 0;
+                                const div = tk.c('div', document.body, 'cm');
+                                tk.p('Calibrate WebDesk', 'bold', div);
+                                tk.p('Some devices have rounded screen corners that cut off the app bar.', undefined, div);
+                                tk.p('This tool lets you adjust the positioning of the taskbar.', undefined, div);
+                                tk.p('Tap the Increase or Decrease buttons to move the app bar.', undefined, div);
+                                tk.cb('b1', 'Increase', function () {
+                                    px += 2;
+                                    el.taskbar.style.bottom = px + "px";
+                                    el.taskbar.style.left = px + "px";
+                                    el.taskbar.style.right = px + "px";
+                                }, div);
+                                tk.cb('b1', 'Decrease', function () {
+                                    if (px !== 0) {
+                                        px -= 2;
+                                        el.taskbar.style.bottom = px + "px";
+                                        el.taskbar.style.left = px + "px";
+                                        el.taskbar.style.right = px + "px";
+                                    }
+                                }, div);
+                            }
+                        }
+                    }, 300);
+                }
                 setTimeout(wd.hawktuah, 200);
-            } else { 
+            } else {
                 await fs.write('/system/apps.json', '[]');
             }
         } else if (migcheck === "down") {

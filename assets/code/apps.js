@@ -75,23 +75,25 @@ var app = {
             // General pane
             tk.p('General', undefined, generalPane);
             tk.cb('b1 b2 red', 'Erase This WebDesk', () => app.eraseassist.init(), generalPane);
-            tk.cb('b1 b2 red', 'Request Persistence (Stops browser from erasing WebDesk)', async function () {
+            /* tk.cb('b1 b2 red', 'Request Persistence (Stops browser from erasing WebDesk)', async function () {
                 const fucker = await fs.persist();
                 if (fucker === true) {
                     app.ach.unlock('The Keeper', `Won't save your data from the death of the universe, though!`);
-                    wm.notif('Persistence turned on');
+                    wm.snack('Persistence turned on');
                 } else {
-                    wm.notif(`Couldn't turn on persistence`);
+                    wm.snack(`Couldn't turn on persistence`);
                 }
-            }, generalPane);
-            tk.cb('b1 b2 red', 'Toggle mobile UI', async function () {
-                if (sys.mob === true) {
-                    await fs.write('/user/info/mobile', 'false');
-                } else {
-                    await fs.del('/user/info/mobile');
-                }
-                wm.notif('Reboot to apply changes', undefined, () => wd.reboot(), 'Reboot');
-            }, generalPane);
+            }, generalPane); */
+            if (sys.mob === true) {
+                tk.cb('b1 b2 red', 'Toggle mobile UI', async function () {
+                    if (sys.mobui === true) {
+                        await fs.write('/user/info/mobile', 'false');
+                    } else {
+                        await fs.del('/user/info/mobile');
+                    }
+                    wm.notif('Reboot to apply changes', undefined, () => wd.reboot(), 'Reboot');
+                }, generalPane);
+            }
             tk.cb('b1 b2 red', 'Enter Recovery Mode', function () {
                 fs.write('/system/migval', 'rec');
                 wd.reboot();
@@ -451,13 +453,28 @@ var app = {
             tk.img('./assets/img/noround.png', 'setupi', warn);
             tk.p(`WebDesk Online services`, 'h2', warn);
             tk.p('WebDesk makes a DeskID for you. Others can use this ID to send you files or call you.', undefined, warn);
-            tk.p('To recieve from others, WebDesk needs to be open. When not in use, WebDesk uses less resources.', undefined, warn);
-            tk.p(`Keep your WebDesk open when possible. <span class="bold">When WebDesk isn't open, anyone's able to take your DeskID.</span>`, undefined, warn);
+            tk.p(`Keep your WebDesk open when possible. <span class="bold">When WebDesk isn't open, anyone's able to take your DeskID and you can't receive things.</span> You are your own server.`, undefined, warn);
             tk.cb('b1', `What's my DeskID?`, function () {
                 const box = wm.cm();
                 tk.p(`Your DeskID is <span class="med">${sys.deskid}</span>. You'll need to finish setup to use it.`, undefined, box);
                 tk.cb('b1', 'Got it', undefined, box);
-            }, warn); tk.cb('b1', 'Got it', function () { ui.sw2(warn, user) }, warn);
+            }, warn); tk.cb('b1', 'Got it', function () {
+                const ua = navigator.userAgent;
+                const ios = /iPad|iPhone|iPod/.test(ua) && !window.MSStream;
+                const safari = ua.includes('Safari') && !ua.includes('CriOS') && !ua.includes('FxiOS') && !ua.includes('EdgiOS');
+                if (ios && safari && window.navigator.standalone !== false) {
+                    const supportmsg = tk.c('div', document.body, 'cm');
+                    tk.p('Install WebDesk as a web app?', 'bold', supportmsg);
+                    tk.p('To install, tap the Share icon, scroll, hit "Add To Home Screen", and open the WebDesk app.', undefined, supportmsg);
+                    tk.p('Installing WebDesk as one gives you more screen space, and a better experience.', undefined, supportmsg);
+                    tk.cb('b1', 'No thanks', async function () {
+                        await fs.write('/system/info/standalone', 'false');
+                        ui.sw2(warn, user);
+                    }, supportmsg)
+                } else {
+                    ui.sw2(warn, user);
+                }
+            }, warn);
             // user menu
             const user = tk.c('div', main, 'setb hide');
             tk.img('./assets/img/setup/user.svg', 'setupi', user);
@@ -776,7 +793,7 @@ var app = {
             const win = tk.mbw(`Files`, '340px', 'auto', true, undefined, undefined);
             const breadcrumbs = tk.c('div', win.main);
             const items = tk.c('div', win.main);
-            if (sys.mob === true) {
+            if (sys.mobui === true) {
                 items.style.maxHeight = screen.height - 180 + "px";
             } else {
                 items.style.maxHeight = "400px";
@@ -828,10 +845,11 @@ var app = {
                         let timer;
 
                         function openmenu() {
-                            if (item.path.includes('/system') || item.path.includes('/user/info') && sys.dev === false) {
-                                wm.snack('Enable Developer Mode to modify this folder.', 6000)
+                            if ((item.path.includes('/system') || item.path.includes('/user/info')) && sys.dev === false) {
+                                wm.snack('Enable Developer Mode to modify this folder.', 6000);
                                 return;
                             }
+
                             const menu = tk.c('div', document.body, 'cm');
                             tk.p(item.path, 'bold', menu);
                             if (item.path.includes('/system') || item.path.includes('/user/info')) {
@@ -1038,7 +1056,7 @@ var app = {
                 }, win.win);
 
                 if (type === "new") {
-                    tk.cb('b1', 'Generate name', function () {
+                    tk.cb('b1', 'Random name', function () {
                         inp.value = gen(8);
                     }, win.win);
                     tk.cb('b1', 'New file', function () {
@@ -1408,8 +1426,6 @@ var app = {
                         weather.innerText = "Error";
                     }
                 };
-
-                await updateweather();
                 const interval = setInterval(updateweather, 300000);
                 let menuo = false;
                 if (sys.setupd === "eepy") {
@@ -1451,6 +1467,7 @@ var app = {
                         });
                     });
                 }
+                await updateweather();
             }
         }
     },
@@ -1467,7 +1484,7 @@ var app = {
             win.closebtn.addEventListener('mousedown', function () {
                 ui.dest(canvas);
             }); */
-            if (sys.mob === false) {
+            if (sys.mobui === false) {
                 win.win.style.maxWidth = "330px";
             }
             win.main.innerHTML = "Loading";
@@ -1690,7 +1707,9 @@ var app = {
             }
 
             const win = tk.mbw('Achievements', '300px', 'auto', true, undefined, undefined);
-            win.win.style.maxHeight = "60%";
+            if (sys.mobui === false) {
+                win.win.style.maxHeight = "60%";
+            }
             tk.p(`WebDesk Achievements`, 'h2', win.main);
             tk.p(`Remember: These are jokes and don't actually do anything`, undefined, win.main);
             tk.p(`Unlocked <span class="bold achcount"></span> achievements`, undefined, win.main);
@@ -1832,6 +1851,7 @@ var app = {
             const searchbtns = tk.c('div', okiedokie, 'tnav');
             btnnest.appendChild(win.winbtns);
             win.closebtn.style.marginLeft = "4px";
+            win.winbtns.style.marginBottom = "3px";
             win.title.remove();
             let thing = [];
             let currentTab = tk.c('div', win.main, 'hide');
