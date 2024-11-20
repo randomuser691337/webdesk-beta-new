@@ -212,11 +212,11 @@ var ui = {
                     'kill', 'murder', 'suici', 'selfharm', 'cutting', 'worthless', 'hopeless', 'die', 'death', 'harm', 'enditall', 'end it all', 'depress', 'jump',
                     'rape', 'rapist', 'molest', 'molester', 'incest', 'pedophile', 'pedo', 'philia',
                     'retar', 'retard', 'idiot', 'moron', 'lunatic', 'crazy', 'psycho',
-                    'worthless', 'loser', 'whore', 'slut', 'you pig', 'scum', 'filth', 'porn', 'sex'
+                    'worthless', 'loser', 'whore', 'slut', 'you pig', 'scum', 'filth', 'porn', 'sex',
                 ]);
 
                 const antiTerms = new Set([
-                    'like', 'sad', 'shown', 'light', 'sit', 'sitting', 'site', 'ship', 'stop', 'kind', 'smart', 'kid', 'heart', 'hope', 'set', 'cat', 'photo', 'will', 'replace', 'say', 'shy'
+                    'like', 'sad', 'shown', 'light', 'sit', 'sitting', 'site', 'ship', 'stop', 'kind', 'smart', 'kid', 'heart', 'hope', 'set', 'cat', 'photo', 'will', 'replace', 'say', 'shy', 'moon'
                 ]);
     
                 const isSimilar = (word, term) => {
@@ -246,7 +246,7 @@ var ui = {
                     for (const term of offensiveTerms) {
                         if (lowerWord.includes(term) || isSimilar(lowerWord, term)) {
                             for (const anti of antiTerms) {
-                                if (lowerWord.includes(anti)) {
+                                if (lowerWord === anti) {
                                     return word;
                                 }
                             }                            
