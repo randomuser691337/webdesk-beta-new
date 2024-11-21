@@ -216,9 +216,9 @@ var ui = {
                 ]);
 
                 const antiTerms = new Set([
-                    'like', 'sad', 'shown', 'light', 'sit', 'sitting', 'site', 'ship', 'stop', 'kind', 'smart', 'kid', 'heart', 'hope', 'set', 'cat', 'photo', 'will', 'replace', 'say', 'shy', 'moon'
+                    'like', 'sad', 'shown', 'light', 'sit', 'sitting', 'site', 'ship', 'stop', 'kind', 'smart', 'kid', 'heart', 'hope', 'set', 'cat', 'photo', 'will', 'replace', 'say', 'shy', 'moon', 'think', 'Mike', 'clink'
                 ]);
-    
+
                 const isSimilar = (word, term) => {
                     const editDistance = (a, b) => {
                         const dp = Array.from({ length: a.length + 1 }, (_, i) =>
@@ -234,29 +234,29 @@ var ui = {
                         }
                         return dp[a.length][b.length];
                     };
-    
+
                     const distance = editDistance(word, term);
                     return distance <= 1;
                 };
-    
+
                 const words = inputText.split(/\b/);
                 const filteredWords = words.map(word => {
                     const lowerWord = word.toLowerCase();
-                    
+
                     for (const term of offensiveTerms) {
                         if (lowerWord.includes(term) || isSimilar(lowerWord, term)) {
                             for (const anti of antiTerms) {
                                 if (lowerWord === anti) {
                                     return word;
                                 }
-                            }                            
+                            }
                             found = true;
                             return '[filtered]';
                         }
                     }
-                    
+
                     return word;
-                });                
+                });
                 if (found === true && sys.nc === true) {
                     return '[No chances filter]';
                 } else {
@@ -285,7 +285,7 @@ var ui = {
         } else {
             return inputText;
         }
-    },    
+    },
     tooltip: function (element, text) {
         // Should I tip him, or should I give him my tip?
         let stillwater = true;

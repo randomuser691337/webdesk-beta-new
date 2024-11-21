@@ -62,11 +62,12 @@ var app = {
                             const updatedApps = parsed.filter(item => item.appid !== entry.appid);
                             const updatedData = JSON.stringify(updatedApps);
                             await fs.write('/system/apps.json', updatedData);
-                            delete app[entry.appid];
+                            await fs.del(entry.exec);
                             ui.dest(notif);
                             wm.notif('Removed ' + entry.name, `It's been removed, but a reboot is needed to clear it completely.`, function () {
                                 wd.reboot();
                             }, 'Reboot');
+                            delete app[entry.appid];
                         }, notif);
                     });
                 }
@@ -716,11 +717,11 @@ var app = {
                 wm.snack('Saved');
             }
             if (readonly !== true) {
-                tk.cb('b4 browserbutton', 'Save', async function () {
+                tk.cb('b4 b6', 'Save', async function () {
                     await save();
                 }, win.winbtns);
             } else {
-                tk.cb('b4 browserbutton', 'Save As', async function () {
+                tk.cb('b4 b6', 'Save As', async function () {
                     const path = await app.files.pick('new', 'Save in new file');
                     const newContents = editor.getValue();
                     fs.write(path, newContents);
@@ -728,7 +729,7 @@ var app = {
                 }, win.winbtns);
                 editor.setReadOnly(true);
             }
-            tk.cb('b4 browserbutton', 'Menu', async function () {
+            tk.cb('b4 b6', 'Menu', async function () {
                 const menu = tk.c('div', document.body, 'cm');
                 if (readonly !== true) {
                     tk.p('Editing ' + path, 'bold', menu);
@@ -761,7 +762,7 @@ var app = {
                     }, menu);
                 }
             }, win.winbtns);
-            tk.cb('b4 browserbutton', 'Run', async function () {
+            function runc() {
                 const menu = tk.c('div', document.body, 'cm');
                 if (sys.dev === true) {
                     tk.p(`WAIT!!!`, 'h2', menu);
@@ -776,6 +777,9 @@ var app = {
                 tk.cb('b1', 'Close', function () {
                     ui.dest(menu, 120);
                 }, menu);
+            }
+            tk.cb('b4 b6', 'Run', async function () {
+                runc();
             }, win.winbtns);
             wd.win();
             if (readonly !== true) {
@@ -783,6 +787,12 @@ var app = {
                     if ((event.ctrlKey || event.metaKey) && event.key === 's') {
                         event.preventDefault();
                         await save();
+                    }
+                });
+                editor.container.addEventListener('keydown', async function (event) {
+                    if ((event.ctrlKey || event.metaKey) && event.key === 'r') {
+                        event.preventDefault();
+                        await runc();
                     }
                 });
             }
@@ -809,6 +819,7 @@ var app = {
             items.style.overflow = "auto";
             items.style.borderRadius = "12px";
             items.style.padding = "6px";
+            items.style.paddingTop = "0px";
             win.main.style.padding = "8px";
             let items2;
             search.placeholder = "Search for a file...";
@@ -855,11 +866,11 @@ var app = {
                 let crumbs = path.split('/').filter(Boolean);
                 let tempPath = '/';
 
-                tk.cb('flist', 'Root', () => navto('/'), breadcrumbs);
+                tk.cb('flist flists', 'Root', () => navto('/'), breadcrumbs);
                 crumbs.forEach((crumb, index) => {
                     tempPath += crumb + '/';
                     tk.cb('flists', '/', undefined, breadcrumbs);
-                    tk.cb('flist', crumb, () => navto('/' + crumbs.slice(0, index + 1).join('/') + "/"), breadcrumbs);
+                    tk.cb('flist flists', crumb, () => navto('/' + crumbs.slice(0, index + 1).join('/') + "/"), breadcrumbs);
                 });
 
                 currentPath = tempPath;
@@ -1306,7 +1317,7 @@ var app = {
                 el.currentid = deskid;
                 tk.ps(`Talking with ${name} - ${deskid}`, 'smtxt', wc.chatting);
                 if (sys.filter === true) {
-                    tk.ps(`PLEASE NOTE: Some filters can detect things YOU send, as they monitor what you type.`, 'smtxt', wc.chatting);
+                    tk.ps(`PLEASE NOTE: Some filters can detect things YOU send, as they monitor your typing.`, 'smtxt', wc.chatting);
                 }
 
                 if (deskid && !chat) {
@@ -1593,9 +1604,7 @@ var app = {
         runs: true,
         name: 'App Market',
         create: async function (apploc, app, update) {
-            console.log(apploc, app, update);
             async function execute(url2) {
-                console.log(url2);
                 try {
                     const response = await fetch(url2);
                     if (!response.ok) {
@@ -1902,7 +1911,7 @@ var app = {
             let currentBtn = tk.c('div', win.main, 'hide');
             let currentName = tk.c('div', win.main, 'hide');
             win.main.classList = "browsercont";
-            const searchInput = tk.c('input', okiedokie, 'i1 browserbutton');
+            const searchInput = tk.c('input', okiedokie, 'i1 b6');
             function addtab(ok) {
                 const tab = tk.c('embed', win.main, 'browsertab');
                 if (ok) {
@@ -1947,11 +1956,11 @@ var app = {
                 }, 200);
             }
 
-            tk.cb('b4 browserbutton', '+', () => addtab(), searchbtns);
-            tk.cb('b4 browserbutton', '⟳', function () {
+            tk.cb('b4 b6', '+', () => addtab(), searchbtns);
+            tk.cb('b4 b6', '⟳', function () {
                 currentTab.src = currentTab.src;
             }, searchbtns);
-            tk.cb('b4 browserbutton', '<', function () {
+            tk.cb('b4 b6', '<', function () {
                 if (thing.length > 1) {
                     const currentIndex = thing.indexOf(currentTab.src);
                     if (currentIndex > 0) {
@@ -1962,7 +1971,7 @@ var app = {
                     }
                 }
             }, searchbtns);
-            tk.cb('b4 browserbutton', '>', function () {
+            tk.cb('b4 b6', '>', function () {
                 if (thing.length > 1) {
                     const currentIndex = thing.indexOf(currentTab.src);
                     if (currentIndex < thing.length - 1) {
@@ -1974,7 +1983,7 @@ var app = {
                 }
             }, searchbtns);
             searchInput.placeholder = "Enter URL";
-            tk.cb('b4 browserbutton', 'Go!', function () {
+            tk.cb('b4 b6', 'Go!', function () {
                 if (searchInput.value.includes('https://')) {
                     currentTab.src = searchInput.value;
                 } else {
@@ -2016,7 +2025,7 @@ var app = {
             tk.cb('winb gre', '', function () {
                 wm.max(win.win);
             }, btnnest);
-            tk.cb('b4 browserbutton', '⟳', function () {
+            tk.cb('b4 b6', '⟳', function () {
                 tab.src = tab.src;
             }, btnnest);
             setTimeout(function () {

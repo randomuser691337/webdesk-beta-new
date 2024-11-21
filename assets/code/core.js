@@ -345,7 +345,7 @@ var wd = {
         }, 200);
     },
     dark: function (fucker) {
-        ui.cv('ui1', 'rgb(45, 45, 45, 0.5)');
+        ui.cv('ui1', 'rgb(40, 40, 40, 0.5)');
         ui.cv('ui2', '#1b1b1b');
         ui.cv('ui3', '#2b2b2b');
         ui.cv('bc', 'rgb(52, 52, 52, 0.4)');
@@ -752,8 +752,15 @@ var wd = {
         }`;
         document.head.appendChild(style);
     },
-    tbcal: function () {
+    tbcal: async function () {
         let px = 0;
+        const ok = await fs.read('/system/standalonepx');
+        if (ok) {
+            px = ok;
+            el.taskbar.style.bottom = px + "px";
+            el.taskbar.style.left = px + "px";
+            el.taskbar.style.right = px + "px";
+        }
         const div = tk.c('div', document.body, 'cm');
         tk.p('Calibrate app bar', 'bold', div);
         tk.p('Some devices have rounded corners that cut off the app bar.', undefined, div);
