@@ -329,7 +329,7 @@ var app = {
             const first = tk.c('div', main, 'setb');
             tk.img('./assets/img/setup/first.svg', 'setupi', first);
             tk.p('In EchoDesk Mode', 'h2', first);
-            tk.p(`Use the ID below/scan the QR code to start your WebDesk on another WebDesk. The other person will have full access to your files.`, undefined, first);
+            tk.p(`Use the ID below/scan the QR code to start your WebDesk on another WebDesk. The other WebDesk will have full access to your files.`, undefined, first);
             const split = tk.c('div', first, 'split');
             const id = tk.c('div', split, 'splititem');
             tk.p('--------', 'h2 deskid', id);
@@ -721,7 +721,7 @@ var app = {
                     await save();
                 }, win.winbtns);
             } else {
-                tk.cb('b4 b6', 'Save As', async function () {
+                tk.cb('b4 b6', 'Save', async function () {
                     const path = await app.files.pick('new', 'Save in new file');
                     const newContents = editor.getValue();
                     fs.write(path, newContents);
@@ -906,6 +906,7 @@ var app = {
 
                             const menu = tk.c('div', document.body, 'cm');
                             tk.p(item.path, 'bold', menu);
+
                             if (item.path.includes('/system') || item.path.includes('/user/info')) {
                                 tk.p('This is an important folder, modifying it will likely cause damage.', 'warn', menu);
                             }
@@ -1031,6 +1032,15 @@ var app = {
                             e.dataTransfer.setData('text/plain', item.path);
                         });
                         fileItem.draggable = true;
+                        fileItem.addEventListener('contextmenu', async function (e) {
+                            e.preventDefault();
+                            const menu2 = tk.c('div', document.body, 'cm');
+                            const date = await fs.date(item.path);
+                            tk.p(`<span class="bold">Created</span> ${wd.timec(date.created)}`, undefined, menu2);
+                            tk.p(`<span class="bold">Edited</span> ${wd.timec(date.edit)}`, undefined, menu2);
+                            tk.p(`<span class="bold">Read</span> ${wd.timec(date.read)}`, undefined, menu2);
+                            tk.cb('b1', 'Cancel', () => ui.dest(menu2), menu2);
+                        })
                     }
                 });
                 items2 = items.querySelectorAll('.flist');

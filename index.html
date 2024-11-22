@@ -5,6 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
     <meta name="mobile-web-app-capable" content="yes">
+    <meta name="theme-color" content="#5a5a5a">
     <link rel="stylesheet" href="./assets/style.css" />
     <link rel="stylesheet" href="./assets/lib/crop/cropper.css" />
     <link rel="shortcut icon" href="./assets/img/favicon.png">
@@ -13,7 +14,7 @@
 </head>
 <script>
     var abt = {
-        lastmod: "Nov 21, 2024",
+        lastmod: "Nov 22, 2024",
         ver: "0.2.1",
     }
 
@@ -279,6 +280,12 @@
                             if (!ok) {
                                 wd.tbcal();
                             } else {
+                                if (px > 50 || px < 0) {
+                                    await fs.del('/system/standalone');
+                                    px = 0;
+                                    wd.tbcal();
+                                    return;
+                                }
                                 px = ok;
                                 if (px !== 0) {
                                     el.taskbar.style.borderRadius = "var(--rad1)";

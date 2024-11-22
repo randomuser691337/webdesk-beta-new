@@ -389,78 +389,90 @@ var wd = {
         ui.light = false;
     },
     timec: function (id) {
-        const timeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
-        const date = new Date(id);
+        try {
+            const timeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+            const date = new Date(id);
 
-        const options = {
-            year: 'numeric',
-            month: 'short',
-            day: 'numeric',
-            hour: '2-digit',
-            minute: '2-digit',
-            hour12: true,
-            timeZone: timeZone
-        };
+            const options = {
+                year: 'numeric',
+                month: 'short',
+                day: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit',
+                hour12: true,
+                timeZone: timeZone
+            };
 
-        const formatter = new Intl.DateTimeFormat('en-US', options);
-        const formattedParts = formatter.formatToParts(date);
-        const month = formattedParts.find(part => part.type === 'month').value;
-        const day = formattedParts.find(part => part.type === 'day').value;
-        const year = formattedParts.find(part => part.type === 'year').value;
-        const hour = formattedParts.find(part => part.type === 'hour').value;
-        const minute = formattedParts.find(part => part.type === 'minute').value;
-        const ampm = formattedParts.find(part => part.type === 'dayPeriod').value;
+            const formatter = new Intl.DateTimeFormat('en-US', options);
+            const formattedParts = formatter.formatToParts(date);
+            const month = formattedParts.find(part => part.type === 'month').value;
+            const day = formattedParts.find(part => part.type === 'day').value;
+            const year = formattedParts.find(part => part.type === 'year').value;
+            const hour = formattedParts.find(part => part.type === 'hour').value;
+            const minute = formattedParts.find(part => part.type === 'minute').value;
+            const ampm = formattedParts.find(part => part.type === 'dayPeriod').value;
 
-        return `${month} ${day}, ${year}, ${hour}:${minute}${ampm}`;
+            return `${month} ${day}, ${year}, ${hour}:${minute}${ampm}`;
+        } catch (error) {
+            return "Unknown";
+        }
     },
     timed: function (id) {
-        const timeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
-        const date = new Date(id);
+        try {
+            const timeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+            const date = new Date(id);
 
-        const options = {
-            year: 'numeric',
-            month: 'short',
-            day: 'numeric',
-            hour: '2-digit',
-            minute: '2-digit',
-            hour12: true,
-            timeZone: timeZone
-        };
+            const options = {
+                year: 'numeric',
+                month: 'short',
+                day: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit',
+                hour12: true,
+                timeZone: timeZone
+            };
 
-        const formatter = new Intl.DateTimeFormat('en-US', options);
-        const formattedParts = formatter.formatToParts(date);
+            const formatter = new Intl.DateTimeFormat('en-US', options);
+            const formattedParts = formatter.formatToParts(date);
 
-        const month = formattedParts.find(part => part.type === 'month').value;
-        const day = formattedParts.find(part => part.type === 'day').value;
-        const year = formattedParts.find(part => part.type === 'year').value;
+            const month = formattedParts.find(part => part.type === 'month').value;
+            const day = formattedParts.find(part => part.type === 'day').value;
+            const year = formattedParts.find(part => part.type === 'year').value;
 
-        return `${month} ${day}, ${year}`;
+            return `${month} ${day}, ${year}`;
+        } catch (error) {
+            return "Unknown";
+        }
     },
     timecs: function (id) {
-        const timeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
-        const date = new Date(id);
+        try {
+            const timeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+            const date = new Date(id);
 
-        const options = {
-            year: 'numeric',
-            month: 'short',
-            day: 'numeric',
-            hour: '2-digit',
-            minute: '2-digit',
-            hour12: true,
-            timeZone: timeZone
-        };
+            const options = {
+                year: 'numeric',
+                month: 'short',
+                day: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit',
+                hour12: true,
+                timeZone: timeZone
+            };
 
-        const formatter = new Intl.DateTimeFormat('en-US', options);
-        const formattedParts = formatter.formatToParts(date);
+            const formatter = new Intl.DateTimeFormat('en-US', options);
+            const formattedParts = formatter.formatToParts(date);
 
-        const month = formattedParts.find(part => part.type === 'month').value;
-        const day = formattedParts.find(part => part.type === 'day').value;
-        const year = formattedParts.find(part => part.type === 'year').value;
-        const hour = formattedParts.find(part => part.type === 'hour').value;
-        const minute = formattedParts.find(part => part.type === 'minute').value;
-        const ampm = formattedParts.find(part => part.type === 'dayPeriod').value;
+            const month = formattedParts.find(part => part.type === 'month').value;
+            const day = formattedParts.find(part => part.type === 'day').value;
+            const year = formattedParts.find(part => part.type === 'year').value;
+            const hour = formattedParts.find(part => part.type === 'hour').value;
+            const minute = formattedParts.find(part => part.type === 'minute').value;
+            const ampm = formattedParts.find(part => part.type === 'dayPeriod').value;
 
-        return `${hour}:${minute}${ampm}`;
+            return `${hour}:${minute}${ampm}`;
+        } catch (error) {
+            return "Unknown";
+        }
     },
     reorg: function (element) {
         const buttons = Array.from(element.querySelectorAll('button'));
@@ -764,7 +776,7 @@ var wd = {
         const div = tk.c('div', document.body, 'cm');
         tk.p('Calibrate app bar', 'bold', div);
         tk.p('Some devices have rounded corners that cut off the app bar.', undefined, div);
-        tk.p('This tool lets you adjust the positioning of the taskbar.', undefined, div);
+        tk.p('This tool lets you adjust the positioning of the app bar.', undefined, div);
         tk.p('Tap the Increase or Decrease buttons to move the app bar.', undefined, div);
         tk.cb('b1 b2', 'Done', async function () {
             ui.dest(div);
@@ -773,18 +785,22 @@ var wd = {
             }
         }, div);
         tk.cb('b1', 'Increase', async function () {
+            if (px === 50) return;
             px += 2;
             el.taskbar.style.bottom = px + "px";
             el.taskbar.style.left = px + "px";
             el.taskbar.style.right = px + "px";
+            el.taskbar.style.borderRadius = "var(--rad1)";
             await fs.write('/system/standalonepx', px);
         }, div);
         tk.cb('b1', 'Decrease', async function () {
             if (px !== 0) {
+                if (px === 0) return;
                 px -= 2;
                 el.taskbar.style.bottom = px + "px";
                 el.taskbar.style.left = px + "px";
                 el.taskbar.style.right = px + "px";
+                el.taskbar.style.borderRadius = "var(--rad1)";
                 await fs.write('/system/standalonepx', px);
             }
         }, div);
