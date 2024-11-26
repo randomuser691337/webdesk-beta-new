@@ -98,18 +98,28 @@ var wm = {
                     opacity: 0,
                 }, 220, function () {
                     $animatedDiv.hide();
+                    $animatedDiv.removeClass("windowanim");
                 });
             } else {
-                const original = $animatedDiv.data('originalPOS');
-                $animatedDiv.removeClass("windowanim");
-                $animatedDiv.show().animate({
-                    top: original.top,
-                    left: original.left,
-                    opacity: 1,
-                }, 220);
-                wd.win(wid);
+                wm.show(wid, btn);
             }
         }
+    },
+    show: function (wid, btn) {
+        const isMinimized = wid.classList.contains('minimized');
+        if (isMinimized) {
+            const $animatedDiv = $(wid);
+            const original = $animatedDiv.data('originalPOS');
+            $animatedDiv.show().animate({
+                top: original.top,
+                left: original.left,
+                opacity: 1,
+            }, 220, function () {
+                $animatedDiv.removeClass("minimized");
+            });
+
+        }
+        wd.win(wid);
     },
     mini: function (window) {
         hidef(window, 120);

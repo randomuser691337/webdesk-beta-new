@@ -14,8 +14,8 @@
 </head>
 <script>
     var abt = {
-        lastmod: "Nov 22, 2024",
-        ver: "0.2.1",
+        lastmod: "Nov 26, 2024",
+        ver: "0.2.2",
     }
 
     var sys = {
@@ -121,7 +121,7 @@
                 ui.crtheme('#010101', true);
                 wd.dark('nosave');
                 app.migrate.init('skibidi');
-                ui.hide(document.getElementById('death'), 180);
+                ui.hide(tk.g('death'), 190);
                 boot = true;
                 return;
             }
@@ -330,7 +330,7 @@
         }
 
         wd.perfmon();
-        ui.hide(document.getElementById('death'), 180);
+        ui.hide(tk.g('death'), 190);
 
         const dropZone = document.body;
         ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {

@@ -443,7 +443,7 @@ var tk = {
             shortened = ui.truncater(title, 10);
         }
         const tbn = tk.cb('b1', shortened, function () {
-            wm.min(windowDiv, tbn);
+            wm.show(windowDiv, tbn);
         }, el.tr);
         if (quit === undefined) {
             closeButton.classList.add('red');

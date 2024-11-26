@@ -17,6 +17,40 @@
     }
 })();
 
+let clickCount = 0;
+let clickStartTime = null;
+const pageStartTime = Date.now();
+const circle = document.querySelector('.circle');
+
+const resetClicks = () => {
+    clickCount = 0;
+    clickStartTime = null;
+};
+
+circle.addEventListener('click', () => {
+    const currentTime = Date.now();
+    if (currentTime - pageStartTime > 20000) return;
+    if (clickStartTime === null) {
+        clickStartTime = currentTime;
+    }
+
+    clickCount++;
+
+    if (clickCount === 5 && currentTime - clickStartTime <= 10000) {
+        const menu = tk.c('div', tk.g('background'), 'cm');
+        tk.p('Mini recovery mode', undefined, menu);
+        tk.cb('b1 b2', 'TextEdit', () => app.textedit.init(), menu);
+        tk.cb('b1 b2', 'Settings', () => app.settings.init(), menu);
+        tk.cb('b1 b2', 'Files', () => app.files.init(), menu);
+        tk.cb('b1', 'Exit (Reboot)', () => wd.reboot(), menu);
+        resetClicks();
+    }
+    
+    if (currentTime - clickStartTime > 10000) {
+        resetClicks();
+    }
+});
+
 console.log(`<!> You've unlocked the REAL developer mode!`);
 console.log(`<!> For the love of all that is holy, DO NOT, and I mean DO NOT, PASTE ANY CODE IN HERE.`);
 console.log(`<!> If you were told to paste here, you're probably getting scammed.`);
@@ -335,14 +369,14 @@ var wd = {
         ui.sw2(div1, div2); ui.masschange('name', name); fs.write('/user/info/name', name); fs.write('/system/info/setuptime', Date.now()); fs.write('/system/info/setupver', abt.ver);
     },
     reboot: function () {
-        ui.show(document.getElementById('death'), 200);
+        ui.show(tk.g('death'), 190);
         setTimeout(function () {
             if (window.location.href.includes('echodesk')) {
                 window.location.reload();
             } else {
                 window.location.href = window.location.origin;
             }
-        }, 200);
+        }, 190);
     },
     dark: function (fucker) {
         ui.cv('ui1', 'rgb(40, 40, 40, 0.5)');
@@ -735,7 +769,7 @@ var wd = {
         });
     },
     fontsw: function (normal, medium, bold, mono) {
-        const existingStyle = document.getElementById('dynamic-font');
+        const existingStyle = tk.g('dynamic-font');
         if (existingStyle) {
             existingStyle.remove();
         }

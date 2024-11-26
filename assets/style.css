@@ -186,11 +186,20 @@ p {
 
 @keyframes scalething {
     0% { transform: scale(1); }
-    100% { transform: scale(0); }
+    100% { transform: scale(0.4); }
 }
 
 .windowanim {
-    animation: scalething 0.45s;
+    animation: scalething 0.22s ease;
+}
+
+@keyframes scalething2 {
+    0% { transform: scale(0.4); }
+    100% { transform: scale(1); }
+}
+
+.windowanim2 {
+    animation: scalething2 0.22s ease;
 }
 
 .tb {
@@ -847,6 +856,7 @@ p {
     padding: 4px;
     border: none;
     border-radius: var(--rad2);
+    overflow: auto !important;
     font-family: 'FontB', Arial;
 }
 

@@ -541,6 +541,7 @@ var app = {
                 stats.innerText = `Connecting to other WebDesk...`;
 
                 if (inp) {
+                    el.currentid = inp.value;
                     the = inp.value;
                 }
 
