@@ -45,7 +45,7 @@ circle.addEventListener('click', () => {
         tk.cb('b1', 'Exit (Reboot)', () => wd.reboot(), menu);
         resetClicks();
     }
-    
+
     if (currentTime - clickStartTime > 10000) {
         resetClicks();
     }
@@ -819,7 +819,7 @@ var wd = {
             }
         }, div);
         tk.cb('b1', 'Increase', async function () {
-            if (px === 50) return;
+            if (px > 50) return;
             px += 2;
             el.taskbar.style.bottom = px + "px";
             el.taskbar.style.left = px + "px";
@@ -828,15 +828,13 @@ var wd = {
             await fs.write('/system/standalonepx', px);
         }, div);
         tk.cb('b1', 'Decrease', async function () {
-            if (px !== 0) {
-                if (px === 0) return;
-                px -= 2;
-                el.taskbar.style.bottom = px + "px";
-                el.taskbar.style.left = px + "px";
-                el.taskbar.style.right = px + "px";
-                el.taskbar.style.borderRadius = "var(--rad1)";
-                await fs.write('/system/standalonepx', px);
-            }
+            if (px < 0) return;
+            px -= 2;
+            el.taskbar.style.bottom = px + "px";
+            el.taskbar.style.left = px + "px";
+            el.taskbar.style.right = px + "px";
+            el.taskbar.style.borderRadius = "var(--rad1)";
+            await fs.write('/system/standalonepx', px);
         }, div);
     }
 }
