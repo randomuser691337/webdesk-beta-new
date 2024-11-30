@@ -161,7 +161,7 @@ var wd = {
                 focused.minbtn = minbtn;
             }
             var $winfocus = $(winfocus);
-            if ($winfocus.length) {
+            if ($winfocus.length && !$winfocus.hasClass('max') && !$winfocus.hasClass('unmax')) {
                 var windows = $('.window');
                 var highestZIndex = Math.max.apply(null, windows.map(function () {
                     var zIndex = parseInt($(this).css('z-index')) || 0;
@@ -306,12 +306,22 @@ var wd = {
                 }, ok);
                 ui.tooltip(screenicon, 'Fullscreen toggle');
                 tk.img('/assets/img/icons/fs.svg', 'contimg', screenicon, false);
-                const setticon = tk.cb('conticon', '', function () {
-                    app.settings.init();
-                    controlcenter();
+                const notificon = tk.cb('conticon', '', async function () {
+                    if (sys.nvol === 0) {
+                        notifimg.src = "/assets/img/icons/notify.svg";
+                        sys.nvol = 1.0;
+                        ui.play(sys.notifsrc);
+                        await fs.del('/user/info/silent');
+                    } else {
+                        notifimg.src = "/assets/img/icons/silent.svg";
+                        sys.nvol = 0.0;
+                        await fs.write('/user/info/silent', 'true');
+                    }
+                    el.contb.classList.toggle('silentbtn');
                 }, ok);
-                ui.tooltip(setticon, 'Opens Settings app');
-                tk.img('/assets/img/icons/settings.svg', 'contimg', setticon, false);
+                const notifimg = tk.img('/assets/img/icons/notify.svg', 'contimg', notificon, false);
+                if (sys.nvol === 0) notifimg.src = "/assets/img/icons/silent.svg";
+                ui.tooltip(notificon, 'Silent toggle');
                 if (sys.guest === false && sys.echodesk === false) {
                     const yeah = tk.cb('b3 b2', 'Deep Sleep', function () {
                         const menu = tk.c('div', document.body, 'cm');
@@ -334,11 +344,12 @@ var wd = {
         }
         function desktopgo() {
             el.taskbar = tk.c('div', document.body, 'taskbar');
-            const lefttb = tk.c('div', el.taskbar, 'tnav');
+            const lefttb = tk.c('div', el.taskbar, 'tnav auto');
             const titletb = tk.c('div', el.taskbar, 'title');
             const start = tk.cb('b1', 'Apps', () => startmenu(), lefttb);
             el.tr = tk.c('div', lefttb);
-            const contbtn = tk.cb('b1t time', '--:--', () => controlcenter(), titletb);
+            el.contb = tk.cb('b1t time', '--:--', () => controlcenter(), titletb);
+            if (sys.nvol === 0) el.contb.classList.toggle('silentbtn');
             if (sys.mobui === true) {
                 el.taskbar.style.boxShadow = "none";
             }
@@ -421,6 +432,15 @@ var wd = {
             fs.write('/user/info/lightdark', 'clear2');
         }
         ui.light = false;
+    },
+    notifsrc: async function (src, play) {
+        sys.notifsrc = src;
+        await fs.write('/user/info/notifsrc', src);
+        if (play === true) {
+            ui.play(src);
+            wm.snack('Saved', 1500);
+            await fs.del('/user/info/cnotifurl');
+        }
     },
     timec: function (id) {
         try {

@@ -127,9 +127,11 @@ var wm = {
     mini: function (window) {
         showf(window, 0);
     },
-    notif: function (name, cont, mode, button) {
+    notif: function (name, cont, mode, button, mute) {
+        if (mute !== true) {
+            ui.play(sys.notifsrc);
+        }
         const div = tk.c('div', document.getElementById('notif'), 'notif');
-        ui.play('./assets/other/notif1.ogg');
         const title = tk.p(name, 'bold', div);
         let content;
         if (cont) {
@@ -147,8 +149,8 @@ var wm = {
             open.addEventListener('click', mode);
             open.addEventListener('click', function () { ui.dest(div, 120); });
         }
-        const txt = tk.c('span', div, 'bold');
-        txt.innerText = ` - ${wd.timecs(Date.now())}`
+        const txt = tk.c('span', div, 'med');
+        txt.innerText = ` ${wd.timecs(Date.now())}`
         return { div, title, content, dismiss: dbtn };
     }
 }
