@@ -767,7 +767,7 @@ p {
     left: 0px;
     bottom: 0px;
     right: 0px;
-    padding: 4px;
+    padding: 5px;
     border-top-left-radius: var(--rad1);
     border-top-right-radius: var(--rad1);
     background-color: var(--ui1);

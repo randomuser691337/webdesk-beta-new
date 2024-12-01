@@ -330,13 +330,14 @@ var app = {
             const degp = tk.p(`<span class="bold">Measurement</span> `, undefined, ok.main);
             const degps = tk.c('span', degp);
             degps.innerText = `${sys.unit} (${sys.unitsym})`;
+            const mousedownevent = new MouseEvent('mousedown');
             tk.cb('b1 b2', 'Disable Location', async function () {
                 await fs.write('/user/info/location.json', [{ city: 'Paris, France', unit: 'Metric', lastupdate: Date.now(), default: true }]);
                 sys.city = "Paris, France";
                 sys.unit = "Metric";
                 sys.unitsym = "°C";
                 sys.defaultloc = true;
-                ok.closebtn.click();
+                ok.closebtn.dispatchEvent(mousedownevent);
                 wm.snack('Location set to Paris, France so that WebDesk has something to fall back on.');
             }, ok.main);
             tk.cb('b1 b2', 'Update Location', async function () {
@@ -350,7 +351,7 @@ var app = {
                 } else {
                     sys.unitsym = "°F";
                 }
-                ok.closebtn.click();
+                ok.closebtn.dispatchEvent(mousedownevent);
                 wm.snack(`New location: ${data.location}`);
             }, ok.main);
         }
