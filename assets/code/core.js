@@ -170,6 +170,7 @@ var wd = {
                 $winfocus.css('z-index', highestZIndex + 1);
                 $('.window').removeClass('winf');
                 $winfocus.addClass('winf');
+                el.menubarbtn.innerText = winfocus.getAttribute('wdname');
             }
             return;
         }
@@ -232,18 +233,17 @@ var wd = {
                     ui.dest(el.cc, 150);
                     el.cc = undefined;
                 }
-                el.sm = tk.c('div', document.body, 'tbmenu');
-                el.sm.style.width = "200px";
+                el.sm = tk.c('div', el.taskthing, 'tbmenu');
                 el.sm.style.left = "5px";
                 const btm = el.taskbar.getBoundingClientRect();
-                el.sm.style.bottom = btm.height + btm.x + 5 + "px";
+                el.sm.style.bottom = btm.height + 5 + "px";
                 tk.p(`Hello, ${name}!`, 'h2', el.sm);
                 tk.p(`Your DeskID is ${sys.deskid}`, undefined, el.sm);
-                const ok = tk.c('div', el.sm, 'embed nest');
+                const ok = tk.c('div', el.sm, 'embed nest brick-layout');
                 for (var key in app) {
                     if (app.hasOwnProperty(key)) {
                         if (app[key].hasOwnProperty("runs") && app[key].runs === true) {
-                            const btn = tk.cb('b3 b2', app[key].name, app[key].init.bind(app[key]), ok);
+                            const btn = tk.cb('b3', app[key].name, app[key].init.bind(app[key]), ok);
                             btn.addEventListener('click', function () {
                                 ui.dest(el.sm, 150);
                                 el.sm = undefined;
@@ -264,11 +264,9 @@ var wd = {
                     ui.dest(el.sm, 150);
                     el.sm = undefined;
                 }
-                el.cc = tk.c('div', document.body, 'tbmenu');
-                el.cc.style.width = "200px";
-                el.cc.style.right = "5px";
+                el.cc = tk.c('div', el.taskthing, 'tbmenu');
                 const btm = el.taskbar.getBoundingClientRect();
-                el.cc.style.bottom = btm.height + btm.x + 5 + "px";
+                el.cc.style.bottom = btm.height + 5 + "px";
                 tk.p(`Controls`, 'h2', el.cc);
                 tk.p(`Your DeskID is ${sys.deskid}`, undefined, el.cc);
                 const ok = tk.c('div', el.cc, 'embed nest');
@@ -322,8 +320,9 @@ var wd = {
                 const notifimg = tk.img('/assets/img/icons/notify.svg', 'contimg', notificon, false);
                 if (sys.nvol === 0) notifimg.src = "/assets/img/icons/silent.svg";
                 ui.tooltip(notificon, 'Silent toggle');
+                const p = tk.c('div', ok);
                 if (sys.guest === false && sys.echodesk === false) {
-                    const yeah = tk.cb('b3 b2', 'Deep Sleep', function () {
+                    const yeah = tk.cb('b3', 'Deep Sleep', function () {
                         const menu = tk.c('div', document.body, 'cm');
                         tk.p('Deep Sleep', 'bold', menu);
                         tk.p(`Your DeskID will work as normal, and WebDesk will use little resources. Save your work before entering.`, undefined, menu);
@@ -331,12 +330,12 @@ var wd = {
                             await fs.write('/system/eepysleepy', 'true');
                             await wd.reboot();
                         }, menu);
-                    }, ok);
+                    }, p);
                     yeah.style.marginTop = "2px";
                 }
-                tk.cb('b3 b2', 'Reboot/Reload', function () {
+                tk.cb('b3', 'Reboot/Reload', function () {
                     wd.reboot();
-                }, ok);
+                }, p);
             } else {
                 ui.dest(el.cc, 150);
                 el.cc = undefined;
@@ -344,8 +343,22 @@ var wd = {
         }
         function desktopgo() {
             el.taskbar = tk.c('div', document.body, 'taskbar');
-            const lefttb = tk.c('div', el.taskbar, 'tnav auto');
-            const titletb = tk.c('div', el.taskbar, 'title');
+            function tbresize() {
+                const screenWidth = window.innerWidth;
+                const elementWidth = el.taskbar.offsetWidth;
+                el.taskbar.style.left = `${(screenWidth - elementWidth) / 2}px`;
+            }
+            setInterval(tbresize, 50);
+            el.menubar = tk.c('div', document.body, 'menubar flexthing hide');
+            // I'm not sure what to do with this menu bar, so I'm gonna hide it for now.
+            const left = tk.c('div', el.menubar, 'tnav');
+            const right = tk.c('div', el.menubar, 'title');
+            el.menubarbtn = tk.cb('bold', 'Desktop', () => controlcenter(), left);
+            tk.cb('time', '--:--', () => controlcenter(), right);
+            el.taskthing = tk.c('div', el.taskbar);
+            const tasknest = tk.c('div', el.taskbar, 'tasknest');
+            const lefttb = tk.c('div', tasknest, 'tnav auto');
+            const titletb = tk.c('div', tasknest, 'title');
             const start = tk.cb('b1', 'Apps', () => startmenu(), lefttb);
             el.tr = tk.c('div', lefttb);
             el.contb = tk.cb('b1t time', '--:--', () => controlcenter(), titletb);

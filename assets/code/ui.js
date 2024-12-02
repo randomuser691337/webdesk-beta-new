@@ -413,6 +413,7 @@ var tk = {
     mbw: function (title, wid, hei, full, min, quit) {
         var windowDiv = document.createElement('div');
         windowDiv.classList.add('window');
+        windowDiv.setAttribute('wdname', title);
         var titlebarDiv = tk.c('div', undefined, 'd tb');
         if (sys.mobui !== true) {
             windowDiv.style.width = wid;

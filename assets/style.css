@@ -185,8 +185,13 @@ p {
 }
 
 @keyframes scalething {
-    0% { transform: scale(1); }
-    100% { transform: scale(0.4); }
+    0% {
+        transform: scale(1);
+    }
+
+    100% {
+        transform: scale(0.4);
+    }
 }
 
 .windowanim {
@@ -194,8 +199,13 @@ p {
 }
 
 @keyframes scalething2 {
-    0% { transform: scale(0.4); }
-    100% { transform: scale(1); }
+    0% {
+        transform: scale(0.4);
+    }
+
+    100% {
+        transform: scale(1);
+    }
 }
 
 .windowanim2 {
@@ -292,7 +302,7 @@ p {
 
 .gre {
     background-color: rgb(52, 199, 89);
-     border: 1px solid rgba(41, 159, 71, 0.4);
+    border: 1px solid rgba(41, 159, 71, 0.4);
 }
 
 .setupbar {
@@ -759,32 +769,56 @@ p {
     background-color: rgba(255, 220, 30, 0.5);
 }
 
-.taskbar {
+.menubar {
     position: fixed;
+    background-color: var(--ui1);
+    left: 0px;
+    right: 0px;
+    top: 0px;
+    padding: 4px;
+    backdrop-filter: blur(var(--bl2));
+    -webkit-backdrop-filter: blur(var(--bl2));
+    z-index: 9998;
+}
+
+.menubar button {
+    padding: 4px 7px;
+    border-radius: 7px;
+    border: none;
+    background-color: rgb(0, 0, 0, 0);
+}
+
+.menubar button:hover {
+    background-color: var(--ui1);
+}
+
+.tasknest {
     display: flex;
     align-items: center;
     justify-content: flex-start;
-    left: 0px;
-    bottom: 0px;
-    right: 0px;
+    white-space: nowrap;
+    overflow-x: auto !important;
+}
+
+.taskbar {
+    position: fixed;
+    bottom: 5px;
     padding: 5px;
-    border-top-left-radius: var(--rad1);
-    border-top-right-radius: var(--rad1);
+    border-radius: var(--rad1);
     background-color: var(--ui1);
-    box-shadow: rgba(0, 0, 0, 0.3) 0px 0px 75px 15px;
+    box-shadow: rgba(0, 0, 0, 0.15) 0px 0px 75px 15px;
     animation: tb 0.6s ease;
     backdrop-filter: blur(var(--bl2));
     -webkit-backdrop-filter: blur(var(--bl2));
     z-index: 1000;
-    overflow-x: auto !important;
-    white-space: nowrap;
     border-top: 1px solid var(--bc);
     transition: 0.05s;
 }
 
-.taskbar button {
+.tasknest button {
     padding: 3px 5px;
     font-size: var(--fz2) !important;
+    box-shadow: none !important;
 }
 
 @keyframes tb {
@@ -834,26 +868,27 @@ p {
 }
 
 .tbmenu {
-    position: fixed;
-    border-radius: var(--rad1);
-    border: 1px solid var(--bc);
-    background-color: var(--ui1);
-    box-shadow: rgba(0, 0, 0, 0.15) 0px 0px 75px 15px;
-    backdrop-filter: blur(var(--bl2));
-    -webkit-backdrop-filter: blur(var(--bl2));
-    padding: 7px;
-    max-width: 80%;
-    max-width: 360px;
-    max-height: 70%;
-    z-index: 9998;
-    animation: tb2 0.2s ease;
+    min-width: 240px;
+    margin-bottom: 4px;
+    padding: 5px;
     overflow-y: auto !important;
+    text-align: left;
+}
+
+.brick-layout {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+}
+
+.brick-layout button {
+    white-space: nowrap; 
+    text-overflow: ellipsis !important;
+    overflow: hidden !important;
 }
 
 .tbmenu::-webkit-scrollbar {
     display: none;
 }
-
 
 @keyframes tb2 {
     0% {
