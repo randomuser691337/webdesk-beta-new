@@ -796,6 +796,7 @@ p {
     -webkit-backdrop-filter: blur(var(--bl2));
     box-shadow: rgba(0, 0, 0, 0.12) 0px 0px 37.5px 7.5px;
     z-index: 1000;
+    font-size: var(--fz2);
 }
 
 .menubar button {
@@ -803,6 +804,7 @@ p {
     border-radius: 8px;
     border: none;
     background-color: rgb(0, 0, 0, 0);
+    font-size: var(--fz2);
 }
 
 .menubar button:hover {
@@ -830,6 +832,7 @@ p {
     z-index: 1000;
     border-top: 1px solid var(--bc);
     transition: 0.1s;
+    max-width: 90%;
 }
 
 .tasknest button {

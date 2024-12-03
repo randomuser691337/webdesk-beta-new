@@ -104,10 +104,6 @@ var app = {
                     wd.tbcal();
                 }, generalPane);
             }
-            tk.cb('b1 b2 red', 'New UI (BETA)', function () {
-                wm.notif('Menu bar shown!', `This UI will be turned off on reboot. Click the button again to toggle it.`, undefined, undefined, true);
-                el.menubar.classList.toggle('hide');
-            }, generalPane);
             tk.cb('b1 b2 red', 'Enter Recovery Mode', function () {
                 fs.write('/system/migval', 'rec');
                 wd.reboot();
