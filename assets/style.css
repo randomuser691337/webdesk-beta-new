@@ -21,6 +21,7 @@
     --fz4: 12px;
     --inv: 0;
     --wina: 0px;
+    --menubarheight: 0px;
 }
 
 #background {
@@ -368,7 +369,7 @@ p {
     background-color: rgba(var(--acc), 0.40);
     border-radius: var(--rad2);
     font-size: var(--fz1);
-    padding: 4px 7px;
+    padding: 5px 8px;
     margin: 1px;
     transition: 0.06s ease-in-out;
     cursor: pointer;
@@ -415,8 +416,8 @@ p {
 }
 
 .b3 {
-    padding: 2px 4px;
-    border-radius: 8px;
+    padding: 3px 5px;
+    border-radius: 9px;
     background-color: rgba(var(--accent), 0.38);
     font-size: var(--fz2);
     border: 2px solid transparent;
@@ -443,7 +444,7 @@ p {
 
 .b5 {
     padding: 2px;
-    border-radius: 8px;
+    border-radius: 9px;
     background-color: rgba(var(--accent), 0.5);
     font-size: var(--fz2);
     border: none;
@@ -454,7 +455,7 @@ p {
 
 .b4 {
     padding: 1px 3px;
-    border-radius: 8px;
+    border-radius: 9px;
     background-color: rgba(var(--accent), 0.28);
     font-size: var(--fz4);
     border: 1px solid transparent;
@@ -690,17 +691,18 @@ p {
 
 #notif {
     position: fixed;
-    top: 0px;
+    top: var(--menubarheight);
     right: 0px;
-    bottom: 45px;
+    bottom: 0px;
     width: 250px;
-    padding: 10px;
+    padding: 8px;
     overflow-x: visible;
     overflow-y: auto !important;
     padding-left: 50px;
-    z-index: 9999;
+    z-index: 1000;
     pointer-events: none;
     max-width: 80%;
+    padding-bottom: 60px;
 }
 
 @keyframes notif {
@@ -769,6 +771,20 @@ p {
     background-color: rgba(255, 220, 30, 0.5);
 }
 
+.menubardiv {
+    position: fixed;
+    background-color: var(--ui1);
+    top: calc(var(--menubarheight) + 8px);
+    right: 8px;
+    padding: 8px;
+    border-radius: var(--rad1);
+    backdrop-filter: blur(var(--bl2));
+    -webkit-backdrop-filter: blur(var(--bl2));
+    box-shadow: rgba(0, 0, 0, 0.12) 0px 0px 37.5px 7.5px;
+    z-index: 9997;
+    max-width: 200px;
+}
+
 .menubar {
     position: fixed;
     background-color: var(--ui1);
@@ -778,12 +794,13 @@ p {
     padding: 4px;
     backdrop-filter: blur(var(--bl2));
     -webkit-backdrop-filter: blur(var(--bl2));
-    z-index: 9998;
+    box-shadow: rgba(0, 0, 0, 0.12) 0px 0px 37.5px 7.5px;
+    z-index: 1000;
 }
 
 .menubar button {
     padding: 4px 7px;
-    border-radius: 7px;
+    border-radius: 8px;
     border: none;
     background-color: rgb(0, 0, 0, 0);
 }
@@ -806,18 +823,18 @@ p {
     padding: 5px;
     border-radius: var(--rad1);
     background-color: var(--ui1);
-    box-shadow: rgba(0, 0, 0, 0.15) 0px 0px 75px 15px;
+    box-shadow: rgba(0, 0, 0, 0.12) 0px 0px 37.5px 7.5px;
     animation: tb 0.6s ease;
     backdrop-filter: blur(var(--bl2));
     -webkit-backdrop-filter: blur(var(--bl2));
     z-index: 1000;
     border-top: 1px solid var(--bc);
-    transition: 0.05s;
+    transition: 0.1s;
 }
 
 .tasknest button {
     padding: 3px 5px;
-    font-size: var(--fz2) !important;
+    font-size: var(--fz3) !important;
     box-shadow: none !important;
 }
 
@@ -827,7 +844,7 @@ p {
     }
 
     73% {
-        bottom: 0px;
+        bottom: 5px;
         padding-bottom: 11px;
     }
 
@@ -877,11 +894,11 @@ p {
 
 .brick-layout {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
 }
 
 .brick-layout button {
-    white-space: nowrap; 
+    white-space: nowrap;
     text-overflow: ellipsis !important;
     overflow: hidden !important;
 }

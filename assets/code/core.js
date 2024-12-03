@@ -230,7 +230,7 @@ var wd = {
         function startmenu() {
             if (el.sm == undefined) {
                 if (el.cc) {
-                    ui.dest(el.cc, 150);
+                    ui.dest(el.cc, 0);
                     el.cc = undefined;
                 }
                 el.sm = tk.c('div', el.taskthing, 'tbmenu');
@@ -245,7 +245,7 @@ var wd = {
                         if (app[key].hasOwnProperty("runs") && app[key].runs === true) {
                             const btn = tk.cb('b3', app[key].name, app[key].init.bind(app[key]), ok);
                             btn.addEventListener('click', function () {
-                                ui.dest(el.sm, 150);
+                                ui.dest(el.sm, 0);
                                 el.sm = undefined;
                             });
                             btn.style.textAlign = "left";
@@ -254,19 +254,17 @@ var wd = {
                 }
                 wd.reorg(ok);
             } else {
-                ui.dest(el.sm, 150);
+                ui.dest(el.sm, 0);
                 el.sm = undefined;
             }
         }
         function controlcenter() {
             if (el.cc == undefined) {
                 if (el.sm) {
-                    ui.dest(el.sm, 150);
+                    ui.dest(el.sm, 0);
                     el.sm = undefined;
                 }
-                el.cc = tk.c('div', el.taskthing, 'tbmenu');
-                const btm = el.taskbar.getBoundingClientRect();
-                el.cc.style.bottom = btm.height + 5 + "px";
+                el.cc = tk.c('div', document.body, 'menubardiv');
                 tk.p(`Controls`, 'h2', el.cc);
                 tk.p(`Your DeskID is ${sys.deskid}`, undefined, el.cc);
                 const ok = tk.c('div', el.cc, 'embed nest');
@@ -322,7 +320,7 @@ var wd = {
                 ui.tooltip(notificon, 'Silent toggle');
                 const p = tk.c('div', ok);
                 if (sys.guest === false && sys.echodesk === false) {
-                    const yeah = tk.cb('b3', 'Deep Sleep', function () {
+                    const yeah = tk.cb('b3 b2', 'Deep Sleep', function () {
                         const menu = tk.c('div', document.body, 'cm');
                         tk.p('Deep Sleep', 'bold', menu);
                         tk.p(`Your DeskID will work as normal, and WebDesk will use little resources. Save your work before entering.`, undefined, menu);
@@ -333,11 +331,11 @@ var wd = {
                     }, p);
                     yeah.style.marginTop = "2px";
                 }
-                tk.cb('b3', 'Reboot/Reload', function () {
+                tk.cb('b3 b2', 'Reboot/Reload', function () {
                     wd.reboot();
                 }, p);
             } else {
-                ui.dest(el.cc, 150);
+                ui.dest(el.cc, 0);
                 el.cc = undefined;
             }
         }
@@ -349,19 +347,17 @@ var wd = {
                 el.taskbar.style.left = `${(screenWidth - elementWidth) / 2}px`;
             }
             setInterval(tbresize, 50);
-            el.menubar = tk.c('div', document.body, 'menubar flexthing hide');
-            // I'm not sure what to do with this menu bar, so I'm gonna hide it for now.
+            el.menubar = tk.c('div', document.body, 'menubar flexthing');
             const left = tk.c('div', el.menubar, 'tnav');
             const right = tk.c('div', el.menubar, 'title');
-            el.menubarbtn = tk.cb('bold', 'Desktop', () => controlcenter(), left);
-            tk.cb('time', '--:--', () => controlcenter(), right);
+            el.menubarbtn = tk.cb('bold', undefined, () => controlcenter(), left);
+            el.contb = tk.cb('time', '--:--', () => controlcenter(), right);
+            ui.cv('menubarheight', el.menubar.getBoundingClientRect().height + "px");
             el.taskthing = tk.c('div', el.taskbar);
             const tasknest = tk.c('div', el.taskbar, 'tasknest');
             const lefttb = tk.c('div', tasknest, 'tnav auto');
-            const titletb = tk.c('div', tasknest, 'title');
             const start = tk.cb('b1', 'Apps', () => startmenu(), lefttb);
             el.tr = tk.c('div', lefttb);
-            el.contb = tk.cb('b1t time', '--:--', () => controlcenter(), titletb);
             if (sys.nvol === 0) el.contb.classList.toggle('silentbtn');
             if (sys.mobui === true) {
                 el.taskbar.style.boxShadow = "none";

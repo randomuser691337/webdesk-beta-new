@@ -1438,7 +1438,32 @@ var app = {
             const info = tk.c('div', main, 'abtinfo');
             const logo = tk.img('./assets/img/favicon.png', 'abtimg', side);
             tk.cb('b4 b2', 'Changes', () => wd.hawktuah(true), side);
-            tk.cb('b4 b2', 'Discord', () => window.open('https://discord.gg/pCbG6hAxFe', '_blank'), side);
+            tk.cb('b4 b2', 'Status', async function () {
+                const win = tk.mbw('Status', '300px');
+                try {
+                    const response = await fetch(`https://weather.meower.xyz/status`);
+                    const info = await response.json();
+                    if (info.status) {
+                        tk.ps('Weather: ' + info.status, undefined, win.main);
+                    } else {
+                        tk.ps('Weather: Offline', undefined, win.main);
+                    }
+                } catch (error) {
+                    tk.ps('Weather: Offline', undefined, win.main);
+                }
+                try {
+                    const response = await fetch(`https://appmarket.meower.xyz/status`);
+                    const info = await response.json();
+                    if (info.status) {
+                        tk.ps('App Market: ' + info.status, undefined, win.main);
+                    } else {
+                        tk.ps('App Market: Offline', undefined, win.main);
+                    }
+                } catch (error) {
+                    tk.ps('App Market: Offline', undefined, win.main);
+                }
+            }, side);
+            tk.cb('b4 b2', 'Discord', () => window.open('https://discord.gg/5Y6ycJS4gu', '_blank'), side);
             tk.cb('b4 b2', 'Creds', function () {
                 const ok = tk.c('div', document.body, 'cm');
                 ok.innerHTML = `<p class="bold">Credits</p>
