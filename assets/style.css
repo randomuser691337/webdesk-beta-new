@@ -97,6 +97,14 @@ button {
     border-radius: 13px;
 }
 
+.weatheri {
+    height: 40px;
+    width: 40px;
+    border-radius: 10px;
+    padding: 0px; margin: 0px;
+    background-color: rgba(var(--acc), 0.18);
+}
+
 p {
     padding: 0px;
     margin: 3px;
@@ -178,7 +186,7 @@ p {
 }
 
 .winf {
-    box-shadow: rgba(0, 0, 0, 0.32) 0px 0px 150px 30px;
+    box-shadow: rgba(0, 0, 0, 0.30) 0px 0px 150px 30px;
 }
 
 .content {
@@ -411,8 +419,7 @@ p {
 }
 
 .silentbtn {
-    border: 2px solid rgba(100, 100, 100, 0.18);
-    background-color: rgba(100, 100, 100, 0.15);
+    background-color: rgba(170, 30, 30, 0.15) !important;
 }
 
 .b3 {
@@ -695,7 +702,7 @@ p {
     right: 0px;
     bottom: 0px;
     width: 250px;
-    padding: 8px;
+    padding: 5px;
     overflow-x: visible;
     overflow-y: auto !important;
     padding-left: 50px;
@@ -774,8 +781,8 @@ p {
 .menubardiv {
     position: fixed;
     background-color: var(--ui1);
-    top: calc(var(--menubarheight) + 8px);
-    right: 8px;
+    top: calc(var(--menubarheight) + 5px);
+    right: 5px;
     padding: 8px;
     border-radius: var(--rad1);
     backdrop-filter: blur(var(--bl2));
@@ -797,6 +804,7 @@ p {
     box-shadow: rgba(0, 0, 0, 0.12) 0px 0px 37.5px 7.5px;
     z-index: 1000;
     font-size: var(--fz2);
+    border-bottom: 1px solid var(--bc);
 }
 
 .menubar button {
@@ -822,7 +830,7 @@ p {
 .taskbar {
     position: fixed;
     bottom: 5px;
-    padding: 5px;
+    padding: 4px;
     border-radius: var(--rad1);
     background-color: var(--ui1);
     box-shadow: rgba(0, 0, 0, 0.12) 0px 0px 37.5px 7.5px;
@@ -830,7 +838,7 @@ p {
     backdrop-filter: blur(var(--bl2));
     -webkit-backdrop-filter: blur(var(--bl2));
     z-index: 1000;
-    border-top: 1px solid var(--bc);
+    border: 1px solid var(--bc);
     transition: 0.1s;
     max-width: 90%;
 }

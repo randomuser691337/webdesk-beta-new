@@ -261,7 +261,7 @@ var wd = {
         function controlcenter() {
             if (el.cc == undefined) {
                 if (el.sm) {
-                    ui.dest(el.sm, 0);
+                    ui.dest(el.sm, 100);
                     el.sm = undefined;
                 }
                 el.cc = tk.c('div', document.body, 'menubardiv');
@@ -335,8 +335,34 @@ var wd = {
                     wd.reboot();
                 }, p);
             } else {
-                ui.dest(el.cc, 0);
+                ui.dest(el.cc, 100);
                 el.cc = undefined;
+            }
+        }
+        function appmenu() {
+            if (el.am == undefined) {
+                el.am = tk.c('div', document.body, 'menubardiv');
+                el.am.style.left = "5px";
+                el.am.style.width = "140px";
+                tk.cb('b3 b2', 'Minimize/Hide', function () {
+                    if (focused.minbtn) {
+                        const mousedownevent = new MouseEvent('mousedown');
+                        focused.minbtn.dispatchEvent(mousedownevent);
+                    }
+                    ui.dest(el.am, 100);
+                    el.am = undefined;
+                }, el.am);
+                tk.cb('b3 b2', 'Quit', function () {
+                    if (focused.closebtn) {
+                        const mousedownevent = new MouseEvent('mousedown');
+                        focused.closebtn.dispatchEvent(mousedownevent);
+                    }
+                    ui.dest(el.am, 100);
+                    el.am = undefined;
+                }, el.am);
+            } else {
+                ui.dest(el.am, 100);
+                el.am = undefined;
             }
         }
         function desktopgo() {
@@ -346,11 +372,12 @@ var wd = {
                 const elementWidth = el.taskbar.offsetWidth;
                 el.taskbar.style.left = `${(screenWidth - elementWidth) / 2}px`;
             }
-            setInterval(tbresize, 50);
+            window.addEventListener('resize', tbresize);
+            setInterval(tbresize, 100);
             el.menubar = tk.c('div', document.body, 'menubar flexthing');
             const left = tk.c('div', el.menubar, 'tnav');
             const right = tk.c('div', el.menubar, 'title');
-            el.menubarbtn = tk.cb('bold', undefined, () => controlcenter(), left);
+            el.menubarbtn = tk.cb('bold', 'Desktop', () => appmenu(), left);
             el.contb = tk.cb('time', '--:--', () => controlcenter(), right);
             ui.cv('menubarheight', el.menubar.getBoundingClientRect().height + "px");
             el.taskthing = tk.c('div', el.taskbar);
@@ -361,7 +388,10 @@ var wd = {
             if (sys.nvol === 0) el.contb.classList.toggle('silentbtn');
             if (sys.mobui === true) {
                 el.taskbar.style.boxShadow = "none";
+                el.menubar.style.boxShadow = "none";
             }
+            el.tbpos = el.taskbar.getBoundingClientRect();
+            el.mbpos = el.menubar.getBoundingClientRect();
         }
         if (waitopt === "wait") {
             setTimeout(function () { desktopgo(); }, 360);
@@ -881,4 +911,5 @@ async function wakelockgo() {
     }
 }
 
+wd.clock();
 setInterval(wd.clock, 1000);

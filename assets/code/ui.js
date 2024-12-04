@@ -421,13 +421,14 @@ var tk = {
             windowDiv.style.maxWidth = "80vw";
             windowDiv.style.maxHeight = "90vh";
         } else {
-            windowDiv.style.top = "5px";
+            const btm2 = el.mbpos;
+            windowDiv.style.top = btm2.height + 5 + "px";
             windowDiv.style.left = "5px";
             windowDiv.style.right = "5px";
             windowDiv.style.boxShadow = "none";
             windowDiv.style.resize = "none";
-            const btm = el.taskbar.getBoundingClientRect();
-            windowDiv.style.bottom = btm.height + btm.x + 5 + "px";
+            const btm = el.tbpos;
+            windowDiv.style.bottom = btm.height + 10 + "px";
         }
         var winbtns = tk.c('div', undefined, 'tnav');
         var closeButton = document.createElement('button');
