@@ -52,18 +52,6 @@ var wm = {
         div.addEventListener('click', () => ui.dest(div));
         return div;
     },
-    close: function (id) {
-        const div = document.getElementById(id);
-        if (div) {
-            hidef(id);
-            const fuck = "btn_" + id;
-            if (document.getElementById(fuck)) {
-                dest(fuck);
-            }
-        } else {
-            log(`<!> Error closing window. Window: ${div} - Button: ${document.getElementById(fuck)}`);
-        }
-    },
     max: function (wid) {
         if (wid) {
             wid.classList.toggle('max');
@@ -121,11 +109,31 @@ var wm = {
         }
         wd.win(wid);
     },
-    mini: function (window) {
-        hidef(window, 120);
+    close: async function (window, tbn) {
+        const mousedownevent = new MouseEvent('mousedown');
+        window.dispatchEvent(mousedownevent);
+        ui.dest(window, 130);
+        ui.dest(tbn, 130);
+        setTimeout(async function () {
+            const yeah = await ughfine(window);
+            if (yeah) {
+                yeah.dispatchEvent(mousedownevent);
+            } else {
+                el.menubarbtn.innerText = "Desktop";
+            }
+        }, 40);
     },
-    mini: function (window) {
-        showf(window, 0);
+    minimize: async function (window, tbn) {
+        const mousedownevent = new MouseEvent('mousedown');
+        wm.min(window, tbn);
+        setTimeout(async function () {
+            const yeah = await ughfine(window);
+            if (yeah) {
+                yeah.dispatchEvent(mousedownevent);
+            } else {
+                el.menubarbtn.innerText = "Desktop";
+            }
+        }, 40);
     },
     notif: function (name, cont, mode, button, mute) {
         if (mute !== true) {

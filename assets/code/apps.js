@@ -342,9 +342,11 @@ var app = {
             }, ok.main);
             tk.cb('b1 b2', 'Update Location', async function () {
                 const data = await wd.savecity();
-                await fs.write('/user/info/location.json', [{ city: data.location, unit: data.unit, lastupdate: Date.now(), default: false }]);
+                const hawktuah = Date.now();
+                await fs.write('/user/info/location.json', [{ city: data.location, unit: data.unit, lastupdate: hawktuah, default: false }]);
                 sys.city = data.location;
                 sys.unit = data.unit;
+                sys.loclast = hawktuah;
                 sys.defaultloc = false;
                 if (ok.unit === "Metric") {
                     sys.unitsym = "°C";
@@ -459,6 +461,7 @@ var app = {
                 sys.guest = true;
                 sys.name = "Guest";
                 wd.desktop('Guest', gen(8));
+                fs.write('/user/files/Welcome to WebDesk!.txt', `Welcome to WebDesk! This is your Files folder, where things you upload are stored. Use the buttons at the top to navigate between folders.`);
                 wm.notif('Welcome to WebDesk!', `You've logged in as a guest, so WebDesk will be erased on reload and some features won't be available.`);
             }, first);
             tk.cb('b1', `Let's go`, () => ui.sw2(first, transfer), first);
@@ -1638,7 +1641,7 @@ var app = {
                 title.style.maxHeight = "40px";
                 img.src = `https://openweathermap.org/img/wn/${info.weather[0].icon}@2x.png`;
                 tk.p(`Humidity is ${info.main.humidity}%, and it feels like ${Math.ceil(info.main.feels_like)}${sys.unitsym}.`, undefined, skibidi);
-                tk.p(`Weather data from <a href="https://openweathermap.org", target="_blank">OpenWeatherMap</a>`, 'smtxt', skibidi);
+                tk.p(`Data from <a href="https://openweathermap.org", target="_blank">OpenWeatherMap.</a>`, 'smtxt', skibidi);
                 tk.cb('b1', 'Settings', () => app.locset.init(), skibidi);
                 tk.cb('b1', 'Refresh', function () {
                     refresh(); wm.snack('Refreshed');
@@ -1708,13 +1711,12 @@ var app = {
 
             console.log(`<i> Installing ${apploc}`);
             const apps = await fs.read('/system/apps.json');
-            const ok = await execute(sys.appurl + apploc);
             const newen = { name: app.name, ver: app.ver, installedon: Date.now(), dev: app.pub, appid: app.appid, exec: '/system/apps/' + app.appid + '.js' };
-            await fs.write('/system/apps/' + app.appid + '.js', ok);
             const jsondata = JSON.parse(apps);
             const check = jsondata.some(entry => entry.appid === newen.appid);
             if (check === true) {
                 wm.snack('Already installed');
+                return;
             } else {
                 jsondata.push(newen);
                 if (update === true) {
@@ -1724,6 +1726,8 @@ var app = {
                 }
                 fs.write('/system/apps.json', jsondata);
             }
+            const ok = await execute(sys.appurl + apploc);
+            await fs.write('/system/apps/' + app.appid + '.js', ok);
         },
         init: async function () {
             const win = tk.mbw('App Market', '340px', 'auto', true, undefined, undefined);
@@ -1743,7 +1747,6 @@ var app = {
                     console.log(error);
                 }
             }
-            tk.p('Welcome to the App Market!', undefined, apps);
             tk.p(`Look for things you might want, all apps have <span class="bold">full access</span> to this WebDesk/it's files. Anything in this store is safe.`, undefined, apps);
             if (sys.dev === true) {
                 tk.cb('b1', 'Sideload', function () {

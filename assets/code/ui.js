@@ -449,9 +449,8 @@ var tk = {
         }, el.tr);
         if (quit === undefined) {
             closeButton.classList.add('red');
-            closeButton.addEventListener('mousedown', function () {
-                ui.dest(windowDiv, 100);
-                ui.dest(tbn, 100);
+            closeButton.addEventListener('mousedown', async function () {
+                await wm.close(windowDiv, tbn);
             });
         }
 
@@ -464,8 +463,8 @@ var tk = {
         }
         if (min === undefined) {
             minimizeButton.classList.add('yel');
-            minimizeButton.addEventListener('mousedown', function () {
-                wm.min(windowDiv, tbn);
+            minimizeButton.addEventListener('mousedown', async function () {
+                await wm.minimize(windowDiv, tbn);
             });
         }
 
@@ -496,9 +495,9 @@ var tk = {
         windowDiv.appendChild(contentDiv);
         document.body.appendChild(windowDiv);
         wd.win();
-        wd.win(windowDiv, closeButton, minimizeButton);
+        wd.win(windowDiv, closeButton, minimizeButton, tbn);
         windowDiv.addEventListener('mousedown', function () {
-            wd.win(windowDiv, closeButton, minimizeButton);
+            wd.win(windowDiv, closeButton, minimizeButton, tbn);
         });
         if (sys.mobui !== true) {
             setTimeout(function () { ui.center(windowDiv); }, 30);

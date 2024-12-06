@@ -85,6 +85,7 @@ async function gens(length) {
 
 var focused = {
     closebtn: undefined,
+    tbn: undefined,
     window: undefined,
     minbtn: undefined,
 }
@@ -113,21 +114,11 @@ function ughfine(targetElement) {
 document.addEventListener('keydown', async function (event) {
     if (event.altKey && event.key.toLowerCase() === 'q' && focused.closebtn !== undefined) {
         event.preventDefault();
-        const yeah = await ughfine(focused.window);
-        const mousedownevent = new MouseEvent('mousedown');
-        focused.closebtn.dispatchEvent(mousedownevent);
-        if (yeah) {
-            yeah.dispatchEvent(mousedownevent);
-        }
+        await wm.close(focused.window, focused.tbn);
     }
     if (event.altKey && event.key.toLowerCase() === 'm' && focused.minbtn !== undefined) {
         event.preventDefault();
-        const yeah = await ughfine(focused.window);
-        const mousedownevent = new MouseEvent('mousedown');
-        focused.minbtn.dispatchEvent(mousedownevent);
-        if (yeah) {
-            yeah.dispatchEvent(mousedownevent);
-        }
+        await wm.minimize(focused.window, focused.tbn);
     }
     if (event.altKey && event.key.toLowerCase() === 'l') {
         event.preventDefault();
@@ -151,7 +142,7 @@ document.addEventListener('keydown', async function (event) {
 });
 
 var wd = {
-    win: function (winfocus, closebtn, minbtn) {
+    win: function (winfocus, closebtn, minbtn, tbnbtn) {
         if (winfocus) {
             if (closebtn) {
                 focused.closebtn = closebtn;
@@ -159,6 +150,9 @@ var wd = {
             }
             if (minbtn) {
                 focused.minbtn = minbtn;
+            }
+            if (tbnbtn) {
+                focused.tbn = tbnbtn;
             }
             var $winfocus = $(winfocus);
             if ($winfocus.length && !$winfocus.hasClass('max') && !$winfocus.hasClass('unmax')) {
@@ -170,7 +164,9 @@ var wd = {
                 $winfocus.css('z-index', highestZIndex + 1);
                 $('.window').removeClass('winf');
                 $winfocus.addClass('winf');
-                el.menubarbtn.innerText = winfocus.getAttribute('wdname');
+                if (el.menubarbtn) {
+                    el.menubarbtn.innerText = winfocus.getAttribute('wdname');
+                }
             }
             return;
         }
@@ -341,24 +337,14 @@ var wd = {
         }
         function appmenu() {
             if (el.am == undefined) {
-                el.am = tk.c('div', document.body, 'menubardiv');
-                el.am.style.left = "5px";
+                el.am = tk.c('div', document.body, 'menubardiv menubarb');
+                el.am.style.left = "7px";
                 el.am.style.width = "140px";
-                tk.cb('b3 b2', 'Minimize/Hide', function () {
-                    if (focused.minbtn) {
-                        const mousedownevent = new MouseEvent('mousedown');
-                        focused.minbtn.dispatchEvent(mousedownevent);
-                    }
-                    ui.dest(el.am, 100);
-                    el.am = undefined;
+                tk.cb('b2', 'Minimize/Hide', async function () {
+                    await wm.minimize(focused.window, focused.tbn);
                 }, el.am);
-                tk.cb('b3 b2', 'Quit', function () {
-                    if (focused.closebtn) {
-                        const mousedownevent = new MouseEvent('mousedown');
-                        focused.closebtn.dispatchEvent(mousedownevent);
-                    }
-                    ui.dest(el.am, 100);
-                    el.am = undefined;
+                tk.cb('b2', 'Quit', async function () {
+                    await wm.close(focused.window, focused.tbn);
                 }, el.am);
             } else {
                 ui.dest(el.am, 100);
@@ -374,12 +360,11 @@ var wd = {
             }
             window.addEventListener('resize', tbresize);
             setInterval(tbresize, 100);
-            el.menubar = tk.c('div', document.body, 'menubar flexthing');
+            el.menubar = tk.c('div', document.body, 'menubar menubarb flexthing');
             const left = tk.c('div', el.menubar, 'tnav');
             const right = tk.c('div', el.menubar, 'title');
             el.menubarbtn = tk.cb('bold', 'Desktop', () => appmenu(), left);
             el.contb = tk.cb('time', '--:--', () => controlcenter(), right);
-            ui.cv('menubarheight', el.menubar.getBoundingClientRect().height + "px");
             el.taskthing = tk.c('div', el.taskbar);
             const tasknest = tk.c('div', el.taskbar, 'tasknest');
             const lefttb = tk.c('div', tasknest, 'tnav auto');
@@ -390,8 +375,11 @@ var wd = {
                 el.taskbar.style.boxShadow = "none";
                 el.menubar.style.boxShadow = "none";
             }
-            el.tbpos = el.taskbar.getBoundingClientRect();
-            el.mbpos = el.menubar.getBoundingClientRect();
+            setTimeout(function () {
+                el.tbpos = el.taskbar.getBoundingClientRect();
+                el.mbpos = el.menubar.getBoundingClientRect();
+                ui.cv('menubarheight', el.mbpos.height + "px");
+            }, 400);
         }
         if (waitopt === "wait") {
             setTimeout(function () { desktopgo(); }, 360);
@@ -756,7 +744,7 @@ var wd = {
         }
     },
     defaultcolor: function () {
-        ui.crtheme('#7A7AFF');
+        ui.crtheme('#7f7fff');
         wd.light();
     },
     wetter: function () {
