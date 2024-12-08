@@ -109,19 +109,9 @@ var wm = {
         }
         wd.win(wid);
     },
-    close: async function (window, tbn) {
+    close: async function (window) {
         const mousedownevent = new MouseEvent('mousedown');
-        window.dispatchEvent(mousedownevent);
-        ui.dest(window, 130);
-        ui.dest(tbn, 130);
-        setTimeout(async function () {
-            const yeah = await ughfine(window);
-            if (yeah) {
-                yeah.dispatchEvent(mousedownevent);
-            } else {
-                el.menubarbtn.innerText = "Desktop";
-            }
-        }, 40);
+        focused.closebtn.dispatchEvent(mousedownevent);
     },
     minimize: async function (window, tbn) {
         const mousedownevent = new MouseEvent('mousedown');

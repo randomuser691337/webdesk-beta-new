@@ -428,7 +428,7 @@ var tk = {
             windowDiv.style.boxShadow = "none";
             windowDiv.style.resize = "none";
             const btm = el.tbpos;
-            windowDiv.style.bottom = btm.height + 10 + "px";
+            windowDiv.style.bottom = btm.height + 5 + "px";
         }
         var winbtns = tk.c('div', undefined, 'tnav');
         var closeButton = document.createElement('button');
@@ -450,7 +450,18 @@ var tk = {
         if (quit === undefined) {
             closeButton.classList.add('red');
             closeButton.addEventListener('mousedown', async function () {
-                await wm.close(windowDiv, tbn);
+                const mousedownevent = new MouseEvent('mousedown');
+                windowDiv.dispatchEvent(mousedownevent);
+                ui.dest(windowDiv, 130);
+                ui.dest(tbn, 130);
+                setTimeout(async function () {
+                    const yeah = await ughfine(windowDiv);
+                    if (yeah) {
+                        yeah.dispatchEvent(mousedownevent);
+                    } else {
+                        el.menubarbtn.innerText = "Desktop";
+                    }
+                }, 40);
             });
         }
 

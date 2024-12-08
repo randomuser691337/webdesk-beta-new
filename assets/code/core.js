@@ -228,6 +228,9 @@ var wd = {
                 if (el.cc) {
                     ui.dest(el.cc, 0);
                     el.cc = undefined;
+                } else if (el.am) {
+                    ui.dest(el.am, 40);
+                    el.am = undefined;
                 }
                 el.sm = tk.c('div', el.taskthing, 'tbmenu');
                 el.sm.style.left = "5px";
@@ -257,8 +260,11 @@ var wd = {
         function controlcenter() {
             if (el.cc == undefined) {
                 if (el.sm) {
-                    ui.dest(el.sm, 100);
+                    ui.dest(el.sm, 40);
                     el.sm = undefined;
+                } else if (el.am) {
+                    ui.dest(el.am, 40);
+                    el.am = undefined;
                 }
                 el.cc = tk.c('div', document.body, 'menubardiv');
                 tk.p(`Controls`, 'h2', el.cc);
@@ -331,12 +337,19 @@ var wd = {
                     wd.reboot();
                 }, p);
             } else {
-                ui.dest(el.cc, 100);
+                ui.dest(el.cc, 40);
                 el.cc = undefined;
             }
         }
         function appmenu() {
             if (el.am == undefined) {
+                if (el.sm) {
+                    ui.dest(el.sm, 40);
+                    el.sm = undefined;
+                } else if (el.cc) {
+                    ui.dest(el.cc, 40);
+                    el.cc = undefined;
+                }
                 el.am = tk.c('div', document.body, 'menubardiv menubarb');
                 el.am.style.left = "7px";
                 el.am.style.width = "140px";
@@ -347,7 +360,7 @@ var wd = {
                     await wm.close(focused.window, focused.tbn);
                 }, el.am);
             } else {
-                ui.dest(el.am, 100);
+                ui.dest(el.am, 40);
                 el.am = undefined;
             }
         }
