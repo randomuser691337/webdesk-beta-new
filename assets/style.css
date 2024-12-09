@@ -101,7 +101,8 @@ button {
     height: 40px;
     width: 40px;
     border-radius: 10px;
-    padding: 0px; margin: 0px;
+    padding: 0px;
+    margin: 0px;
     background-color: rgba(var(--acc), 0.18);
 }
 
@@ -841,8 +842,13 @@ p {
 }
 
 @keyframes menubar {
-    0% {top: -40px;}
-    100% {top: 0px;}
+    0% {
+        top: -40px;
+    }
+
+    100% {
+        top: 0px;
+    }
 }
 
 .menubarb button {
@@ -1188,4 +1194,22 @@ a:active {
 
 .dash {
     border: 2px dotted rgba(var(--acc), 0.7) !important;
+}
+
+.buttonflex {
+    display: flex;
+    align-items: center;
+    width: 100%;
+    box-sizing: border-box;
+    gap: 6px;
+}
+
+.buttonflex input {
+    flex: 1;
+    width: unset !important;
+    box-sizing: unset !important;
+}
+
+.buttonflex button {
+    white-space: nowrap;
 }

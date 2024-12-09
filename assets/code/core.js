@@ -213,11 +213,6 @@ var wd = {
                     $(document).off('mousemove touchmove');
                     $window.removeClass('dragging');
                 });
-
-                document.body.addEventListener('touchmove', function (event) {
-                    event.preventDefault();
-                }, { passive: false });
-
             }
         });
     },
@@ -381,7 +376,7 @@ var wd = {
             el.taskthing = tk.c('div', el.taskbar);
             const tasknest = tk.c('div', el.taskbar, 'tasknest');
             const lefttb = tk.c('div', tasknest, 'tnav auto');
-            const start = tk.cb('b1', 'Apps', () => startmenu(), lefttb);
+            el.startbutton = tk.cb('b1', 'Apps', () => startmenu(), lefttb);
             el.tr = tk.c('div', lefttb);
             if (sys.nvol === 0) el.contb.classList.toggle('silentbtn');
             if (sys.mobui === true) {
@@ -392,10 +387,11 @@ var wd = {
                 el.tbpos = el.taskbar.getBoundingClientRect();
                 el.mbpos = el.menubar.getBoundingClientRect();
                 ui.cv('menubarheight', el.mbpos.height + "px");
+                el.startbutton.click();
             }, 400);
         }
         if (waitopt === "wait") {
-            setTimeout(function () { desktopgo(); }, 360);
+            setTimeout(function () { desktopgo(); }, 340);
         } else {
             desktopgo();
         }

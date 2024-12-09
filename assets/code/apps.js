@@ -1436,6 +1436,7 @@ var app = {
             const side = tk.c('div', main, 'abtlogo');
             const info = tk.c('div', main, 'abtinfo');
             const logo = tk.img('./assets/img/favicon.png', 'abtimg', side);
+            win.main.style.padding = "0px";
             tk.cb('b4 b2', 'Changes', () => wd.hawktuah(true), side);
             tk.cb('b4 b2', 'Status', async function () {
                 const win = tk.mbw('Status', '300px', undefined, true);
@@ -2142,7 +2143,7 @@ var app = {
                         callStatus.textContent = `Other person didn't answer`;
                         call.close();
                     }
-                }, 28000);
+                }, 24000);
 
                 call.on('stream', (remoteStream) => {
                     oncall = true;
