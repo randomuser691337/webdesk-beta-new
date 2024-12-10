@@ -133,6 +133,21 @@ var app = {
                     }, pane);
                 }
             }, generalPane);
+            const pgfx = tk.c('div', generalPane, 'list');
+            const okgfx = tk.c('span', pgfx);
+            okgfx.innerText = "Performance mode ";
+            tk.cb('b3', 'On', async function () {
+                wm.notif('Performance mode on', `Reboot to apply changes.`, function () {
+                    wd.reboot();
+                }, 'Reboot', true);
+                await fs.write('/system/info/lowgfx', 'true');
+            }, pgfx);
+            tk.cb('b3', 'Off', async function () {
+                wm.notif('Performance mode off', `Reboot to apply changes.`, function () {
+                    wd.reboot();
+                }, 'Reboot', true);
+                await fs.del('/system/info/lowgfx');
+            }, pgfx);
             const p = tk.c('div', generalPane, 'list');
             const ok = tk.c('span', p);
             ok.innerText = "Clock seconds ";
@@ -1078,15 +1093,38 @@ var app = {
                             e.dataTransfer.setData('text/plain', item.path);
                         });
                         fileItem.draggable = true;
-                        fileItem.addEventListener('contextmenu', async function (e) {
-                            e.preventDefault();
+                        let isLongPress = false;
+                        let timer;
+
+                        async function openmenu() {
                             const menu2 = tk.c('div', document.body, 'cm');
                             const date = await fs.date(item.path);
                             tk.p(`<span class="bold">Created</span> ${wd.timec(date.created)}`, undefined, menu2);
                             tk.p(`<span class="bold">Edited</span> ${wd.timec(date.edit)}`, undefined, menu2);
                             tk.p(`<span class="bold">Read</span> ${wd.timec(date.read)}`, undefined, menu2);
                             tk.cb('b1', 'Cancel', () => ui.dest(menu2), menu2);
-                        })
+                        }
+
+                        fileItem.addEventListener('touchstart', e => {
+                            e.preventDefault();
+                            isLongPress = false;
+                            timer = setTimeout(() => {
+                                isLongPress = true;
+                                openmenu();
+                            }, 500);
+                        });
+                        fileItem.addEventListener('touchend', () => {
+                            clearTimeout(timer);
+                            if (!isLongPress) {
+                                fileItem.click();
+                            }
+                        });
+                        fileItem.addEventListener('touchmove', () => clearTimeout(timer));
+                        fileItem.addEventListener('touchcancel', () => clearTimeout(timer));
+                        fileItem.addEventListener('contextmenu', e => {
+                            e.preventDefault();
+                            openmenu();
+                        });
                     }
                 });
                 items2 = items.querySelectorAll('.flist');

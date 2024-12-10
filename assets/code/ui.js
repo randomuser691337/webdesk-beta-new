@@ -27,13 +27,13 @@ var ui = {
     sw: function (d1, d2) {
         const dr1 = document.getElementById(d1);
         const dr2 = document.getElementById(d2);
-        $(dr1).fadeOut(130, function () { $(dr2).fadeIn(130); });
+        $(dr1).fadeOut(120, function () { $(dr2).fadeIn(120); });
     },
     sw2: function (d1, d2, fadetime) {
         if (fadetime) {
             $(d1).fadeOut(fadetime, function () { $(d2).fadeIn(fadetime); });
         } else {
-            $(d1).fadeOut(140, function () { $(d2).fadeIn(130); });
+            $(d1).fadeOut(120, function () { $(d2).fadeIn(120); });
         }
     },
     hide: function (dr1, anim) {
@@ -405,6 +405,20 @@ var tk = {
         if (ele) {
             ele.appendChild(button);
         }
+
+        if (classn.includes('b1') && sys.lowgfx === false) {
+            button.onmouseleave = (e) => {
+                e.target.style.background = "rgba(var(--accent), 0.4)";
+            };
+
+            button.addEventListener("mousemove", (e) => {
+                const rect = e.target.getBoundingClientRect();
+                const x = e.clientX - rect.left;
+                const y = e.clientY - rect.top;
+                e.target.style.background = `radial-gradient(circle at ${x}px ${y}px , rgba(var(--accent), 0.65),rgba(var(--accent), 0.5))`;
+            });
+        }
+
         return button;
     },
     a: function (ele1, ele2) {

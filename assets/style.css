@@ -65,7 +65,7 @@ body {
 }
 
 button {
-    cursor: pointer;
+    cursor: default !important;
     font-family: 'FontM', Arial;
     color: var(--font);
 }
@@ -211,6 +211,7 @@ p {
     position: sticky;
     top: 0;
     cursor: default !important;
+    box-shadow: 0 2px 3px rgba(0, 0, 0, 0.02);
 }
 
 .winf {
@@ -409,7 +410,7 @@ p {
     font-size: var(--fz1);
     padding: 5px 8px;
     margin: 1px;
-    transition: 0.06s ease-in-out;
+    transition: 0.04s ease-in-out, background-color 0s !important;
     cursor: pointer;
     border: 2px solid transparent;
     color: var(--font);
@@ -418,7 +419,7 @@ p {
 .b1:hover {
     box-shadow: rgba(0, 0, 0, 0.2) 0px 0px 20px 4px;
     border: 2px solid rgba(var(--acc), 0.8);
-    background-color: rgba(var(--acc), 0.6);
+    background-color: rgba(var(--acc), 0.5);
 }
 
 .b1:active {
@@ -432,7 +433,7 @@ p {
     font-size: var(--fz1);
     padding: 4px 7px;
     margin: 1px;
-    transition: 0.06s ease-in-out;
+    transition: 0.04s ease-in-out;
     cursor: pointer;
     border: 2px solid transparent;
     color: var(--font);
@@ -487,7 +488,7 @@ p {
     font-size: var(--fz2);
     border: none;
     cursor: pointer;
-    transition: all 0.05s ease-in-out;
+    transition: all 0.04s ease-in-out;
     margin-left: 4px;
 }
 
@@ -498,12 +499,13 @@ p {
     font-size: var(--fz4);
     border: 1px solid transparent;
     cursor: pointer;
-    transition: all 0.05s ease-in-out;
+    transition: all 0.04s ease-in-out;
     margin: 1px;
 }
 
 .b4:hover {
-    border: 1px solid rgba(var(--accent), 0.38);
+    border: 1px solid rgba(var(--accent), 0.4);
+    background-color: rgba(var(--accent), 0.35);
 }
 
 .b4:active {
