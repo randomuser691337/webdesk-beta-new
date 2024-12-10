@@ -168,6 +168,10 @@ p {
     }
 }
 
+.resizeoff {
+    resize: none !important;
+}
+
 .window {
     position: absolute;
     border-radius: var(--rad1);
@@ -956,6 +960,7 @@ p {
 .brick-layout {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
+    gap: 1px
 }
 
 .brick-layout button {
@@ -1034,7 +1039,7 @@ p {
     overflow: auto;
     max-height: 75%;
     vertical-align: middle;
-    border: none !important;
+    border: 1px solid var(--bc);
 }
 
 .nest {
@@ -1043,6 +1048,7 @@ p {
     padding: 7px;
     overflow: auto !important;
     border: 1px solid var(--bc);
+    color: var(--font);
 }
 
 .warn {

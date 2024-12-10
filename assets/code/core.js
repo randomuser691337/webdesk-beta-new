@@ -237,7 +237,7 @@ var wd = {
                 for (var key in app) {
                     if (app.hasOwnProperty(key)) {
                         if (app[key].hasOwnProperty("runs") && app[key].runs === true) {
-                            const btn = tk.cb('b3', app[key].name, app[key].init.bind(app[key]), ok);
+                            const btn = tk.cb('b3', app[key].name, app[key].init.bind(), ok);
                             btn.addEventListener('click', function () {
                                 ui.dest(el.sm, 0);
                                 el.sm = undefined;
@@ -328,6 +328,13 @@ var wd = {
                     }, p);
                     yeah.style.marginTop = "2px";
                 }
+                tk.cb('b3 b2', 'Clear Notifications', function () {
+                    ui.hide(tk.g('notif'), 200);
+                    setTimeout(function () {
+                        tk.g('notif').innerHTML = "";
+                        ui.show(tk.g('notif'));
+                    }, 200);
+                }, p);
                 tk.cb('b3 b2', 'Reboot/Reload', function () {
                     wd.reboot();
                 }, p);
@@ -661,19 +668,18 @@ var wd = {
                 const fucker = await fs.read(inapp.exec);
                 eval(fucker);
             } else {
-                wm.notif(inapp.name + ` isn't recognized`, `This app has been blocked for safety. For more details, hit "Open".`, function () {
+                wm.notif(inapp.name + ` isn't recognized`, `This app has been blocked for safety. For options, hit "Open".`, function () {
                     const thing = tk.c('div', document.body, 'cm');
-                    tk.p(`This app isn't on the App Market, so it's been flagged and blocked.`, undefined, thing);
-                    tk.p(`If you didn't add this, remove all apps. Their data will be saved.`, undefined, thing);
-                    tk.p(`If you want to use this app, enable Developer Mode in Settings.`, undefined, thing);
-                    tk.cb('b1 b2', 'Remove All Apps', async function () {
-                        await fs.del('/system/apps.json');
-                        await fs.delfold('/system/apps');
+                    tk.p(`This app isn't on the App Market, so it's been blocked.`, undefined, thing);
+                    tk.p(`If you didn't add this, consider erasing WebDesk, as it could be a virus. If you don't want to, just remove it.`, undefined, thing);
+                    tk.cb('b1 b2', 'Remove ' + inapp.name, async function () {
+                        const data = await fs.read('/system/apps.json');
+                        const parsed = JSON.parse(data);
+                        const updatedApps = parsed.filter(item => item.appid !== inapp.appid);
+                        const updatedData = JSON.stringify(updatedApps);
+                        await fs.write('/system/apps.json', updatedData);
+                        await fs.del(inapp.exec);
                         await wd.reboot();
-                    }, thing);
-                    tk.cb('b1 b2', 'Open Settings', function () {
-                        app.settings.init();
-                        ui.dest(thing);
                     }, thing);
                     tk.cb('b1', 'Close', function () {
                         ui.dest(thing);
