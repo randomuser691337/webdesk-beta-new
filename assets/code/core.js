@@ -218,19 +218,19 @@ var wd = {
     },
     desktop: function (name, deskid, waitopt) {
         ui.dest(tk.g('setuparea'));
+        let screenWidth;
         function startmenu() {
             if (el.sm == undefined) {
                 if (el.cc) {
-                    ui.dest(el.cc, 0);
+                    ui.dest(el.cc, 40);
                     el.cc = undefined;
                 } else if (el.am) {
                     ui.dest(el.am, 40);
                     el.am = undefined;
                 }
-                el.sm = tk.c('div', el.taskthing, 'tbmenu');
-                el.sm.style.left = "5px";
-                const btm = el.taskbar.getBoundingClientRect();
-                el.sm.style.bottom = btm.height + 5 + "px";
+                el.sm = tk.c('div', document.body, 'tbmenu');
+                elementWidth = el.sm.offsetWidth;
+                el.sm.style.left = `${(screenWidth - elementWidth) / 2}px`;
                 tk.p(`Hello, ${name}!`, 'h2', el.sm);
                 tk.p(`Your DeskID is ${sys.deskid}`, undefined, el.sm);
                 const ok = tk.c('div', el.sm, 'embed nest brick-layout');
@@ -248,14 +248,14 @@ var wd = {
                 }
                 wd.reorg(ok);
             } else {
-                ui.dest(el.sm, 0);
+                ui.dest(el.sm, 140);
                 el.sm = undefined;
             }
         }
         function controlcenter() {
             if (el.cc == undefined) {
                 if (el.sm) {
-                    ui.dest(el.sm, 40);
+                    ui.dest(el.sm, 140);
                     el.sm = undefined;
                 } else if (el.am) {
                     ui.dest(el.am, 40);
@@ -346,7 +346,7 @@ var wd = {
         function appmenu() {
             if (el.am == undefined) {
                 if (el.sm) {
-                    ui.dest(el.sm, 40);
+                    ui.dest(el.sm, 140);
                     el.sm = undefined;
                 } else if (el.cc) {
                     ui.dest(el.cc, 40);
@@ -369,18 +369,17 @@ var wd = {
         function desktopgo() {
             el.taskbar = tk.c('div', document.body, 'taskbar');
             function tbresize() {
-                const screenWidth = window.innerWidth;
-                const elementWidth = el.taskbar.offsetWidth;
+                screenWidth = window.innerWidth;
+                elementWidth = el.taskbar.offsetWidth;
                 el.taskbar.style.left = `${(screenWidth - elementWidth) / 2}px`;
             }
             window.addEventListener('resize', tbresize);
-            setInterval(tbresize, 100);
+            setInterval(tbresize, 200);
             el.menubar = tk.c('div', document.body, 'menubar menubarb flexthing');
             const left = tk.c('div', el.menubar, 'tnav');
             const right = tk.c('div', el.menubar, 'title');
             el.menubarbtn = tk.cb('bold', 'Desktop', () => appmenu(), left);
             el.contb = tk.cb('time', '--:--', () => controlcenter(), right);
-            el.taskthing = tk.c('div', el.taskbar);
             const tasknest = tk.c('div', el.taskbar, 'tasknest');
             const lefttb = tk.c('div', tasknest, 'tnav auto');
             el.startbutton = tk.cb('b1', 'Apps', () => startmenu(), lefttb);
@@ -394,6 +393,7 @@ var wd = {
                 el.tbpos = el.taskbar.getBoundingClientRect();
                 el.mbpos = el.menubar.getBoundingClientRect();
                 ui.cv('menubarheight', el.mbpos.height + "px");
+                ui.cv('hawktuah', el.tbpos.height + 5 + "px");
                 el.startbutton.click();
             }, 400);
         }
@@ -772,7 +772,7 @@ var wd = {
         tk.p('If you deny, your location will be set to Paris, France.', undefined, menu);
         tk.cb('b1', 'Deny', async function () {
             await fs.write('/user/info/location.json', [{ city: 'Paris, France', unit: 'Metric', lastupdate: Date.now(), default: true }]);
-            wd.reboot();
+            ui.dest(main);
         }, menu);
         tk.cb('b1', 'More Info', async function () {
             ui.sw2(menu, info);
@@ -781,7 +781,16 @@ var wd = {
             try {
                 const data = await wd.savecity();
                 await fs.write('/user/info/location.json', [{ city: data.location, unit: data.unit, lastupdate: Date.now(), default: false }]);
-                wd.reboot();
+                sys.city = data.location;
+                sys.unit = data.unit;
+                if (sys.unit === "Metric") {
+                    sys.unitsym = "°C";
+                } else {
+                    sys.unitsym = "°F";
+                }
+                sys.defaultloc = false;
+                sys.loclast = Date.now();
+                ui.dest(main);
             } catch (error) {
                 const skibidi = tk.c('div', main, 'hide');
                 ui.sw2(menu, skibidi);
@@ -791,12 +800,21 @@ var wd = {
                 inp.placeholder = "Enter city & country here";
                 tk.cb('b1', 'Deny', async function () {
                     await fs.write('/user/info/location.json', [{ city: 'Paris, France', unit: 'Metric', lastupdate: Date.now(), default: true }]);
-                    wd.reboot();
+                    ui.dest(main);
                 }, skibidi);
                 tk.cb('b1', 'Set City', async function () {
                     const data = await wd.savecity(inp.value);
                     await fs.write('/user/info/location.json', [{ city: data.location, unit: data.unit, lastupdate: Date.now(), default: false }]);
-                    wd.reboot();
+                    sys.city = data.location;
+                    sys.unit = data.unit;
+                    if (sys.unit === "Metric") {
+                        sys.unitsym = "°C";
+                    } else {
+                        sys.unitsym = "°F";
+                    }
+                    sys.defaultloc = false;
+                    sys.loclast = Date.now();
+                    ui.dest(main);
                 }, skibidi);
             }
         }, menu);

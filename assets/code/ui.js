@@ -406,7 +406,7 @@ var tk = {
             ele.appendChild(button);
         }
 
-        if (classn.includes('b1') && sys.lowgfx === false) {
+        if ((classn.includes('b1') || classn.includes('b3')) && sys.lowgfx === false) {
             button.onmouseleave = (e) => {
                 e.target.style.background = "rgba(var(--accent), 0.4)";
             };

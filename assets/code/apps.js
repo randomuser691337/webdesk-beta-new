@@ -136,13 +136,13 @@ var app = {
             const pgfx = tk.c('div', generalPane, 'list');
             const okgfx = tk.c('span', pgfx);
             okgfx.innerText = "Performance mode ";
-            tk.cb('b3', 'On', async function () {
+            tk.cb('b7', 'On', async function () {
                 wm.notif('Performance mode on', `Reboot to apply changes.`, function () {
                     wd.reboot();
                 }, 'Reboot', true);
                 await fs.write('/system/info/lowgfx', 'true');
             }, pgfx);
-            tk.cb('b3', 'Off', async function () {
+            tk.cb('b7', 'Off', async function () {
                 wm.notif('Performance mode off', `Reboot to apply changes.`, function () {
                     wd.reboot();
                 }, 'Reboot', true);
@@ -151,11 +151,11 @@ var app = {
             const p = tk.c('div', generalPane, 'list');
             const ok = tk.c('span', p);
             ok.innerText = "Clock seconds ";
-            tk.cb('b3', 'On', async function () {
+            tk.cb('b7', 'On', async function () {
                 sys.seconds = true;
                 await fs.write('/user/info/clocksec', 'true');
             }, p);
-            tk.cb('b3', 'Off', async function () {
+            tk.cb('b7', 'Off', async function () {
                 sys.seconds = false;
                 await fs.write('/user/info/clocksec', 'false');
             }, p);
@@ -200,19 +200,19 @@ var app = {
             const p4 = tk.c('div', appearPane, 'list');
             const ok4 = tk.c('span', p4);
             ok4.innerText = "Notifications ";
-            tk.cb('b3', '1', async function () {
+            tk.cb('b7', '1', async function () {
                 wd.notifsrc('/assets/other/notif1.ogg', true);
             }, p4);
-            tk.cb('b3', '2', async function () {
+            tk.cb('b7', '2', async function () {
                 wd.notifsrc('/assets/other/notif2.ogg', true);
             }, p4);
-            tk.cb('b3', '3', async function () {
+            tk.cb('b7', '3', async function () {
                 wd.notifsrc('/assets/other/notif3.ogg', true);
             }, p4);
-            tk.cb('b3', '4', async function () {
+            tk.cb('b7', '4', async function () {
                 wd.notifsrc('/assets/other/notif4.ogg', true);
             }, p4);
-            tk.cb('b3', 'More', async function () {
+            tk.cb('b7', 'More', async function () {
                 const menu = tk.c('div', document.body, 'cm');
                 tk.p('Custom notification sound', 'bold', menu);
                 const the = tk.c('input', menu, 'i1');
@@ -282,34 +282,34 @@ var app = {
             const p2 = tk.c('div', accPane, 'list');
             const ok2 = tk.c('span', p2);
             ok2.innerText = "Font size ";
-            tk.cb('b3', 'Big', async function () {
+            tk.cb('b7', 'Big', async function () {
                 wd.bgft();
                 fs.write('/user/info/font', 'big');
             }, p2);
-            tk.cb('b3', 'Normal', function () {
+            tk.cb('b7', 'Normal', function () {
                 wd.meft();
                 fs.write('/user/info/font', 'normal');
             }, p2);
-            tk.cb('b3', 'Small', function () {
+            tk.cb('b7', 'Small', function () {
                 wd.smft();
                 fs.write('/user/info/font', 'small');
             }, p2);
             const p3 = tk.c('div', accPane, 'list');
             const ok3 = tk.c('span', p3);
             ok3.innerHTML = `SFW mode (Filters text before it's seen to help stop things like <a href="https://www.gaggle.net/" target="_blank">this</a>) `;
-            tk.cb('b3', 'No chances', async function () {
+            tk.cb('b7', 'No chances', async function () {
                 sys.filter = true;
                 sys.nc = true;
                 fs.write('/user/info/filter', 'nc');
                 wm.notif('No chances mode on!', `Text with filtered items simply won't be shown. WebDesk browser isn't filtered, along with anything that's not text. Already shown text won't be filtered.`, undefined, undefined, true);
             }, p3);
-            tk.cb('b3', 'Filter', async function () {
+            tk.cb('b7', 'Filter', async function () {
                 sys.filter = true;
                 sys.nc = false;
                 fs.write('/user/info/filter', 'true');
                 wm.notif('SFW mode on!', `WebDesk browser isn't filtered, along with anything that's not text. Already shown text won't be filtered.`, undefined, undefined, true);
             }, p3);
-            tk.cb('b3', 'Off', function () {
+            tk.cb('b7', 'Off', function () {
                 sys.filter = false;
                 sys.nc = false;
                 fs.del('/user/info/filter');
@@ -543,8 +543,26 @@ var app = {
             // user menu
             const user = tk.c('div', main, 'setb hide');
             tk.img('./assets/img/setup/user.svg', 'setupi', user);
-            tk.p('Create a User', 'h2', user);
+            tk.p('Create User', 'h2', user);
             tk.p(`Data is stored on your device only. WebDesk does not collect any data from you. The name you enter is visible to anyone with your DeskID.`, undefined, user);
+            const p = tk.c('div', user, 'list flexthing');
+            const ok2 = tk.c('div', p, 'tnav');
+            const p2 = tk.c('div', p, 'title');
+            ok2.innerText = "Font size";
+            ok2.style.marginLeft = "4px";
+            p.style.marginBottom = "3px";
+            tk.cb('b7', 'Big', async function () {
+                wd.bgft();
+                fs.write('/user/info/font', 'big');
+            }, p2);
+            tk.cb('b7', 'Normal', function () {
+                wd.meft();
+                fs.write('/user/info/font', 'normal');
+            }, p2);
+            tk.cb('b7', 'Small', function () {
+                wd.smft();
+                fs.write('/user/info/font', 'small');
+            }, p2);
             const input = tk.c('input', user, 'i1');
             input.placeholder = "Enter a name to use with WebDesk";
             tk.cb('b1', 'Done!', function () {
@@ -965,8 +983,8 @@ var app = {
                             }
 
                             const menu = tk.c('div', document.body, 'cm');
-                            tk.ps(item.path, 'bold', menu);
-
+                            const p = tk.ps(item.path, 'bold', menu);
+                            p.style.marginBottom = "7px";
                             if (item.path.includes('/system') || item.path.includes('/user/info')) {
                                 tk.p('Important folder, modifying it could cause damage.', 'warn', menu);
                             }
@@ -1012,7 +1030,7 @@ var app = {
                             const filecontent = await fs.read(item.path);
                             const menu = tk.c('div', document.body, 'cm');
                             const p = tk.ps(item.path, 'bold', menu);
-                            p.style.marginBottom = "4px";
+                            p.style.marginBottom = "7px";
 
                             if (item.path.includes('/system') || item.path.includes('/user/info')) {
                                 tk.p('Important file, modifying it could cause damage.', 'warn', menu);
@@ -1020,26 +1038,27 @@ var app = {
                             if (item.path.includes('/user/info/name')) {
                                 tk.p('Deleting this file will erase your data on next restart.', 'warn', menu);
                             }
-
-                            if (filecontent.includes('data:')) {
-                                const thing = tk.img(filecontent, 'embed', menu, false);
-                                thing.style.marginBottom = "4px";
-                            } else {
-                                const thing = tk.c('div', menu, 'embed resizeoff');
-                                const genit = gen(8);
-                                thing.id = genit;
-                                const editor = ace.edit(`${genit}`);
-                                editor.setOptions({
-                                    fontFamily: "MonoS",
-                                    fontSize: "9px",
-                                    wrap: true,
-                                });
-                                if (ui.light !== true) editor.setTheme("ace/theme/monokai");
-                                thing.style.marginBottom = "4px";
-                                thing.style.height = "130px";
-                                editor.resize();
-                                editor.setValue(filecontent, -1);
-                                editor.setReadOnly(true);
+                            if (!filecontent.includes('data:video')) {
+                                if (filecontent.includes('data:')) {
+                                    const thing = tk.img(filecontent, 'embed', menu, false);
+                                    thing.style.marginBottom = "4px";
+                                } else {
+                                    const thing = tk.c('div', menu, 'embed resizeoff');
+                                    const genit = gen(8);
+                                    thing.id = genit;
+                                    const editor = ace.edit(`${genit}`);
+                                    editor.setOptions({
+                                        fontFamily: "MonoS",
+                                        fontSize: "9px",
+                                        wrap: true,
+                                    });
+                                    if (ui.light !== true) editor.setTheme("ace/theme/monokai");
+                                    thing.style.marginBottom = "4px";
+                                    thing.style.height = "130px";
+                                    editor.resize();
+                                    editor.setValue(filecontent, -1);
+                                    editor.setReadOnly(true);
+                                }
                             }
 
                             const btnmenu = tk.c('div', menu, 'brick-layout');
@@ -1715,14 +1734,14 @@ var app = {
                 const skibidi = tk.c('div', win.main);
                 if (archive !== true) {
                     tk.p(`${sys.city}`, 'med', skibidi);
-                    win.title.style.innerHTML = "";
+                    win.name.innerHTML = "";
                     tk.cb('b3', 'Archive data', async function () {
                         const the = await app.files.pick('new', 'Save weather archive file... (JSON)');
                         const silly = info;
                         silly.timestamp = Date.now();
                         await fs.write(the + ".json", silly);
                         wm.snack('Saved weather to ' + the + ".json");
-                    }, win.title);
+                    }, win.name);
                 } else {
                     tk.p(`${sys.city}`, 'med', skibidi);
                     tk.ps('Archived: ' + wd.timec(info.timestamp), undefined, skibidi);

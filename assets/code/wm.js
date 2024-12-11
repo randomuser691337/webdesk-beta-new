@@ -66,7 +66,6 @@ var wm = {
     min: async function (wid, btn) {
         if (wid) {
             const $animatedDiv = $(wid);
-            const $button = $(btn);
             const isMinimized = wid.classList.toggle('minimized');
             if (isMinimized) {
                 $animatedDiv.data('originalPOS', {
@@ -78,13 +77,13 @@ var wm = {
                 if (yeah) {
                     yeah.dispatchEvent(mousedownevent);
                 }
-                const endOffset = $button.offset();
+                const endOffset = btn.getBoundingClientRect();
                 $animatedDiv.addClass("windowanim");
                 $animatedDiv.animate({
-                    top: endOffset.top,
-                    left: endOffset.left,
+                    top: endOffset.bottom,
+                    left: endOffset.x,
                     opacity: 0,
-                }, 220, function () {
+                }, 220, "swing", function () {
                     $animatedDiv.hide();
                     $animatedDiv.removeClass("windowanim");
                 });
@@ -102,7 +101,7 @@ var wm = {
                 top: original.top,
                 left: original.left,
                 opacity: 1,
-            }, 220, function () {
+            }, 220, "swing", function () {
                 $animatedDiv.removeClass("minimized");
             });
 
