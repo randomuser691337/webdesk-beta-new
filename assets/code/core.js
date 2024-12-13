@@ -229,7 +229,7 @@ var wd = {
                     el.am = undefined;
                 }
                 el.sm = tk.c('div', document.body, 'tbmenu');
-                elementWidth = el.sm.offsetWidth;
+                elementWidth = el.sm.getBoundingClientRect().width;
                 el.sm.style.left = `${(screenWidth - elementWidth) / 2}px`;
                 tk.p(`Hello, ${name}!`, 'h2', el.sm);
                 tk.p(`Your DeskID is ${sys.deskid}`, undefined, el.sm);
@@ -393,9 +393,9 @@ var wd = {
                 el.tbpos = el.taskbar.getBoundingClientRect();
                 el.mbpos = el.menubar.getBoundingClientRect();
                 ui.cv('menubarheight', el.mbpos.height + "px");
-                ui.cv('hawktuah', el.tbpos.height + 5 + "px");
+                ui.cv('hawktuah', el.tbpos.height + 10 + "px");
                 el.startbutton.click();
-            }, 400);
+            }, 450);
         }
         if (waitopt === "wait") {
             setTimeout(function () { desktopgo(); }, 340);

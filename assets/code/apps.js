@@ -1724,6 +1724,7 @@ var app = {
             async function refresh() {
                 let response;
                 let info;
+                let unitsym = sys.unitsym;
                 if (archive !== true) {
                     response = await fetch(`https://weather.meower.xyz/json?city=${sys.city}&units=${sys.unit}`);
                     info = await response.json();
@@ -1743,7 +1744,16 @@ var app = {
                         wm.snack('Saved weather to ' + the + ".json");
                     }, win.name);
                 } else {
-                    tk.p(`${sys.city}`, 'med', skibidi);
+                    if (archive !== true) {
+                        tk.p(`${sys.city}`, 'med', skibidi);
+                    } else {
+                        if (info.sys.country !== "US") {
+                            unitsym = "°C";
+                        } else {
+                            unitsym = "°F";
+                        }
+                        tk.p(`${info.name}, ${info.sys.country}`, 'med', skibidi);
+                    }
                     tk.ps('Archived: ' + wd.timec(info.timestamp), undefined, skibidi);
                 }
                 const userl = tk.c('div', skibidi, 'list flexthing');
@@ -1751,7 +1761,7 @@ var app = {
                 const title = tk.c('div', userl, 'title');
                 tnav.style.marginLeft = "6px";
                 userl.style.marginBottom = "6px";
-                tnav.innerText = `${Math.ceil(info.main.temp)}${sys.unitsym}, ${info.weather[0].description}`;
+                tnav.innerText = `${Math.ceil(info.main.temp)}${unitsym}, ${info.weather[0].description}`;
                 const img = tk.img('', 'weatheri', title);
                 title.style.maxHeight = "40px";
                 img.src = `https://openweathermap.org/img/wn/${info.weather[0].icon}@2x.png`;
