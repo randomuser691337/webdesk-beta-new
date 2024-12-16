@@ -8,8 +8,8 @@ var ui = {
         ui.cv('accent', accent);
     },
     crtheme: async function (hex, opt) {
-        const a = ui.hextool(hex, 25);
-        ui.theme(ui.hextool(hex, 12), a, ui.hextool(hex, 35), ui.hextool(hex, 50), ui.hextorgb(ui.hextool(hex, 55)));
+        const a = ui.hextool(hex, 15);
+        ui.theme(ui.hextool(hex, 20), a, ui.hextool(hex, 45), ui.hextool(hex, 55), ui.hextorgb(ui.hextool(hex, 50)));
         if (!opt === true) {
             await fs.write('/user/info/color', hex);
             if (sys.autodarkacc === true) {
@@ -333,7 +333,22 @@ var ui = {
                 }
             });
         }
-    }
+    },
+    rightclick: function (menu, event, btn) {
+        menu.style.left = event.clientX + "px";
+        menu.style.top = event.clientY + "px";
+        if (btn) {
+            const hover = new Event('mouseover');
+            btn.dispatchEvent(hover);
+        }
+        document.body.addEventListener('mousedown', function () {
+            if (btn) {
+                const stop = new Event('mouseout');
+                btn.dispatchEvent(stop);
+            }
+            ui.dest(menu, 50);
+        });
+    },
 }
 var tk = {
     c: function (type, ele, classn) {

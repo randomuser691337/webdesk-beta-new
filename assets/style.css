@@ -25,7 +25,7 @@
     --hawktuah: 47px;
 }
 
-#background {
+.background {
     position: fixed;
     left: 0;
     right: 0;
@@ -36,6 +36,12 @@
     height: 100%;
     background: var(--bg1);
     transition: 0.02s;
+    opacity: 80%;
+}
+
+.dark {
+    background: var(--ui2) !important;
+    z-index: -3 !important;
 }
 
 body {
@@ -713,6 +719,7 @@ p {
     box-shadow: var(--sh2) 0px 0px 300px 60px;
     animation: circle 1.35s ease;
     transition: 0.02s;
+    opacity: 82% !important;
 }
 
 .circle2 {
@@ -723,6 +730,7 @@ p {
     box-shadow: var(--sh2) 0px 0px 300px 60px;
     animation: circle2 1.35s ease;
     transition: 0.02s;
+    opacity: 82% !important;
 }
 
 .t1 {
@@ -944,6 +952,21 @@ p {
     100% {
         padding-bottom: 4px;
     }
+}
+
+.rightclick {
+    position: fixed;
+    padding: 6px;
+    border-radius: var(--rad2);
+    background-color: var(--ui2);
+    border: 1px solid var(--bc);
+    box-shadow: rgba(0, 0, 0, 0.1) 0px 0px 25px 5px;
+    z-index: 9998;
+    width: 250px;
+    max-width: 85%;
+    max-height: 85%;
+    overflow: auto !important;
+    font-size: var(--fz2) !important;
 }
 
 .cm {

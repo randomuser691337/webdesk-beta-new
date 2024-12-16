@@ -433,9 +433,9 @@ var wd = {
         }, 190);
     },
     dark: function (fucker) {
-        ui.cv('ui1', 'rgb(40, 40, 40, 0.5)');
-        ui.cv('ui2', '#1b1b1b');
-        ui.cv('ui3', '#2b2b2b');
+        ui.cv('ui1', 'rgb(30, 30, 30, 0.5)');
+        ui.cv('ui2', '#1a1a1a');
+        ui.cv('ui3', '#2a2a2a');
         ui.cv('bc', 'rgb(52, 52, 52, 0.4)');
         ui.cv('font', '#fff');
         ui.cv('inv', '1.0');

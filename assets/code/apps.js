@@ -476,7 +476,7 @@ var app = {
                 sys.guest = true;
                 sys.name = "Guest";
                 wd.desktop('Guest', gen(8));
-                fs.write('/user/files/Welcome to WebDesk!.txt', `Welcome to WebDesk! This is your Files folder, where things you upload are stored. Use the buttons at the top to navigate between folders.`);
+                fs.write('/user/files/Welcome to WebDesk!.txt', `Welcome to WebDesk! This is your Files folder, where things you upload are stored. Use the buttons at the top to navigate between folders, right-click/tap and hold a file to see it's info, and normal tap/click it to open it.`);
                 wm.notif('Welcome to WebDesk!', `You've logged in as a guest, so WebDesk will be erased on reload and some features won't be available.`);
             }, first);
             tk.cb('b1', `Let's go`, () => ui.sw2(first, transfer), first);
@@ -1153,13 +1153,14 @@ var app = {
                         let isLongPress = false;
                         let timer;
 
-                        async function openmenu() {
-                            const menu2 = tk.c('div', document.body, 'cm');
+                        async function openmenu(event) {
+                            const menu2 = tk.c('div', document.body, 'rightclick');
                             const date = await fs.date(item.path);
                             tk.p(`<span class="bold">Created</span> ${wd.timec(date.created)}`, undefined, menu2);
                             tk.p(`<span class="bold">Edited</span> ${wd.timec(date.edit)}`, undefined, menu2);
                             tk.p(`<span class="bold">Read</span> ${wd.timec(date.read)}`, undefined, menu2);
                             tk.cb('b1', 'Cancel', () => ui.dest(menu2), menu2);
+                            ui.rightclick(menu2, event, fileItem);
                         }
 
                         fileItem.addEventListener('touchstart', e => {
@@ -1167,7 +1168,7 @@ var app = {
                             isLongPress = false;
                             timer = setTimeout(() => {
                                 isLongPress = true;
-                                openmenu();
+                                openmenu(e);
                             }, 500);
                         });
                         fileItem.addEventListener('touchend', () => {
@@ -1180,7 +1181,7 @@ var app = {
                         fileItem.addEventListener('touchcancel', () => clearTimeout(timer));
                         fileItem.addEventListener('contextmenu', e => {
                             e.preventDefault();
-                            openmenu();
+                            openmenu(e);
                         });
                     }
                 });
