@@ -315,7 +315,6 @@ var wd = {
                 const notifimg = tk.img('/assets/img/icons/notify.svg', 'contimg', notificon, false);
                 if (sys.nvol === 0) notifimg.src = "/assets/img/icons/silent.svg";
                 ui.tooltip(notificon, 'Silent toggle');
-                const p = tk.c('div', ok);
                 if (sys.guest === false && sys.echodesk === false) {
                     const yeah = tk.cb('b3 b2', 'Deep Sleep', function () {
                         const menu = tk.c('div', document.body, 'cm');
@@ -325,7 +324,7 @@ var wd = {
                             await fs.write('/system/eepysleepy', 'true');
                             await wd.reboot();
                         }, menu);
-                    }, p);
+                    }, ok);
                     yeah.style.marginTop = "2px";
                 }
                 tk.cb('b3 b2', 'Clear Notifications', function () {
@@ -334,10 +333,10 @@ var wd = {
                         tk.g('notif').innerHTML = "";
                         ui.show(tk.g('notif'));
                     }, 200);
-                }, p);
+                }, ok);
                 tk.cb('b3 b2', 'Reboot/Reload', function () {
                     wd.reboot();
-                }, p);
+                }, ok);
             } else {
                 ui.dest(el.cc, 40);
                 el.cc = undefined;
@@ -395,7 +394,7 @@ var wd = {
                 ui.cv('menubarheight', el.mbpos.height + "px");
                 ui.cv('hawktuah', el.tbpos.height + 10 + "px");
                 el.startbutton.click();
-            }, 450);
+            }, 900);
         }
         if (waitopt === "wait") {
             setTimeout(function () { desktopgo(); }, 340);
@@ -423,14 +422,14 @@ var wd = {
         ui.sw2(div1, div2); ui.masschange('name', name); fs.write('/user/info/name', name); fs.write('/system/info/setuptime', Date.now()); fs.write('/system/info/setupver', abt.ver);
     },
     reboot: function () {
-        ui.show(tk.g('death'), 190);
+        ui.show(tk.g('death'), 140);
         setTimeout(function () {
             if (window.location.href.includes('echodesk')) {
                 window.location.reload();
             } else {
                 window.location.href = window.location.origin;
             }
-        }, 190);
+        }, 140);
     },
     dark: function (fucker) {
         ui.cv('ui1', 'rgb(30, 30, 30, 0.5)');
@@ -509,7 +508,7 @@ var wd = {
             const minute = formattedParts.find(part => part.type === 'minute').value;
             const ampm = formattedParts.find(part => part.type === 'dayPeriod').value;
 
-            return `${month} ${day}, ${year}, ${hour}:${minute}${ampm}`;
+            return `${month} ${day}, ${year}, ${hour}:${minute} ${ampm}`;
         } catch (error) {
             return "Unknown";
         }
@@ -759,7 +758,7 @@ var wd = {
         }
     },
     defaultcolor: function () {
-        ui.crtheme('#7f7fff');
+        ui.crtheme('#6f6fff');
         wd.light();
     },
     wetter: function () {
@@ -915,8 +914,19 @@ document.addEventListener('visibilitychange', function () {
 });
 
 let wakelocked = false;
-document.addEventListener('mousedown', async function () {
+document.addEventListener('mousedown', async function (event) {
     wakelockgo();
+    if (el.am || el.sm || el.cc) {
+        const parentDiv = event.target.parentElement;
+        if ((parentDiv?.tagName === 'DIV' && ![el.am, el.sm, el.cc].includes(parentDiv)) || event.target.tagName == "button") {
+            ui.dest(el.am, 40);ui.dest(el.cc, 40);
+            setTimeout(function () {
+                ui.dest(el.sm, 140);
+                el.sm = undefined;
+            }, 100);
+            el.am = undefined; el.cc = undefined;
+        }        
+    }
 });
 
 async function wakelockgo() {

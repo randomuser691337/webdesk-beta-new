@@ -23,6 +23,8 @@
     --wina: 0px;
     --menubarheight: 38px;
     --hawktuah: 47px;
+    --optbox: rgba(0, 0, 0, 0.034) 0px 0px 1px 2.5px;
+    --mangomango: 3px;
 }
 
 .background {
@@ -36,8 +38,31 @@
     height: 100%;
     background: var(--bg1);
     transition: 0.02s;
-    opacity: 80%;
+    opacity: 75%;
 }
+
+.circle {
+    position: fixed;
+    background: linear-gradient(45deg, var(--sh1), var(--sh2));
+    border-radius: 50%;
+    z-index: 0;
+    box-shadow: var(--sh2) 0px 0px 300px 60px;
+    animation: circle 1.35s ease;
+    transition: 0.02s;
+    opacity: 85% !important;
+}
+
+.circle2 {
+    position: fixed;
+    background: linear-gradient(45deg, var(--sh1), var(--sh2));
+    border-radius: 50%;
+    z-index: 0;
+    box-shadow: var(--sh2) 0px 0px 300px 60px;
+    animation: circle2 1.35s ease;
+    transition: 0.02s;
+    opacity: 85% !important;
+}
+
 
 .dark {
     background: var(--ui2) !important;
@@ -167,7 +192,7 @@ p {
     0% {
         transform: scale(0.6);
         opacity: 0%;
-        filter: blur(2px);
+        filter: blur(var(--mangomango));
     }
 
     100% {
@@ -415,6 +440,7 @@ p {
     box-sizing: border-box;
     margin-left: 0px !important;
     margin-right: 0px !important;
+    margin-bottom: 2px !important;
 }
 
 .b1 {
@@ -427,6 +453,7 @@ p {
     cursor: pointer;
     border: 2px solid transparent;
     color: var(--font);
+    box-shadow: var(--optbox);
 }
 
 .b1:hover {
@@ -447,7 +474,6 @@ p {
     padding: 4px 7px;
     margin: 1px;
     transition: 0.04s ease-in-out;
-    cursor: pointer;
     border: 2px solid transparent;
     color: var(--font);
 }
@@ -475,7 +501,9 @@ p {
     border: 2px solid transparent;
     cursor: pointer;
     transition: 0.04s ease-in-out, background-color 0s !important;
+    font-family: 'FontM', Arial;
     margin: 1px;
+    box-shadow: var(--optbox);
 }
 
 .b3:hover {
@@ -514,7 +542,7 @@ p {
     cursor: pointer;
     transition: all 0.04s ease-in-out;
     margin: 1px;
-    font-family: 'FontB', Arial !important;
+    font-family: 'FontM', Arial !important;
 }
 
 .b4:hover {
@@ -711,28 +739,6 @@ p {
     background: rgba(var(--accent), 0.7);
 }
 
-.circle {
-    position: fixed;
-    background: linear-gradient(45deg, var(--sh1), var(--sh2));
-    border-radius: 50%;
-    z-index: 0;
-    box-shadow: var(--sh2) 0px 0px 300px 60px;
-    animation: circle 1.35s ease;
-    transition: 0.02s;
-    opacity: 82% !important;
-}
-
-.circle2 {
-    position: fixed;
-    background: linear-gradient(45deg, var(--sh1), var(--sh2));
-    border-radius: 50%;
-    z-index: 0;
-    box-shadow: var(--sh2) 0px 0px 300px 60px;
-    animation: circle2 1.35s ease;
-    transition: 0.02s;
-    opacity: 82% !important;
-}
-
 .t1 {
     padding: 5px;
     border-radius: var(--rad2);
@@ -762,6 +768,7 @@ p {
     margin-bottom: 2px;
     transition: 0.05s;
     outline: none;
+    box-shadow: var(--optbox);
 }
 
 .i1:focus {
@@ -841,6 +848,7 @@ p {
     box-sizing: border-box;
     margin-bottom: 3px;
     margin-top: 3px;
+    box-shadow: var(--optbox);
 }
 
 .rb {
@@ -866,6 +874,9 @@ p {
     border: 1px solid var(--bc);
 }
 
+.menubardiv button:hover {
+    background-color: rgba(var(--acc), 0.6);
+}
 
 .menubar {
     position: fixed;
@@ -904,7 +915,7 @@ p {
 }
 
 .menubarb button:hover {
-    background-color: rgba(var(--acc), 0.4);
+    background-color: rgba(var(--acc), 0.6);
 }
 
 .tasknest {
@@ -918,7 +929,7 @@ p {
 .taskbar {
     position: fixed;
     bottom: 5px;
-    padding: 4px;
+    padding: 3px;
     border-radius: var(--rad1);
     background-color: var(--ui1);
     box-shadow: rgba(0, 0, 0, 0.12) 0px 0px 37.5px 7.5px;
@@ -937,6 +948,7 @@ p {
     padding: 3px 5px;
     font-size: var(--fz3) !important;
     box-shadow: none !important;
+    margin: 2px;
 }
 
 @keyframes tb {
@@ -1054,7 +1066,7 @@ p {
     font: var(--font);
     padding: 4px;
     border: none;
-    border-radius: var(--rad2);
+    border-radius: var(--rad3);
     overflow: auto !important;
     font-family: 'FontB', Arial;
 }
