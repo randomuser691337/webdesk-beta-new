@@ -135,21 +135,21 @@ var app = {
             }, generalPane);
             const pgfx = tk.c('div', generalPane, 'list');
             const okgfx = tk.c('span', pgfx);
-            okgfx.innerText = "Limit Effects ";
-            tk.cb('b7', 'Most', async function () {
-                wm.notif('Performance mode on', `Effects limited/disabled. Reboot to apply.`, function () {
+            okgfx.innerText = "Graphics ";
+            tk.cb('b7', 'Low', async function () {
+                wm.notif('Graphics set to low', `Reboot to apply`, function () {
                     wd.reboot();
                 }, 'Reboot', true);
                 await fs.write('/system/info/lowgfx', 'true');
             }, pgfx);
-            tk.cb('b7', 'Some', async function () {
-                wm.notif('Performance mode halved', `Effects will show, but not all. Reboot to apply.`, function () {
+            tk.cb('b7', 'Medium', async function () {
+                wm.notif('Graphics set to medium', `Reboot to apply`, function () {
                     wd.reboot();
                 }, 'Reboot', true);
                 await fs.write('/system/info/lowgfx', 'half');
             }, pgfx);
-            tk.cb('b7', 'None', async function () {
-                wm.notif('Performance mode off', `All effects are enabled. Reboot to apply.`, function () {
+            tk.cb('b7', 'High', async function () {
+                wm.notif('Graphics set to high (default)', `Reboot to apply`, function () {
                     wd.reboot();
                 }, 'Reboot', true);
                 await fs.del('/system/info/lowgfx');
@@ -943,7 +943,6 @@ var app = {
             var currentPath = undefined;
             let dragoverListener = null;
             let dropListener = null;
-
             async function navto(path) {
                 items.innerHTML = "";
                 breadcrumbs.innerHTML = "";
@@ -982,9 +981,11 @@ var app = {
                 dragoverListener = e => e.preventDefault();
                 dropListener = async e => {
                     e.preventDefault();
+                    el.dropped = true;
                     const text = e.dataTransfer.getData('text/plain');
                     const fileData = await fs.read(text);
                     const relativePath = text.split('/').pop();
+                    await fs.del(text);
                     await fs.write(currentPath + relativePath, fileData);
                     setTimeout(() => navto(currentPath), 300);
                 };
@@ -1175,6 +1176,17 @@ var app = {
 
                         fileItem.addEventListener('dragstart', e => {
                             e.dataTransfer.setData('text/plain', item.path);
+                        });
+
+                        fileItem.addEventListener('dragend', e => {
+                            setTimeout(function () {
+                                console.log(el.dropped)
+                                if (el.dropped === true) {
+                                    console.log('waddafak')
+                                    ui.slidehide(fileItem);
+                                    ui.dest(fileItem);
+                                }
+                            }, 100);
                         });
                         fileItem.draggable = true;
                         let isLongPress = false;

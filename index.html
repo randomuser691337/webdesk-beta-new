@@ -63,6 +63,7 @@
         sm: undefined,
         tr: undefined,
         cc: undefined,
+        dropped: false,
     }
 
     var wc = {
@@ -164,9 +165,9 @@
                 ui.cv('optbox', 'none');
                 ui.cv('mangomango', '0px');
             } else if (perf === "half") {
-                sys.lowgfx = true;
                 ui.cv('bl1', '6px');
                 ui.cv('bl2', '4px');
+                ui.cv('optbox', 'none');
                 ui.cv('mangomango', '1px');
             }
 

@@ -23,7 +23,7 @@
     --wina: 0px;
     --menubarheight: 38px;
     --hawktuah: 47px;
-    --optbox: rgba(0, 0, 0, 0.034) 0px 0px 1px 2.5px;
+    --optbox: rgba(0, 0, 0, 0.027) 0px 0px 4px 3px;
     --mangomango: 3px;
 }
 
@@ -249,7 +249,7 @@ p {
     position: sticky;
     top: 0;
     cursor: default !important;
-    box-shadow: 0 2px 3px rgba(0, 0, 0, 0.02);
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.02);
 }
 
 .winf {
@@ -1223,15 +1223,12 @@ a:active {
 
 .max {
     position: fixed;
-    left: 0px !important;
-    top: 0px !important;
-    max-width: 100% !important;
-    max-height: 100% !important;
+    left: 5px !important;
+    top: calc(var(--menubarheight) + 5px) !important;
+    bottom: 40px;
+    right: 5px !important;
     transition: 0.3s all ease !important;
-    width: 100% !important;
-    height: 100% !important;
     z-index: 6000 !important;
-    border-radius: 0px;
 }
 
 .unmax {

@@ -129,10 +129,10 @@ var wm = {
             ui.play(sys.notifsrc);
         }
         const div = tk.c('div', tk.g('notif'), 'notif');
-        const title = tk.p(name, 'bold', div);
+        const title = tk.p(ui.filter(name), 'bold', div);
         let content;
         if (cont) {
-            content = tk.p(cont, undefined, div);
+            content = tk.p(ui.filter(cont), undefined, div);
         }
         function ok() {
             $(div).css({ opacity: 1 })
@@ -147,7 +147,7 @@ var wm = {
         const dbtn = tk.cb('b4', 'Close', () => ok(), div);
         let the = "Open";
         if (button) {
-            the = button;
+            the = ui.filter(button);
         }
         if (mode) {
             const open = tk.cb('b4', the, undefined, div);
