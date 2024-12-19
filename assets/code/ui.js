@@ -370,6 +370,14 @@ var ui = {
             }
         });
     },
+    note: function (contents, div) {
+        const fuck = document.createElement('span');
+        fuck.innerHTML = ui.filter(" " + contents, fuck);
+        fuck.classList = 'rsmtxt';
+        fuck.style.opacity = "70%";
+        div.appendChild(fuck);
+        return fuck;
+    },
 }
 var tk = {
     c: function (type, ele, classn) {

@@ -83,7 +83,7 @@ var wm = {
                     top: endOffset.bottom,
                     left: endOffset.x,
                     opacity: 0,
-                }, 220, "swing", function () {
+                }, 260, "swing", function () {
                     $animatedDiv.hide();
                     $animatedDiv.removeClass("windowanim");
                 });
@@ -101,7 +101,7 @@ var wm = {
                 top: original.top,
                 left: original.left,
                 opacity: 1,
-            }, 220, "swing", function () {
+            }, 260, "swing", function () {
                 $animatedDiv.removeClass("minimized");
             });
 
@@ -138,9 +138,9 @@ var wm = {
             $(div).css({ opacity: 1 })
                 .animate(
                     { opacity: 0 },
-                    { duration: 210, queue: false }
+                    { duration: 260, queue: false }
                 )
-                .slideUp(210, function () {
+                .slideUp(260, function () {
                     ui.dest(div, 0);
                 });
         }

@@ -353,13 +353,19 @@ var wd = {
                 }
                 el.am = tk.c('div', document.body, 'menubardiv menubarb');
                 el.am.style.left = "7px";
-                el.am.style.width = "140px";
-                tk.cb('b2', 'Minimize/Hide', async function () {
+                el.am.style.width = "170px";
+                const min = tk.cb('b2', 'Minimize/Hide', async function () {
                     await wm.minimize(focused.window, focused.tbn);
                 }, el.am);
-                tk.cb('b2', 'Quit', async function () {
+                ui.note('Alt+M', min);
+                const rec = tk.cb('b2', 'Recenter', async function () {
                     await wm.close(focused.window, focused.tbn);
                 }, el.am);
+                ui.note('Alt+R', rec);
+                const quit = tk.cb('b2', 'Quit', async function () {
+                    await wm.close(focused.window, focused.tbn);
+                }, el.am);
+                ui.note('Alt+Q', quit);
             } else {
                 ui.dest(el.am, 40);
                 el.am = undefined;

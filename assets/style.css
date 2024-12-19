@@ -13,8 +13,8 @@
     --bl1: 10px;
     --bl2: 6px;
     --rad1: 16px;
-    --rad2: 12px;
-    --rad3: 10px;
+    --rad2: 13px;
+    --rad3: var(--rad2);
     --fz1: 15px;
     --fz2: 14px;
     --fz3: 13px;
@@ -89,6 +89,10 @@ body {
 
 .smtxt {
     font-size: var(--fz2);
+}
+
+.rsmtxt {
+    font-size: var(--fz3) !important;
 }
 
 html,
