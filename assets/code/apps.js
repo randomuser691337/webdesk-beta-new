@@ -3,7 +3,7 @@ var app = {
         runs: true,
         name: 'Settings',
         init: async function () {
-            const main = tk.mbw('Settings', '300px', 'auto', true, undefined, undefined);
+            const main = tk.mbw('Settings', '320px', 'auto', true, undefined, undefined);
             const generalPane = tk.c('div', main.main, 'hide');
             const appearPane = tk.c('div', main.main, 'hide');
             const accPane = tk.c('div', main.main, 'hide');
@@ -153,6 +153,12 @@ var app = {
                     wd.reboot();
                 }, 'Reboot', true);
                 await fs.del('/system/info/lowgfx');
+            }, pgfx);
+            tk.cb('b7', 'Epic', async function () {
+                wm.notif('Graphics set to epic', `Reboot to apply`, function () {
+                    wd.reboot();
+                }, 'Reboot', true);
+                await fs.write('/system/info/lowgfx', 'epic');
             }, pgfx);
             const p = tk.c('div', generalPane, 'list');
             const ok = tk.c('span', p);
