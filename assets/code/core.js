@@ -173,17 +173,17 @@ var wd = {
 
         $('.d').not('.dragged').on('mousedown touchstart', function (event) {
             var $window = $(this).closest('.window');
-            if (!$window.hasClass('max') && sys.mobui !== true) {
-                var offsetX, offsetY;
-                var windows = $('.window');
-                var highestZIndex = Math.max.apply(null, windows.map(function () {
-                    var zIndex = parseInt($(this).css('z-index')) || 0;
-                    return zIndex;
-                }).get());
-                $window.css('z-index', highestZIndex + 1);
-                $('.window').removeClass('winf');
-                $window.addClass('winf');
+            var offsetX, offsetY;
+            var windows = $('.window');
+            var highestZIndex = Math.max.apply(null, windows.map(function () {
+                var zIndex = parseInt($(this).css('z-index')) || 0;
+                return zIndex;
+            }).get());
+            $window.css('z-index', highestZIndex + 1);
+            $('.window').removeClass('winf');
+            $window.addClass('winf');
 
+            if (!$window.hasClass('max') && sys.mobui !== true) {
                 if (event.type === 'mousedown') {
                     offsetX = event.clientX - $window.offset().left;
                     offsetY = event.clientY - $window.offset().top;
@@ -218,6 +218,7 @@ var wd = {
     },
     desktop: function (name, deskid, waitopt) {
         ui.dest(tk.g('setuparea'));
+        ui.cv('menubarheight', '38px');
         let screenWidth;
         function startmenu() {
             if (el.sm == undefined) {
@@ -398,7 +399,7 @@ var wd = {
                 el.tbpos = el.taskbar.getBoundingClientRect();
                 el.mbpos = el.menubar.getBoundingClientRect();
                 ui.cv('menubarheight', el.mbpos.height + "px");
-                ui.cv('hawktuah', el.tbpos.height + 10 + "px");
+                ui.cv('hawktuah', el.tbpos.height + 12 + "px");
                 el.startbutton.click();
             }, 900);
         }
@@ -739,7 +740,7 @@ var wd = {
                 wd.defaultcolor();
             }, 'Set defaults');
         } else {
-            ui.crtheme('#7A7AFF');
+            wd.defaultcolor();
         }
     },
     savecity: async function (city2) {
@@ -764,7 +765,7 @@ var wd = {
         }
     },
     defaultcolor: function () {
-        ui.crtheme('#6f6fff');
+        ui.crtheme('#5781FF');
         wd.light();
     },
     wetter: function () {

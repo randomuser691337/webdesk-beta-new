@@ -1033,7 +1033,7 @@ var app = {
                             timer = setTimeout(() => {
                                 isLongPress = true;
                                 openmenu();
-                            }, 500);
+                            }, 400);
                         });
                         folder.addEventListener('touchend', () => {
                             clearTimeout(timer);
@@ -1211,18 +1211,43 @@ var app = {
                             }
                         }
 
+                        let startX, startY, isScrolling;
+
+                        // I'll deal with it later
                         fileItem.addEventListener('touchstart', e => {
+                            e.preventDefault();
                             isLongPress = false;
+                            isScrolling = false;
+                            startX = e.touches[0].clientX;
+                            startY = e.touches[0].clientY;
+
                             timer = setTimeout(() => {
-                                isLongPress = true;
-                                openmenu();
-                            }, 500);
+                                if (!isScrolling) {
+                                    isLongPress = true;
+                                    openmenu();
+                                }
+                            }, 400);
                         });
+
+                        fileItem.addEventListener('touchmove', e => {
+                            const moveX = e.touches[0].clientX;
+                            const moveY = e.touches[0].clientY;
+
+                            if (Math.abs(moveX - startX) > 10 || Math.abs(moveY - startY) > 10) {
+                                isScrolling = true;
+                                clearTimeout(timer);
+                            }
+                        });
+
                         fileItem.addEventListener('touchend', () => {
                             clearTimeout(timer);
+                            if (!isLongPress && !isScrolling) {
+                                fileItem.click();
+                            }
                         });
-                        fileItem.addEventListener('touchmove', () => clearTimeout(timer));
+
                         fileItem.addEventListener('touchcancel', () => clearTimeout(timer));
+
                         if (sys.mob === false) {
                             fileItem.addEventListener('contextmenu', e => {
                                 e.preventDefault();
@@ -1911,7 +1936,7 @@ var app = {
                     const apps = await response.json();
                     apps.forEach(function (app2) {
                         const notif = tk.c('div', win.main, 'notif2');
-                        tk.p(`<span class="bold">${app2.name}</bold> by ${app2.pub}`, 'bold', notif);
+                        tk.p(`<span class="bold">${app2.name}</span> by ${app2.pub}`, undefined, notif);
                         tk.p(app2.info, undefined, notif);
                         tk.cb('b3', 'App ID', () => wm.notif(`${app2.name}'s App ID:`, app2.appid, () => ui.copy(app2.appid), 'Copy', true), notif); tk.cb('b3', 'Install', () => app.appmark.create(app2.path, app2), notif)
                     });
