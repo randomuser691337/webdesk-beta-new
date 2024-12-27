@@ -462,7 +462,7 @@ var app = {
     },
     setup: {
         runs: false,
-        init: function () {
+        init: function (isid, id) {
             const main = tk.c('div', tk.g('setuparea'), 'setupbox');
             // create setup menubar
             const bar = tk.c('div', main, 'setupbar');
@@ -473,35 +473,60 @@ var app = {
             // first menu
             const first = tk.c('div', main, 'setb');
             tk.img('./assets/img/setup/first.svg', 'setupi', first);
-            tk.p('Welcome to WebDesk!', 'h2', first);
-            tk.cb('b1', `EchoDesk`, function () {
-                const echotemp = tk.c('div', main, 'setb hide');
-                tk.img('./assets/img/setup/quick.png', 'setupi', echotemp);
-                tk.p('EchoDesk', 'h2', echotemp);
-                tk.p(`Enter the EchoDesk ID, and hit "Okay" to connect to the other WebDesk.`, undefined, echotemp);
-                const input = tk.c('input', echotemp, 'i1');
-                input.placeholder = "Enter EchoDesk ID";
-                tk.cb('b1', 'Back', () => ui.sw2(echotemp, first), echotemp); tk.cb('b1', 'Okay', () => window.location.href = "./echodesk.html?deskid=" + input.value, echotemp);
-                ui.sw2(first, echotemp);
-            }, first);
-            tk.cb('b1', `Guest`, function () {
-                sys.guest = true;
-                sys.name = "Guest";
-                wd.desktop('Guest', gen(8));
-                fs.write('/user/files/Welcome to WebDesk!.txt', `Welcome to WebDesk! This is your Files folder, where things you upload are stored. Use the buttons at the top to navigate between folders, right-click/tap and hold a file to see it's info, and normal tap/click it to open it.`);
-                wm.notif('Welcome to WebDesk!', `You've logged in as a guest, so WebDesk will be erased on reload and some features won't be available.`);
-            }, first);
-            tk.cb('b1', `Let's go`, () => ui.sw2(first, transfer), first);
+            function defaultsetup() {
+                tk.p('Welcome to WebDesk!', 'h2', first);
+                tk.cb('b1', `EchoDesk`, function () {
+                    const echotemp = tk.c('div', main, 'setb hide');
+                    tk.img('./assets/img/setup/quick.png', 'setupi', echotemp);
+                    tk.p('EchoDesk', 'h2', echotemp);
+                    tk.p(`Enter the EchoDesk ID, and hit "Okay" to connect to the other WebDesk.`, undefined, echotemp);
+                    const input = tk.c('input', echotemp, 'i1');
+                    input.placeholder = "Enter EchoDesk ID";
+                    tk.cb('b1', 'Back', () => ui.sw2(echotemp, first), echotemp); tk.cb('b1', 'Okay', () => window.location.href = "./echodesk.html?deskid=" + input.value, echotemp);
+                    ui.sw2(first, echotemp);
+                }, first);
+                tk.cb('b1', `Guest`, function () {
+                    sys.guest = true;
+                    sys.name = "Guest";
+                    wd.desktop('Guest', 'min');
+                    fs.write('/user/files/Welcome to WebDesk!.txt', `Welcome to WebDesk! This is your Files folder, where things you upload are stored. Use the buttons at the top to navigate between folders, right-click/tap and hold a file to see it's info, and normal tap/click it to open it.`);
+                    wm.notif('Welcome to WebDesk!', `You're logged in as a guest. Keep in mind, WebDesk will erase itself on reload, and some features may be limited.`);
+                }, first);
+                tk.cb('b1', `Let's go`, () => ui.sw2(first, transfer), first);
+            }
+            if (isid !== true) {
+                defaultsetup();
+            } else {
+                tk.p('Welcome to WebDesk!', 'h2', first);
+                tk.p(`WebDesk is like a desktop right in your browser. Someone wants to talk to you, so pick an option below to start.`, undefined, first);
+                const split3 = tk.c('div', first, 'split');
+                const id23 = tk.c('div', split3, 'splititem');
+                tk.p('Set up WebDesk', 'h2', id23);
+                tk.p(`Take a moment to set things up. You'll get to pick a name and start talking once you're ready.`, undefined, id23);
+                tk.cb('b1 b2', 'Set up WebDesk', function () {
+                    defaultsetup();
+                }, id23);
+                const ok = tk.c('div', split3, 'splititem');
+                tk.p('Continue as Guest', 'h2', ok);
+                tk.p(`Skip the setup and talk as a guest. You'll be able to start talking immediately.`, undefined, ok);
+                tk.cb('b1 b2', 'Talk as Guest', function () {
+                    sys.guest = true;
+                    sys.name = "Guest";
+                    wd.desktop('Guest', 'min');
+                    fs.write('/user/files/Welcome to WebDesk!.txt', `Welcome to WebDesk! This is your Files folder, where uploaded items are stored. Use the buttons at the top to navigate folders, right-click/tap and hold a file for info, or click/tap it to open.`);
+                    wm.notif('Welcome to WebDesk!', `You're logged in as a guest. Keep in mind, WebDesk will erase itself on reload, and some features may be limited.`);
+                }, ok);
+            }
             // migrate menu
             const transfer = tk.c('div', main, 'setb hide');
             tk.img('./assets/img/setup/quick.png', 'setupi', transfer);
             tk.p('Quick Start', 'h2', transfer);
             tk.p('To copy your data, just scan the QR code, or open Data Assistant on the other WebDesk, hit "Migrate", and enter this code:', undefined, transfer);
             const split = tk.c('div', transfer, 'split');
-            const id = tk.c('div', split, 'splititem');
-            tk.p('--------', 'h2 deskid', id);
-            sys.model = tk.p(`Waiting for other WebDesk to enter code`, undefined, id);
-            tk.cb('b1', `No thanks`, () => ui.sw2(transfer, warn), id);
+            const id2 = tk.c('div', split, 'splititem');
+            tk.p('--------', 'h2 deskid', id2);
+            sys.model = tk.p(`Waiting for other WebDesk`, undefined, id2);
+            tk.cb('b1', `No thanks`, () => ui.sw2(transfer, warn), id2);
             const ok = tk.c('div', split, 'splititem');
             var qrcode = new QRCode(ok, {
                 text: `${window.location.origin}?deskid=${sys.deskid}`,
@@ -1188,7 +1213,6 @@ var app = {
                             setTimeout(function () {
                                 console.log(el.dropped)
                                 if (el.dropped === true) {
-                                    console.log('waddafak')
                                     ui.slidehide(fileItem);
                                     ui.dest(fileItem);
                                 }
@@ -1360,10 +1384,14 @@ var app = {
     webcomm: {
         runs: true,
         name: "WebComm",
-        init: async function () {
+        init: async function (isid, id) {
             const win = tk.mbw('WebComm', '320px', 'auto', true);
             const inp = tk.c('input', win.main, 'i1');
             inp.placeholder = "Enter a DeskID";
+            if (isid === true) {
+                inp.value = id;
+                wm.snack('Autofilled DeskID', 3000);
+            }
             const skibidiv = tk.c('div', win.main);
             let extraid = undefined;
             const dropbtn = tk.cb('b1', 'WebDrop', async function () {
@@ -1402,7 +1430,7 @@ var app = {
                     }, menu2);
                 }
             }, win.main);
-            const callbtn = tk.cb('b1', 'Call', async function () {
+            const callbtn = tk.cb('b1', 'Voice Call', async function () {
                 if (inp.value === sys.deskid) {
                     wm.snack(`Type a DeskID that isn't yours.`);
                     app.ach.unlock('So lonely...', 'So lonely, you tried calling yourself.');
@@ -1425,7 +1453,7 @@ var app = {
                         });
                 }
             }, win.main);
-            const chatbtn = tk.cb('b1', 'Chat', async function () {
+            const chatbtn = tk.cb('b1', 'Message', async function () {
                 if (inp.value === sys.deskid) {
                     wm.snack(`Type a DeskID that isn't yours.`);
                     app.ach.unlock('So lonely...', 'So lonely, you tried messaging yourself.');
@@ -1528,7 +1556,7 @@ var app = {
         runs: false,
         init: async function (deskid, chat, name) {
             if (el.webchat !== undefined) {
-                wd.win(el.webchat);
+                wd.win(el.webchat, el.webchat.closebtn, el.webchat.minbtn, el.webchat.tbn);
                 el.currentid = deskid;
             } else {
                 el.webchat = tk.mbw('WebChat', '300px', 'auto', true);

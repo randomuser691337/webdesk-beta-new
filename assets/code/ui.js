@@ -571,6 +571,6 @@ var tk = {
         if (sys.mobui !== true) {
             setTimeout(function () { ui.center(windowDiv); }, 30);
         }
-        return { win: windowDiv, main: contentDiv, tbn, title: titlebarDiv, closebtn: closeButton, winbtns, name: titleDiv };
+        return { win: windowDiv, main: contentDiv, tbn, title: titlebarDiv, closebtn: closeButton, winbtns, name: titleDiv, minbtn: minimizeButton };
     }
 }
