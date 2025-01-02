@@ -362,7 +362,7 @@ var wd = {
                 }, el.am);
                 ui.note('Alt+M', min);
                 const rec = tk.cb('b2', 'Recenter', async function () {
-                    await wm.close(focused.window, focused.tbn);
+                    ui.center(focused.window);
                 }, el.am);
                 ui.note('Alt+R', rec);
                 const quit = tk.cb('b2', 'Quit', async function () {
@@ -385,7 +385,7 @@ var wd = {
             setInterval(tbresize, 200);
             el.menubar = tk.c('div', document.body, 'menubar menubarb flexthing');
             const left = tk.c('div', el.menubar, 'tnav');
-            const right = tk.c('div', el.menubar, 'title');
+            const right = tk.c('div', el.menubar, 'title nogrowth');
             el.menubarbtn = tk.cb('bold', 'Desktop', () => appmenu(), left);
             el.contb = tk.cb('time', '--:--', () => controlcenter(), right);
             const tasknest = tk.c('div', el.taskbar, 'tasknest');
@@ -417,15 +417,17 @@ var wd = {
                         el.taskbar.style.bottom = px + "px";
                     }
                 }
-                if (type !== "min") {
-                    setTimeout(wd.hawktuah, 300);
-                    el.startbutton.click();
-                }
                 el.tbpos = el.taskbar.getBoundingClientRect();
                 el.mbpos = el.menubar.getBoundingClientRect();
                 ui.cv('menubarheight', el.mbpos.height + "px");
                 ui.cv('hawktuah', el.tbpos.height + 12 + "px");
                 const uid2 = params.get('id');
+                if (type !== "min") {
+                    setTimeout(wd.hawktuah, 300);
+                    if (!uid2) {
+                        el.startbutton.click();
+                    }
+                }
                 if (uid2) {
                     app.webcomm.init(true, uid2);
                     const newURL = window.location.origin;
@@ -472,7 +474,7 @@ var wd = {
         ui.cv('ui1', 'rgb(30, 30, 30, 0.5)');
         ui.cv('ui2', '#1a1a1a');
         ui.cv('ui3', '#2a2a2a');
-        ui.cv('bc', 'rgb(52, 52, 52, 0.4)');
+        ui.cv('bc', 'rgb(36, 36, 36, 0.5)');
         ui.cv('font', '#fff');
         ui.cv('inv', '1.0');
         if (fucker !== "nosave") {
@@ -484,7 +486,7 @@ var wd = {
         ui.cv('ui1', 'rgb(255, 255, 255, 0.5)');
         ui.cv('ui2', '#ffffff');
         ui.cv('ui3', '#ededed');
-        ui.cv('bc', 'rgb(220, 220, 220, 0.4)');
+        ui.cv('bc', 'rgb(204, 204, 204, 0.5)');
         ui.cv('font', '#000');
         ui.cv('inv', '0');
         if (fucker !== "nosave") {
@@ -795,7 +797,7 @@ var wd = {
         }
     },
     defaultcolor: function () {
-        ui.crtheme('#5781FF');
+        ui.crtheme('#4D79FF');
         wd.light();
     },
     wetter: function () {

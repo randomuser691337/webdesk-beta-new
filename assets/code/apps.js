@@ -3,7 +3,7 @@ var app = {
         runs: true,
         name: 'Settings',
         init: async function () {
-            const main = tk.mbw('Settings', '320px', 'auto', true, undefined, undefined);
+            const main = tk.mbw('Settings', '310px', 'auto', true, undefined, undefined);
             const generalPane = tk.c('div', main.main, 'hide');
             const appearPane = tk.c('div', main.main, 'hide');
             const accPane = tk.c('div', main.main, 'hide');
@@ -142,7 +142,7 @@ var app = {
                 }, 'Reboot', true);
                 await fs.write('/system/info/lowgfx', 'true');
             }, pgfx);
-            tk.cb('b7', 'Medium', async function () {
+            tk.cb('b7', 'Med', async function () {
                 wm.notif('Graphics set to medium', `Reboot to apply`, function () {
                     wd.reboot();
                 }, 'Reboot', true);
@@ -1385,7 +1385,12 @@ var app = {
         runs: true,
         name: "WebComm",
         init: async function (isid, id) {
-            const win = tk.mbw('WebComm', '320px', 'auto', true);
+            let win;
+            if (isid === true) {
+                win = tk.mbw('WebComm (Autofilled)', '320px', 'auto', true);
+            } else {
+                win = tk.mbw('WebComm', '320px', 'auto', true);
+            }
             const inp = tk.c('input', win.main, 'i1');
             inp.placeholder = "Enter a DeskID";
             if (isid === true) {
@@ -1424,7 +1429,6 @@ var app = {
                                 } else {
                                     console.log(error);
                                     wm.snack(`User isn't online or your Internet isn't working`);
-                                    inp.value = "";
                                 }
                             });
                     }, menu2);
@@ -1448,7 +1452,6 @@ var app = {
                             } else {
                                 console.log(error);
                                 wm.snack(`User isn't online or your Internet isn't working`);
-                                inp.value = "";
                             }
                         });
                 }
@@ -1471,7 +1474,6 @@ var app = {
                             } else {
                                 console.log(error);
                                 wm.snack(`User isn't online or your Internet isn't working`);
-                                inp.value = "";
                             }
                         });
                 }
@@ -1556,7 +1558,7 @@ var app = {
         runs: false,
         init: async function (deskid, chat, name) {
             if (el.webchat !== undefined) {
-                wd.win(el.webchat, el.webchat.closebtn, el.webchat.minbtn, el.webchat.tbn);
+                wd.win(el.webchat.win, el.webchat.closebtn, el.webchat.minbtn, el.webchat.tbn);
                 el.currentid = deskid;
             } else {
                 el.webchat = tk.mbw('WebChat', '300px', 'auto', true);
@@ -2132,6 +2134,7 @@ var app = {
                                 await fs.write('/user/info/contactlist.json', updated);
                                 ui.slidehide(notif);
                                 ui.dest(notif);
+                                ok = update;
                             }, notif);
                             tk.cb('b4', 'Edit', async function () {
                                 const update = ok.find(item => item.time === entry.time);
