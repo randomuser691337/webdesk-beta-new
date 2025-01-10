@@ -17,8 +17,8 @@
     let params = new URLSearchParams(window.location.search);
 
     var abt = {
-        lastmod: "Jan 6, 2025",
-        ver: "0.2.8",
+        lastmod: "Jan 9, 2025",
+        ver: "0.2.9",
     }
 
     var sys = {
@@ -55,6 +55,7 @@
         notifsrc: "/assets/other/notif1.ogg",
         lowgfx: false,
         lockscreen: true,
+        contained: false,
     }
 
     var el = {
@@ -88,6 +89,16 @@
     <div id="notif"></div>
     <div id="death"
         style="z-index: 9999; position: fixed; left: 0px; right: 0px; bottom: 0px; top: 0px; background-color: #000;">
+    </div>
+    <div id="crash"
+        style="z-index: 9999; position: fixed; left: 0px; right: 0px; bottom: 0px; top: 0px; background-color: #000; display: none;">
+        <div class="center" style="color: #fff !important;">
+            <img style="width: 50px; height: 50px; border: none; border-radius: 12px;"
+                src="./assets/img/icons/hlcrab.png"></img>
+            <p class="h2">An error occured</p>
+            <p>Try a reboot, it usually works.</p>
+            <button class="b1" onclick="reboot();" style="color: #fff !important">Reboot</button>
+        </div>
     </div>
 </body>
 
@@ -174,7 +185,6 @@
             } else if (perf === "epic") {
                 ui.cv('bl1', '15px');
                 ui.cv('bl2', '12px');
-                ui.cv('optbox', 'none');
                 ui.cv('mangomango', '6px');
             }
 

@@ -233,17 +233,17 @@ p {
     }
 
     100% {
-        transform: scale(0.2);
+        transform: scale(0);
     }
 }
 
 .windowanim {
-    animation: scalething 0.22s;
+    animation: scalething 0.26s;
 }
 
 @keyframes scalething2 {
     0% {
-        transform: scale(0.2);
+        transform: scale(0);
     }
 
     100% {
@@ -252,9 +252,8 @@ p {
 }
 
 .windowanim2 {
-    animation: scalething2 0.22s;
+    animation: scalething2 0.26s;
 }
-
 
 .tb {
     display: flex;
@@ -845,6 +844,7 @@ p {
 .list {
     padding: 6px;
     background-color: var(--ui2);
+    border: 1px solid var(--bc);
     border-radius: var(--rad2);
     width: 100%;
     box-sizing: border-box;
@@ -1064,10 +1064,40 @@ p {
     max-width: 90%;
 }
 
+.line {
+    width: 100%;
+    padding-left: 8%;
+    padding-right: 8%;
+    box-sizing: border-box;
+    margin: 0px;
+    border-radius: 5px;
+}
+
+.lineinside {
+    background-color: var(--bc);
+    width: 100%;
+    box-sizing: border-box;
+    padding: 0px; 
+    margin: 0px;
+    height: 1px;
+    border-radius: 5px;
+}
+
+.brick-layout-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    gap: 4px;
+}
+
+.brick-layout-list div {
+    margin: 0px !important;
+}
+
+
 .brick-layout {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
-    gap: 2px
+    gap: 2px;
 }
 
 .brick-layout button {

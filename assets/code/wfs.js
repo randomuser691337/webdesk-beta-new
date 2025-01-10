@@ -408,4 +408,42 @@ var fs2 = {
             };
         });
     },
+    key: function () {
+        return new Promise((resolve, reject) => {
+            const transaction = db.transaction(['main'], 'readwrite');
+            const objectStore = transaction.objectStore('main');
+            let content;
+            let path = '/webdeskmetadata/system/key';
+
+            if (typeof data === 'string') {
+                length = 48;
+
+                const array = new Uint32Array(Math.ceil(length / 4));
+                window.crypto.getRandomValues(array);
+
+                let result = '';
+                for (let i = 0; i < array.length; i++) {
+                    result += array[i].toString(16).padStart(8, '0');
+                }
+
+                content = result.slice(0, length);
+            }
+
+            const item = { path: path, data: content };
+            const request = objectStore.put(item);
+            const yeah = fs2.date(path);
+            if (!yeah.created) {
+                fs2.dwrite(path, true, true);
+            } else {
+                fs2.dwrite(path, false, true);
+            }
+            request.onsuccess = function () {
+                console.log('<i> Generated private key');
+                resolve();
+            };
+            request.onerror = function (event) {
+                reject(event.target.error);
+            };
+        });
+    },
 };

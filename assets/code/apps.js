@@ -810,9 +810,6 @@ var app = {
                     editor.setTheme("ace/theme/monokai");
                 }
             }
-            if (path.endsWith('.js')) {
-                editor.session.setMode("ace/mode/javascript");
-            }
             ok();
             const colorch = setInterval(() => {
                 ok();
@@ -827,6 +824,9 @@ var app = {
                 tk.cb('b4 b6', 'Save', async function () {
                     await save();
                 }, win.name);
+                if (path.endsWith('.js')) {
+                    editor.session.setMode("ace/mode/javascript");
+                }
             } else {
                 tk.cb('b4 b6', 'Save', async function () {
                     const path = await app.files.pick('new', 'Save in new file');
@@ -1029,8 +1029,7 @@ var app = {
                     tk.cb('b3 b2', 'New folder', function () {
                         if (input.value) {
                             fs.write(tempPath + input.value + "/.folder", ' ');
-                            navto(tempPath + input.value);
-                            app.textedit.init('', tempPath + input.value);
+                            navto(tempPath + input.value + "/");
                             ui.dest(menu, 0);
                         } else {
                             wm.snack('Enter a name for your folder!');
@@ -1077,7 +1076,7 @@ var app = {
                             }
                             tk.cb('b1 b2', 'Delete folder', () => {
                                 fs.delfold(item.path);
-                                ui.slidehide(folder);
+                                ui.slidehide(folder, 100);
                                 ui.dest(folder);
                                 ui.dest(menu);
                             }, menu);
@@ -1232,7 +1231,7 @@ var app = {
                                 tk.ps(`This cannot be undone!`, undefined, menu2);
                                 tk.cb('b1', 'Delete file', () => {
                                     fs.del(item.path);
-                                    ui.slidehide(fileItem);
+                                    ui.slidehide(fileItem, 100);
                                     ui.dest(fileItem);
                                     ui.dest(menu2);
                                 }, menu2);
@@ -1254,7 +1253,7 @@ var app = {
                             setTimeout(function () {
                                 console.log(el.dropped)
                                 if (el.dropped === true) {
-                                    ui.slidehide(fileItem);
+                                    ui.slidehide(fileItem, 100);
                                     ui.dest(fileItem);
                                 }
                             }, 100);
@@ -1770,7 +1769,7 @@ var app = {
         runs: false,
         name: 'Lockscreen',
         init: async function () {
-            if (!el.lock) {
+            if (!el.lock && sys.contained === false) {
                 wd.clock();
                 el.lock = tk.c('div', document.body, 'lockscreen');
                 const clock = tk.c('div', el.lock, 'center');
@@ -2007,16 +2006,19 @@ var app = {
             await fs.write('/system/apps/' + app.appid + '.js', ok);
         },
         init: async function () {
-            const win = tk.mbw('App Market', '340px', 'auto', true, undefined, undefined);
+            const win = tk.mbw('App Market', '400px', true, undefined, undefined);
             const apps = tk.c('div', win.main);
             const appinfo = tk.c('div', win.main, 'hide');
             async function loadapps() {
                 try {
                     const response = await fetch(sys.appurl);
                     const apps = await response.json();
+                    const containerdiv = tk.c('div', win.main, 'brick-layout-list');
+                    containerdiv.style.marginTop = "5px";
                     apps.forEach(function (app2) {
-                        const notif = tk.c('div', win.main, 'notif2');
+                        const notif = tk.c('div', containerdiv, 'notif2');
                         tk.p(`<span class="bold">${app2.name}</span> by ${app2.pub}`, undefined, notif);
+                        tk.line(notif);
                         tk.p(app2.info, undefined, notif);
                         tk.cb('b3', 'App ID', () => wm.notif(`${app2.name}'s App ID:`, app2.appid, () => ui.copy(app2.appid), 'Copy', true), notif); tk.cb('b3', 'Install', () => app.appmark.create(app2.path, app2), notif)
                     });
@@ -2024,7 +2026,7 @@ var app = {
                     console.log(error);
                 }
             }
-            tk.p(`Look for things you might want, all apps have <span class="bold">full access</span> to this WebDesk/it's files. Anything in this store is safe.`, undefined, apps);
+            tk.p(`Look for things you might want, all apps have <span class="bold">full access</span> to this WebDesk/it's files. Anything here is safe.`, undefined, apps);
             if (sys.dev === true) {
                 tk.cb('b1', 'Sideload', function () {
                     const menu = tk.c('div', document.body, 'cm');
@@ -2257,6 +2259,9 @@ var app = {
             await load();
         },
     },
+    placeholder: {
+        init: function () { wm.snack('I do nothing.'); } // Placeholder for container
+    },
     browser: {
         runs: true,
         name: 'Browser (beta)',
@@ -2371,7 +2376,7 @@ var app = {
             }, 250);
             wd.win();
         },
-        view: async function (path2, title) {
+        view: async function (path2, title, background) {
             tk.css('./assets/lib/browse.css');
             if (title === undefined) {
                 title = "Embedder";
@@ -2382,6 +2387,9 @@ var app = {
             const tab = tk.c('embed', win.main, 'browsertab browserREALtab');
             win.main.classList = "browsercont";
             win.name.innerHTML = "";
+            if (background === false) {
+                tab.style.background = "rgba(0, 0, 0, 0)";
+            }
             tk.cb('b4 b6', '⟳', function () {
                 tab.src = tab.src;
             }, win.name);
@@ -2394,6 +2402,7 @@ var app = {
                 ui.show(tab, 0);
             }, 250);
             wd.win();
+            return tab;
         }
     },
     webcall: {

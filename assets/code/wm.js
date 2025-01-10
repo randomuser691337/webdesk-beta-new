@@ -80,13 +80,12 @@ var wm = {
                     yeah.dispatchEvent(mousedownevent);
                 }
                 const endOffset = btn.getBoundingClientRect();
-                const winrect = wid.getBoundingClientRect();
                 $animatedDiv.addClass("windowanim");
                 $animatedDiv.animate({
                     top: endOffset.bottom,
-                    left: endOffset.x,
+                    left: endOffset.x - (endOffset.width / 2),
                     opacity: 0,
-                }, 260, "swing", function () {
+                }, 260, function () {
                     $animatedDiv.hide();
                     $animatedDiv.removeClass("windowanim");
                 });
@@ -104,7 +103,7 @@ var wm = {
                 top: original.top,
                 left: original.left,
                 opacity: 1,
-            }, 260, "swing", function () {
+            }, 260, function () {
                 $animatedDiv.removeClass("minimized");
             });
 

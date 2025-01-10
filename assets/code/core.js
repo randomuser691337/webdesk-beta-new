@@ -239,13 +239,24 @@ var wd = {
                     wm.snack('Copied DeskID quicklink. Send it to your friends!');
                 }, thing);
                 const ok = tk.c('div', el.sm, 'embed nest brick-layout');
-                for (var key in app) {
+                for (let key in app) {
                     if (app.hasOwnProperty(key)) {
                         if (app[key].hasOwnProperty("runs") && app[key].runs === true) {
                             const btn = tk.cb('b3', app[key].name, app[key].init.bind(), ok);
                             btn.addEventListener('click', function () {
                                 ui.dest(el.sm, 0);
                                 el.sm = undefined;
+                            });
+                            btn.addEventListener('contextmenu', function (event) {
+                                event.preventDefault();
+                                const menu = tk.c('div', document.body, 'rightclick');
+                                const pos = btn.getBoundingClientRect();
+                                const thing = { clientX: pos.left, clientY: pos.top };
+                                ui.rightclick(menu, thing, btn, true);
+                                tk.cb('b2 b3', 'Container', async function () {
+                                    const thing = await new Blob([app[key].init], { type: "text/plain" });;
+                                    app.browser.view(`./container.html?code=${thing}`, app[key].name, false);
+                                }, menu);
                             });
                             btn.style.textAlign = "left";
                         }

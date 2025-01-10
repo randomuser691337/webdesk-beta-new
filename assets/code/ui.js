@@ -362,7 +362,7 @@ var ui = {
         }
         document.body.addEventListener('mousedown', function (event) {
             const parentDiv = event.target.parentElement;
-            if (parentDiv?.tagName === 'DIV' && ![menu].includes(parentDiv)) {
+            if (![menu].includes(parentDiv)) {
                 if (btn) {
                     const stop = new Event('mouseout');
                     btn.dispatchEvent(stop);
@@ -393,6 +393,10 @@ var tk = {
     },
     g: function (element) {
         return document.getElementById(element);
+    },
+    line: function (ele) {
+        const ok = tk.c('div', ele, 'line');
+        const no = tk.c('div', ok, 'lineinside');
     },
     t: function (ele, text) {
         ele.innerHTML = text;
@@ -489,6 +493,7 @@ var tk = {
             const btm = el.tbpos;
             windowDiv.style.bottom = btm.height + 12 + "px";
         }
+
         var winbtns = tk.c('div', undefined, 'tnav');
         var closeButton = document.createElement('button');
         let closeButtonNest = document.createElement('button');
@@ -500,6 +505,7 @@ var tk = {
             closeButtonNest.classList.add('winbnest');
             closeButton.classList.add('winb');
         }
+
         closeButtonNest.appendChild(closeButton);
         let shortened;
         if (sys.mob === true) {
