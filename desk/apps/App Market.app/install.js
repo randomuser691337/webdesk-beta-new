@@ -24,7 +24,7 @@ app['appmark'] = {
         const path = '/apps/' + app.appid + '.app/';
         const check = await fs.read(`${path}install.js`);
         const newen = { name: app.name, ver: app.ver, installedon: Date.now(), dev: app.pub, appid: app.appid, system: false, lastpath: path, };
-        if (check) {
+        if (check && update !== true) {
             wm.snack('Already installed');
             return;
         } else {
@@ -125,5 +125,28 @@ app['appmark'] = {
             }, apps);
         }
         await loadapps();
+    },
+    checkforup: async function () {
+        const contents = await fs.ls('/apps/');
+        for (const item of contents.items) {
+            if (item.path.endsWith('.app')) {
+                const skibidihawk = await fs.ls(item.path + "/");
+                for (const item3 of skibidihawk.items) {
+                    if (item3.name === "manifest.json") {
+                        const fuck = await fs.read(item3.path);
+                        const ok = JSON.parse(fuck);
+                        if (ok.dev === "Browser" && ok.ver === 1) {
+                            console.log(`<i> ` + ok.name + ` skipped updates`);
+                        } else {
+                            const ok2 = await fetch(sys.appurl + "/update/" + ok.appid);
+                            const upd = await ok2.json();
+                            if (upd.ver !== ok.ver) {
+                                app.appmark.create(upd.path, upd, true);
+                            }
+                        }
+                    }
+                }
+            }
+        }
     }
 }
