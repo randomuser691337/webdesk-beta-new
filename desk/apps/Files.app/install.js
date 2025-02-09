@@ -228,8 +228,7 @@ app['files'] = {
                                 if (!filecontent.startsWith('data:video')) {
                                     if (filecontent.startsWith('data:')) {
                                         thing = await tk.img(filecontent, 'embed', menu, false, true);
-                                        thing.style.marginBottom = "4px";
-                                        p.style.marginBottom = "7px";
+                                        (await thing).style.marginBottom = "4px";
                                     } else {
                                         const thing = tk.c('div', menu, 'embed resizeoff');
                                         const genit = gen(8);
@@ -246,7 +245,6 @@ app['files'] = {
                                         editor.resize();
                                         editor.setValue(filecontent, -1);
                                         editor.setReadOnly(true);
-                                        p.style.marginBottom = "7px";
                                     }
                                 }
                             } catch (error) {
