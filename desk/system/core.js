@@ -459,7 +459,8 @@ var wd = {
             el.contb = tk.cb('time', '--:--', () => controlcenter(), right);
             const tasknest = tk.c('div', el.taskbar, 'tasknest');
             const lefttb = tk.c('div', tasknest, 'tnav auto');
-            el.startbutton = tk.cb('b1', 'Apps', () => startmenu(), lefttb);
+            el.startbutton = tk.cb('', '', () => startmenu(), lefttb);
+            tk.img('/system/lib/img/icons/apps.svg', 'dockicon', el.startbutton, false, 'noretry');
             el.tr = tk.c('div', lefttb);
             if (sys.nvol === 0) el.contb.classList.toggle('silentbtn');
             if (sys.mobui === true) {

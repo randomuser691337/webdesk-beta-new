@@ -39,7 +39,7 @@ app['appmark'] = {
         }
     },
     init: async function () {
-        const win = tk.mbw('App Market', '400px', true, undefined, undefined);
+        const win = tk.mbw('App Market', '400px', true, undefined, undefined, undefined, '/apps/App Market.app/icon.png');
         const apps = tk.c('div', win.main);
         const appinfo = tk.c('div', win.main, 'hide');
         async function loadapps() {

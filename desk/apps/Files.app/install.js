@@ -2,7 +2,7 @@ app['files'] = {
     runs: true,
     name: 'Files',
     init: async function () {
-        const win = tk.mbw(`Files`, '340px', 'auto', true, undefined, undefined);
+        const win = tk.mbw(`Files`, '340px', 'auto', true, undefined, undefined, '/apps/Files.app/icon.svg');
         const search = tk.c('input', win.main, 'i1');
         win.name.innerHTML = "";
         const breadcrumbs = tk.c('div', win.name);
