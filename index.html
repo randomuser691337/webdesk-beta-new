@@ -81,7 +81,7 @@
     let params = new URLSearchParams(window.location.search);
 
     var abt = {
-        lastmod: "Feb 7, 2025",
+        lastmod: "Feb 9, 2025",
         ver: "0.3.0",
     }
 
@@ -188,6 +188,20 @@
             .catch((error) => {
                 console.error('Service Worker registration failed:', error);
             });
+    }
+
+    async function initapps() {
+        const contents = await fs.ls('/apps/');
+        for (const item of contents.items) {
+            if (item.path.endsWith('.app')) {
+                const skibidihawk = await fs.ls(item.path + "/");
+                for (const item3 of skibidihawk.items) {
+                    if (item3.name === "install.js") {
+                        await initscript(item3.path);
+                    }
+                }
+            }
+        }
     }
 
     async function boot() {
@@ -384,20 +398,6 @@
                     wd.seasonal();
                 }
                 console.log('<i> Boot stage 3: Load apps');
-                async function initapps() {
-                    const contents = await fs.ls('/apps/');
-                    for (const item of contents.items) {
-                        if (item.path.endsWith('.app')) {
-                            const skibidihawk = await fs.ls(item.path + "/");
-                            for (const item3 of skibidihawk.items) {
-                                if (item3.name === "install.js") {
-                                    await initscript(item3.path);
-                                }
-                            }
-                        }
-                    }
-                }
-
                 await initapps();
                 console.log('<i> Boot stage 4: Load desktop, check for updates');
                 await wd.desktop(sd, deskid, 'wait');
@@ -422,6 +422,7 @@
                     console.log(error);
                 }
             } else if (migcheck === "down") {
+                await initapps();
                 const id = gen(7);
                 await ptp.go(id);
                 ui.crtheme('#010101', true);
@@ -431,6 +432,7 @@
                 ui.dest(tk.g('loading', 220));
                 boot = true;
             } else if (migcheck === "echo") {
+                await initapps();
                 const id = gen(7);
                 await ptp.go(id);
                 ui.crtheme('#010101', true);
@@ -440,9 +442,11 @@
                 ui.dest(tk.g('loading', 220));
                 boot = true;
             } else if (migcheck === "rec") {
+                await initapps();
                 await app.system.recovery.init();
                 ui.dest(tk.g('loading', 220));
             } else {
+                await initapps();
                 wd.seasonal();
                 const id = await wd.newid();
                 await ptp.go(id);

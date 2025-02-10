@@ -227,8 +227,8 @@ app['files'] = {
                             try {
                                 if (!filecontent.startsWith('data:video')) {
                                     if (filecontent.startsWith('data:')) {
-                                        thing = await tk.img(filecontent, 'embed', menu, false, true);
-                                        (await thing).style.marginBottom = "4px";
+                                        thing = tk.img(filecontent, 'embed', menu, false, true);
+                                        (await thing).img.style.marginBottom = "4px";
                                     } else {
                                         const thing = tk.c('div', menu, 'embed resizeoff');
                                         const genit = gen(8);
