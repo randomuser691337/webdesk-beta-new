@@ -30,7 +30,8 @@ app['imgview'] = {
                 }, div);
             });
         } else if (contents.includes('data:application/pdf')) {
-            wm.notif(`WebDesk can't view PDFs`, 'Open PDF in a new tab?', () => window.open(contents, '_blank'), undefined, true);
+            wm.close(win);
+            app.browser.view(contents, path);
         } else {
             const container = tk.c('div', win.main);
             container.style.marginBottom = "4px";

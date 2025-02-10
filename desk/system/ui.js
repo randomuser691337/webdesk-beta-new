@@ -614,6 +614,8 @@ var tk = {
                     }
                 }, 40);
             });
+        } else {
+            closeButton.classList.add('grey');
         }
         let minimizeButton = document.createElement('button');
         let minimizeButtonNest = document.createElement('button');
@@ -631,6 +633,8 @@ var tk = {
             minimizeButtonNest.addEventListener('mousedown', async function () {
                 await wm.minimize(windowDiv, tbn);
             });
+        } else {
+            minimizeButton.classList.add('grey');
         }
         winbtns.appendChild(closeButtonNest);
         winbtns.appendChild(minimizeButtonNest);
@@ -648,12 +652,14 @@ var tk = {
                 titlebarDiv.addEventListener('dblclick', function () {
                     wm.max(windowDiv);
                 });
+            } else {
+                maximizeButton.classList.add('grey');
             }
             winbtns.appendChild(maximizeButtonNest);
         }
         titlebarDiv.appendChild(winbtns);
         var titleDiv = document.createElement('div');
-        titleDiv.classList.add('title');
+        titleDiv.classList = 'title wintitle';
         titleDiv.innerHTML = title;
         titlebarDiv.appendChild(titleDiv);
         windowDiv.appendChild(titlebarDiv);

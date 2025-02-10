@@ -130,6 +130,9 @@ var wm = {
         wd.win(wid);
     },
     close: async function (window) {
+        if (window) {
+            window.win.click();
+        }
         const mousedownevent = new MouseEvent('mousedown');
         focused.closebtn.dispatchEvent(mousedownevent);
     },

@@ -283,14 +283,6 @@ p {
     overflow: auto !important;
 }
 
-.title {
-    flex-grow: 1;
-    text-align: right;
-    white-space: normal;
-    word-break: break-word;
-    margin-left: 2px;
-}
-
 .winbnest {
     padding-right: 4px;
     padding-left: 3px;
@@ -310,21 +302,31 @@ p {
 .winb {
     width: 13px;
     height: 13px;
-    padding: 0px !important;
-    border: 1px solid rgba(0, 0, 0, 0);
     border-radius: 50%;
-    background-color: rgba(127, 127, 127, 0.5);
-    cursor: default !important;
-    box-sizing: border-box;
-    box-shadow: var(--optbox);
+    position: relative;
+    overflow: hidden;
+    cursor: pointer;
+    padding: 0px;
+    justify-content: center;
+    align-items: center;
 }
 
-.winb:hover {
-    opacity: 88%;
+.winb:before,
+.winb:after {
+    content: "";
+    position: absolute;
+    top: 100%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    border-radius: 2px;
+    opacity: 0;
+    margin: 0px;
 }
 
-.winb:active {
-    opacity: 50%;
+.winb:hover:before,
+.winb:hover:after {
+  top: 50%;
+  opacity: 1;
 }
 
 .conticon {
@@ -353,8 +355,23 @@ p {
 }
 
 .red {
-    background-color: rgb(255, 59, 48);
-    border: 1px solid rgba(204, 47, 38, 0.4);
+    background: #FF5D5B;
+    border: 1px solid #CF544D;
+}
+
+.red:before,
+.red:after {
+    width: 1px;
+    height: 70%;
+    background: #460100;
+}
+
+.red:before {
+    transform: translate(-50%, -50%) rotate(45deg);
+}
+
+.red:after {
+    transform: translate(-50%, -50%) rotate(-45deg);
 }
 
 .yel {
@@ -362,9 +379,33 @@ p {
     border: 1px solid rgba(204, 163, 0, 0.4);
 }
 
+.yel:before {
+    width: 70%;
+    height: 1px;
+    background: #460100;
+}
+
+.grey {
+    background-color: rgba(127, 127, 127, 0.5);
+    border: 1px solid rgba(0, 0, 0, 0);
+}
+
 .gre {
     background-color: rgb(52, 199, 89);
     border: 1px solid rgba(41, 159, 71, 0.4);
+}
+
+.gre:before {
+    width: 50%;
+    height: 50%;
+    background: #024D0F;
+}
+
+.gre:after {
+    width: 1.5px;
+    height: 70%;
+    transform: translate(-50%, -50%) rotate(-135deg);
+    background: #00CD4E;
 }
 
 .setupbar {
@@ -391,9 +432,13 @@ p {
 .title {
     flex-grow: 1;
     text-align: right;
-    overflow: hidden;
     white-space: nowrap;
     text-overflow: ellipsis;
+    overflow: hidden;
+}
+
+.wintitle {
+    overflow: auto !important;
 }
 
 .tnav {
@@ -1138,7 +1183,7 @@ p {
     background-color: var(--dimfont);
     width: 100%;
     box-sizing: border-box;
-    padding: 0px; 
+    padding: 0px;
     margin: 0px;
     height: 1px;
     border-radius: 5px;
@@ -1424,8 +1469,10 @@ a:active {
 
 .darkscreen {
     position: fixed;
-    left: 0px; right: 0px;
-    bottom: 0px; top: 0px;
+    left: 0px;
+    right: 0px;
+    bottom: 0px;
+    top: 0px;
     z-index: 9990;
     background: rgba(0, 0, 0, 0.5);
     /* -webkit-backdrop-filter: blur(var(--bl1));
@@ -1434,6 +1481,11 @@ a:active {
 }
 
 @keyframes dark {
-    0% {opacity: 0%;}
-    100% {opacity: 100%;}
+    0% {
+        opacity: 0%;
+    }
+
+    100% {
+        opacity: 100%;
+    }
 }
