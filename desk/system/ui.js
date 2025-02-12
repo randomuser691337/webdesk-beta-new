@@ -65,7 +65,7 @@ var ui = {
                 correct = ok.replace(/^data:application\/octet-stream/, 'data:audio/wav');
                 audio = new Audio(correct);
             } else {
-                console.log(`<!> Who are you, who am I to you? (Audio file isn't wav, giving up)`)
+                console.log(`<!> Audio file isn't wav, giving up`)
             }
         } else {
             audio = new Audio(filename);
@@ -537,6 +537,7 @@ var tk = {
         }
 
         var winbtns = tk.c('div', undefined, 'tnav');
+        var winbtnc = tk.c('div', winbtns, 'tnavc');
         var closeButton = document.createElement('button');
         let closeButtonNest = document.createElement('button');
         if (sys.mobui === true) {
@@ -600,8 +601,8 @@ var tk = {
         };
         if (quit === undefined) {
             closeButton.classList.add('red');
-            closeButtonNest.addEventListener('mousedown', async function () {
-                const mousedownevent = new MouseEvent('mousedown');
+            closeButtonNest.addEventListener('click', async function () {
+                const mousedownevent = new MouseEvent('click');
                 windowDiv.dispatchEvent(mousedownevent);
                 ui.dest(windowDiv, 130);
                 ui.dest(tbn, 130);
@@ -630,14 +631,14 @@ var tk = {
         minimizeButtonNest.appendChild(minimizeButton);
         if (min === undefined && el.tr !== undefined) {
             minimizeButton.classList.add('yel');
-            minimizeButtonNest.addEventListener('mousedown', async function () {
+            minimizeButtonNest.addEventListener('click', async function () {
                 await wm.minimize(windowDiv, tbn);
             });
         } else {
             minimizeButton.classList.add('grey');
         }
-        winbtns.appendChild(closeButtonNest);
-        winbtns.appendChild(minimizeButtonNest);
+        winbtnc.appendChild(closeButtonNest);
+        winbtnc.appendChild(minimizeButtonNest);
         if (sys.mobui !== true) {
             var maximizeButton = document.createElement('button');
             const maximizeButtonNest = document.createElement('button');
@@ -646,7 +647,7 @@ var tk = {
             maximizeButtonNest.appendChild(maximizeButton);
             if (full === undefined) {
                 maximizeButton.classList.add('gre');
-                maximizeButton.addEventListener('mousedown', function () {
+                maximizeButton.addEventListener('click', function () {
                     wm.max(windowDiv);
                 });
                 titlebarDiv.addEventListener('dblclick', function () {
@@ -655,7 +656,7 @@ var tk = {
             } else {
                 maximizeButton.classList.add('grey');
             }
-            winbtns.appendChild(maximizeButtonNest);
+            winbtnc.appendChild(maximizeButtonNest);
         }
         titlebarDiv.appendChild(winbtns);
         var titleDiv = document.createElement('div');
@@ -669,7 +670,7 @@ var tk = {
         document.body.appendChild(windowDiv);
         wd.win();
         wd.win(windowDiv, closeButtonNest, minimizeButtonNest, tbn);
-        windowDiv.addEventListener('mousedown', function () {
+        windowDiv.addEventListener('click', function () {
             wd.win(windowDiv, closeButtonNest, minimizeButtonNest, tbn);
         });
         if (sys.mobui !== true) {

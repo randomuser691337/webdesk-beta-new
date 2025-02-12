@@ -94,7 +94,7 @@ var wm = {
                     left: $animatedDiv.offset().left,
                 });
                 const yeah = await ughfine(wid);
-                const mousedownevent = new MouseEvent('mousedown');
+                const mousedownevent = new MouseEvent('click');
                 if (yeah) {
                     yeah.dispatchEvent(mousedownevent);
                 }
@@ -103,7 +103,6 @@ var wm = {
                 $animatedDiv.animate({
                     top: endOffset.bottom,
                     left: endOffset.x - (endOffset.width / 2),
-                    opacity: 0,
                 }, 260, function () {
                     $animatedDiv.hide();
                     $animatedDiv.removeClass("windowanim");
@@ -121,7 +120,6 @@ var wm = {
             $animatedDiv.show().animate({
                 top: original.top,
                 left: original.left,
-                opacity: 1,
             }, 260, function () {
                 $animatedDiv.removeClass("minimized");
             });
@@ -129,20 +127,22 @@ var wm = {
         }
         wd.win(wid);
     },
-    close: async function (window) {
-        if (window) {
-            window.win.click();
+    close: async function (window, closeviawin) {
+        if (window && closeviawin === true) {
+            if (window.win) {
+                window.win.click();
+            } else {
+                window.click();
+            }
         }
-        const mousedownevent = new MouseEvent('mousedown');
-        focused.closebtn.dispatchEvent(mousedownevent);
+        focused.closebtn.click();
     },
     minimize: async function (window, tbn) {
-        const mousedownevent = new MouseEvent('mousedown');
         wm.min(window, tbn);
         setTimeout(async function () {
             const yeah = await ughfine(window);
             if (yeah) {
-                yeah.dispatchEvent(mousedownevent);
+                yeah.click();
             } else {
                 el.menubarbtn.innerText = "Desktop";
             }

@@ -81,8 +81,8 @@
     let params = new URLSearchParams(window.location.search);
 
     var abt = {
-        lastmod: "Feb 9, 2025",
-        ver: "0.3.0",
+        lastmod: "Feb 12, 2025",
+        ver: "0.3.1",
     }
 
     var sys = {
@@ -502,7 +502,7 @@
             try {
                 boot = true;
                 document.body.innerHTML = "<p>Downloading update package...</p>";
-                const response = await fetch('desk.zip');
+                const response = await fetch('desk.zip', { cache: 'no-store' });
                 const test = await fs.read('/system/core.js');
                 if (test) {
                     navigator.serviceWorker.getRegistrations().then(registrations => {

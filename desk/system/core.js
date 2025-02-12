@@ -185,6 +185,10 @@ var wd = {
             $window.addClass('winf');
 
             if (!$window.hasClass('max') && sys.mobui !== true) {
+                if (event.target.tagName === 'BUTTON' || event.target.tagName === 'INPUT') {
+                    return;
+                }
+
                 if (event.type === 'mousedown') {
                     offsetX = event.clientX - $window.offset().left;
                     offsetY = event.clientY - $window.offset().top;
@@ -928,15 +932,15 @@ var wd = {
         if (existingStyle) {
             existingStyle.remove();
         }
-    
+
         const normalURL = await fs.read(normal);
         const mediumURL = await fs.read(medium);
         const boldURL = await fs.read(bold);
         const monoURL = await fs.read(mono);
-    
+
         const style = document.createElement('style');
         style.id = 'dynamic-font';
-    
+
         style.innerHTML = `
             @font-face {
                 font-family: 'Font';
@@ -957,9 +961,9 @@ var wd = {
                 font-family: 'MonoS';
                 src: url(${monoURL}) format('woff2');
             }`;
-    
+
         document.head.appendChild(style);
-    },    
+    },
     tbcal: async function () {
         let px = 0;
         const ok = await fs.read('/system/standalonepx');

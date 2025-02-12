@@ -83,4 +83,7 @@ var fs = {
     persist: function () {
         return this.askwfs('persist');
     },
+    usedspace: function () {
+        return this.askwfs('space');
+    },
 };

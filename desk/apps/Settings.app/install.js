@@ -367,7 +367,7 @@ app['settings'] = {
             const degp = tk.p(`<span class="bold">Measurement</span> `, undefined, ok.main);
             const degps = tk.c('span', degp);
             degps.innerText = `${sys.unit} (${sys.unitsym})`;
-            const mousedownevent = new MouseEvent('mousedown');
+            const mousedownevent = new MouseEvent('click');
             tk.cb('b1 b2', 'Disable Location', async function () {
                 await fs.write('/user/info/location.json', [{ city: 'Paris, France', unit: 'Metric', lastupdate: Date.now(), default: true }]);
                 sys.city = "Paris, France";

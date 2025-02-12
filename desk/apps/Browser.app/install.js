@@ -11,7 +11,7 @@ app['browser'] = {
         const okiedokie = tk.c('div', tabs, 'browsertitle');
         const searchbtns = tk.c('div', okiedokie, 'tnav');
         btnnest.appendChild(win.winbtns);
-        win.closebtn.style.marginLeft = "4px";
+        win.closebtn.style.marginLeft = "2px";
         win.winbtns.style.marginBottom = "3px";
         win.title.remove();
         let thing = [];

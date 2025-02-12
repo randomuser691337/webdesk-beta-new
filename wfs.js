@@ -87,6 +87,9 @@ function idbop(operation, params, opt, requestId) {
         case 'persist':
             fs2.persist();
             break;
+        case 'space':
+            fs2.used();
+            break;
         case 'all':
             fs2.all().then(files => {
                 self.postMessage({ type: 'result', data: files, requestId });
@@ -444,6 +447,36 @@ var fs2 = {
                 resolve();
             };
             request.onerror = function (event) {
+                reject(event.target.error);
+            };
+        });
+    },
+    used: function () {
+        return new Promise((resolve, reject) => {
+            const transaction = db.transaction(['main'], 'readonly');
+            const objectStore = transaction.objectStore('main');
+            let totalSize = 0;
+
+            objectStore.openCursor().onsuccess = function (event) {
+                const cursor = event.target.result;
+                if (cursor) {
+                    const item = cursor.value;
+                    if (item && item.data) {
+                        if (typeof item.data === 'string') {
+                            totalSize += item.data.length;
+                        } else if (item.data instanceof Blob) {
+                            totalSize += item.data.size;
+                        } else if (typeof item.data === 'object') {
+                            totalSize += JSON.stringify(item.data).length;
+                        }
+                    }
+                    cursor.continue();
+                } else {
+                    resolve(totalSize);
+                }
+            };
+
+            objectStore.openCursor().onerror = function (event) {
                 reject(event.target.error);
             };
         });

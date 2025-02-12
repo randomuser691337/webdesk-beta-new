@@ -30,7 +30,7 @@ app['imgview'] = {
                 }, div);
             });
         } else if (contents.includes('data:application/pdf')) {
-            wm.close(win);
+            wm.close(win, true);
             app.browser.view(contents, path);
         } else {
             const container = tk.c('div', win.main);
