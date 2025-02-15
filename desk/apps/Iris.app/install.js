@@ -3,8 +3,8 @@
 app['imgview'] = {
     runs: false,
     name: 'Iris',
-    init: async function (contents, path) {
-        const win = tk.mbw('Iris', '400px', 'auto', undefined, undefined, undefined, '/apps/Iris.app/icon.svg');
+    init: async function (contents, path, name) {
+        const win = tk.mbw('Iris', '400px', 'auto', undefined, undefined, undefined, '/apps/Iris.app/Contents/icon.svg');
         if (contents.includes('data:video')) {
             const img = tk.c('video', win.main, 'embed');
             const src = tk.c('source', img);
@@ -32,6 +32,9 @@ app['imgview'] = {
         } else if (contents.includes('data:application/pdf')) {
             wm.close(win, true);
             app.browser.view(contents, path);
+        } else if (contents.includes('data:audio')) {
+            wm.close(win, true)
+            app.music.init(path, name);
         } else {
             const container = tk.c('div', win.main);
             container.style.marginBottom = "4px";

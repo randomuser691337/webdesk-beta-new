@@ -546,9 +546,9 @@ var wd = {
     },
     dark: function (fucker) {
         ui.cv('ui1', 'rgb(35, 35, 35, 0.6)');
-        ui.cv('ui2', '#1a1a1a');
-        ui.cv('ui3', '#2a2a2a');
-        ui.cv('bc', 'rgb(37, 37, 37, 0.6)');
+        ui.cv('ui2', '#1f1f1f');
+        ui.cv('ui3', '#2f2f2f');
+        ui.cv('bc', 'rgba(45, 45, 45, 0.5)');
         ui.cv('font', '#fff');
         ui.cv('dimfont', '#bbb');
         ui.cv('inv', '1.0');
@@ -560,7 +560,7 @@ var wd = {
     light: function (fucker) {
         ui.cv('ui1', 'rgb(255, 255, 255, 0.6)');
         ui.cv('ui2', '#ffffff');
-        ui.cv('ui3', '#ededed');
+        ui.cv('ui3', '#efefef');
         ui.cv('bc', 'rgb(220, 220, 220, 0.6)');
         ui.cv('font', '#000');
         ui.cv('dimfont', '#444');

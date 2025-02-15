@@ -5,7 +5,7 @@ app['browser'] = {
     name: 'Browser',
     init: async function (path2) {
         tk.css('/system/lib/layout1.css');
-        const win = tk.mbw('Browser', '80vw', '80vh', undefined, undefined, undefined, '/apps/Browser.app/icon.svg');
+        const win = tk.mbw('Browser', '80vw', '80vh', undefined, undefined, undefined, '/apps/Browser.app/Contents/icon.svg');
         const tabs = tk.c('div', win.main, 'tabbar d');
         const btnnest = tk.c('div', tabs, 'tnav');
         const okiedokie = tk.c('div', tabs, 'browsertitle');
@@ -68,7 +68,7 @@ app['browser'] = {
         tk.cb('b4 b6', '⟳', function () {
             currentTab.src = currentTab.src;
         }, searchbtns);
-        tk.cb('b4 b6', '<', function () {
+        tk.cb('b4 b6 hide', '<', function () {
             if (thing.length > 1) {
                 const currentIndex = thing.indexOf(currentTab.src);
                 if (currentIndex > 0) {
@@ -79,7 +79,7 @@ app['browser'] = {
                 }
             }
         }, searchbtns);
-        tk.cb('b4 b6', '>', function () {
+        tk.cb('b4 b6 hide', '>', function () {
             if (thing.length > 1) {
                 const currentIndex = thing.indexOf(currentTab.src);
                 if (currentIndex < thing.length - 1) {

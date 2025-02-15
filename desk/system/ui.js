@@ -64,8 +64,11 @@ var ui = {
             if (filename.endsWith('.wav')) {
                 correct = ok.replace(/^data:application\/octet-stream/, 'data:audio/wav');
                 audio = new Audio(correct);
+            } else if (filename.endsWith('.mp3')) {
+                correct = ok.replace(/^data:application\/octet-stream/, 'data:audio/mpeg');
+                audio = new Audio(correct);
             } else {
-                console.log(`<!> Audio file isn't wav, giving up`)
+                console.log(`<!> Audio file isn't wav or mp3, giving up`)
             }
         } else {
             audio = new Audio(filename);
@@ -595,17 +598,19 @@ var tk = {
         tbn.addEventListener('mouseenter', showTooltip);
         tbn.addEventListener('mouseleave', hideTooltip);
 
-        const removeTooltipListener = () => {
+        const removeTooltipListener = () => { 
             tbn.removeEventListener('mouseenter', showTooltip);
             tbn.removeEventListener('mouseleave', hideTooltip);
         };
+
         if (quit === undefined) {
             closeButton.classList.add('red');
             closeButtonNest.addEventListener('click', async function () {
                 const mousedownevent = new MouseEvent('click');
                 windowDiv.dispatchEvent(mousedownevent);
-                ui.dest(windowDiv, 130);
-                ui.dest(tbn, 130);
+                ui.dest(windowDiv, 140);
+                ui.dest(tbn, 140);
+                removeTooltipListener();
                 setTimeout(async function () {
                     const yeah = await ughfine(windowDiv);
                     if (yeah) {

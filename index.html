@@ -81,7 +81,7 @@
     let params = new URLSearchParams(window.location.search);
 
     var abt = {
-        lastmod: "Feb 12, 2025",
+        lastmod: "Feb 14, 2025",
         ver: "0.3.1",
     }
 
@@ -116,7 +116,7 @@
         filter: false,
         nc: false,
         loclast: Date.now(),
-        notifsrc: "/assets/other/notif1.wav",
+        notifsrc: "/system/lib/other/notif1.wav",
         lowgfx: false,
         lockscreen: true,
         contained: false,
@@ -143,10 +143,10 @@
 
 <body>
     <div id="contain">
-        <div class="dark background"></div>
+        <div class="dark background" id="darkbg"></div>
         <div id="background" class="background"></div>
-        <div class="circle"></div>
-        <div class="circle2"></div>
+        <div class="circle" id="circle1"></div>
+        <div class="circle2" id="circle2"></div>
     </div>
     <div id="setuparea">
     </div>
@@ -193,10 +193,10 @@
     async function initapps() {
         const contents = await fs.ls('/apps/');
         for (const item of contents.items) {
-            if (item.path.endsWith('.app')) {
-                const skibidihawk = await fs.ls(item.path + "/");
+            if (item.path.endsWith('.app/')) {
+                const skibidihawk = await fs.ls(item.path);
                 for (const item3 of skibidihawk.items) {
-                    if (item3.name === "install.js") {
+                    if (item3.type === "file" && item3.name === "install.js") {
                         await initscript(item3.path);
                     }
                 }
@@ -333,6 +333,7 @@
 
                 if (eepysleepy === "true") {
                     ui.hide(tk.g('contain'), 0);
+                    await initscript('/apps/Lock Screen.app/install.js');
                     sys.setupd = "eepy";
                     boot = true;
                     wd.dark('nosave');

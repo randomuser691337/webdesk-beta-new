@@ -2,7 +2,7 @@ app['settings'] = {
     runs: true,
     name: 'Settings',
     init: async function () {
-        const main = tk.mbw('Settings', '310px', 'auto', true, undefined, undefined, '/apps/Settings.app/icon.svg');
+        const main = tk.mbw('Settings', '310px', 'auto', true, undefined, undefined, '/apps/Settings.app/Contents/icon.svg');
         const generalPane = tk.c('div', main.main, 'hide');
         const appearPane = tk.c('div', main.main, 'hide');
         const accPane = tk.c('div', main.main, 'hide');
@@ -34,7 +34,7 @@ app['settings'] = {
             for (const item of contents.items) {
                 if (item.type === "folder") {
                     if (item.path.includes('.app')) {
-                        const skibidi2 = await fs.ls(item.path + "/");
+                        const skibidi2 = await fs.ls(item.path);
                         for (const item3 of skibidi2.items) {
                             if (item3.name === "manifest.json") {
                                 const thing = await fs.read(item3.path);
