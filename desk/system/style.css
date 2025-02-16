@@ -3,8 +3,6 @@
     --sh2: #99bbff;
     --bg1: #eeeeff;
     --bg2: #aaccff;
-    --accent: 0, 60, 255;
-    --acc: var(--accent);
     --ui1: rgb(255, 255, 255, 0.5);
     --ui2: #ffffff;
     --ui3: #ededed;

@@ -400,6 +400,10 @@ var ui = {
     },
 }
 var tk = {
+    loadbar: function (el) {
+        const bar = tk.c('div', el, 'line-wobble');
+        return bar;
+    },
     c: function (type, ele, classn) {
         const ok = document.createElement(type);
         if (ele) {

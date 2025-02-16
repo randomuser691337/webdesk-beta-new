@@ -10,6 +10,27 @@ app['imgview'] = {
             const src = tk.c('source', img);
             src.src = contents;
             img.controls = true;
+            tk.cb('b1', 'Shrink', async function () {
+                const script = await initscript('/apps/Iris.app/Contents/ffmpeg.min.js');
+                const { createFFmpeg, fetchFile } = await FFmpeg;
+                const ffmpeg = await createFFmpeg({ log: true });
+                await ffmpeg.load();
+                ffmpeg.FS('writeFile', 'input.mp4', await fetchFile(contents));
+                await ffmpeg.run(
+                    '-i', 'input.mp4',
+                    '-b:v', '500k',
+                    '-vf', 'scale=640:-1',
+                    'output.mp4'
+                );
+
+                const data = ffmpeg.FS('readFile', 'output.mp4');
+                const blob = new Blob([data.buffer], { type: 'video/mp4' });
+                const url = URL.createObjectURL(blob);
+                const link = tk.c('a', win.main, undefined);
+                link.innerText = "Download";
+                link.src = url;
+                script.remove();
+            }, win.main);
         } else if (contents.includes('data:application/x-zip-') || contents.includes('data:application/zip')) {
             win.win.style.width = "300px";
             const base64Data = contents.split(',')[1];
