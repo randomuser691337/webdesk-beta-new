@@ -40,8 +40,33 @@ app['music'] = {
             nowplay.innerHTML = "";
             nowplaytxt.innerText = "Manage what's playing";
         }
+        async function shuffle() {
+            const div = tk.c('div', document.body, 'hide');
+            const ok = await fs.ls('/apps/Music.app/Contents/library/');
+            for (const item of ok.items) {
+                tk.cb('b4 b2 left', item.name, async function () {
+                    stopmusic(); playmusic(item.path, item.name);
+                }, div);
+            }
+            const elements = div.children;
+            if (elements.length === 0) return null;
+            let go = elements[Math.floor(Math.random() * elements.length)];
+            function go2() {
+                if (go.innerText !== "Back") {
+                    go.click();
+                } else {
+                    go = elements[Math.floor(Math.random() * elements.length)];
+                    go2();
+                }
+            }
+            go2();
+            div.remove();
+        }
         async function playmusic(path2, name2, ext) {
             audio = await ui.play(path2);
+            audio.addEventListener("ended", async function () {
+                shuffle();
+            });
             nowplaytxt.innerText = ui.truncater(name2, 20);
             const progressBar = tk.c('input', nowplay);
             progressBar.type = "range";
@@ -86,12 +111,10 @@ app['music'] = {
                 ui.dest(div);
                 showm(mainm);
             }, div);
-            const ok = await fs.ls('/apps/Music.app/Contents/library/');
             tk.cb('b4', 'Shuffle', function () {
-                const elements = div.children;
-                if (elements.length === 0) return null;
-                elements[Math.floor(Math.random() * elements.length)].click();
+                shuffle();
             }, div);
+            const ok = await fs.ls('/apps/Music.app/Contents/library/');
             for (const item of ok.items) {
                 tk.cb('b4 b2 left', item.name, async function () {
                     stopmusic(); playmusic(item.path, item.name);
@@ -99,7 +122,7 @@ app['music'] = {
             }
         }, mainm).addEventListener('mouseover', function () { show(musicthing); });
         tk.cb('b4 b2 left', 'Settings', () => showm(settingsm), mainm).addEventListener('mouseover', function () { show(settingsthing); });
-        tk.cb('b4 b2 left', 'Now Playing', undefined, mainm).addEventListener('mouseover', function () { show(plaything); });
+        tk.cb('b4 b2 left', 'Now Playing', () => shuffle(), mainm).addEventListener('mouseover', function () { show(plaything); });
 
         const musicm = tk.c('div', half1, 'hide');
 
