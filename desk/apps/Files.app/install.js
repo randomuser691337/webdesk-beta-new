@@ -31,6 +31,13 @@ app['files'] = {
                 }
             });
         });
+        function prohibited(path) {
+            if ((path.startsWith('/system/') || path.startsWith('/apps/') || path.startsWith('/user/info/')) && sys.dev === false) {
+                return true;
+            } else {
+                return false;
+            }
+        }
         function clr() {
             items2.forEach(item => {
                 item.style.display = 'block';
@@ -106,6 +113,10 @@ app['files'] = {
                 e.preventDefault();
                 el.dropped = true;
                 const text = e.dataTransfer.getData('text/plain');
+                if (prohibited(text) === true) {
+                    wm.snack('Enable Developer Mode to move system files.');
+                    return;
+                }
                 const fileData = await fs.read(text);
                 const relativePath = text.split('/').pop();
                 await fs.del(text);
@@ -170,7 +181,7 @@ app['files'] = {
                     let timer;
 
                     function openmenu() {
-                        if ((item.path.startsWith('/system') || item.path.startsWith('/user/info') || item.path.startsWith('/apps/')) && sys.dev === false) {
+                        if (prohibited(item.path) === true) {
                             wm.snack('Enable Developer Mode to modify this folder.', 6000);
                             return;
                         }
@@ -178,7 +189,7 @@ app['files'] = {
                         const menu = tk.c('div', document.body, 'cm');
                         const p = tk.ps(item.path, 'bold', menu);
                         p.style.marginBottom = "7px";
-                        if (item.path.startsWith('/system') || item.path.startsWith('/user/info')) {
+                        if (item.path.startsWith('/system/') || item.path.startsWith('/user/info/') || item.path.startsWith('/apps/')) {
                             tk.p('Important folder, modifying it could cause damage.', 'warn', menu);
                         }
                         tk.cb('b1 b2', 'Delete folder', () => {
@@ -217,7 +228,7 @@ app['files'] = {
 
                     const fileItem = tk.cb('flist width', "File: " + item.name, async function () {
                         try {
-                            if (sys.dev === false && (item.path.startsWith('/system/') || item.path.startsWith('/user/info/') || item.path.startsWith('/apps/'))) {
+                            if (prohibited(item.path) === true) {
                                 wm.snack('Enable Developer Mode to modify system files.', 6000);
                                 return;
                             }
@@ -228,9 +239,10 @@ app['files'] = {
                             const menu = tk.c('div', document.body, 'cm');
                             const p = tk.ps(item.path, 'bold', menu);
 
-                            if (item.path.startsWith('/system/') || item.path.startsWith('/user/info/')) {
+                            if (item.path.startsWith('/system/') || item.path.startsWith('/user/info/') || item.path.startsWith('/apps/')) {
                                 tk.p('Important file, modifying it could cause damage.', 'warn', menu);
                             }
+
                             if (item.path.startsWith('/user/info/name')) {
                                 tk.p('Deleting this file will erase your data on next restart.', 'warn', menu);
                             }
@@ -239,7 +251,7 @@ app['files'] = {
 
                             try {
                                 if (!filecontent.startsWith('data:video')) {
-                                    if (filecontent.startsWith('data:')) {
+                                    if (filecontent.startsWith('data:image')) {
                                         thing = tk.img(filecontent, 'embed', menu, false, true);
                                         (await thing).img.style.marginBottom = "4px";
                                     } else if (item.name.endsWith('.svg')) {
@@ -513,7 +525,7 @@ app['files'] = {
                                 }, menu);
                                 tk.cb('b1', 'Choose', function () {
                                     ui.dest(menu); ui.dest(win.win);
-                                    if (thing.path.startsWith('/system/') || thing.path.startsWith('/user/info/') || thing.path.startsWith('/apps/')) {
+                                    if (prohibited(thing.path) === true) {
                                         if (sys.dev === false) {
                                             wm.snack(`Enable Developer Mode to make or edit files here.`);
                                             return;
@@ -545,7 +557,7 @@ app['files'] = {
                     if (inp.value === "") {
                         wm.snack('Enter a filename.');
                     } else {
-                        if (selectedPath.startsWith('/system') || selectedPath.startsWith('/user/info') || selectedPath.startsWith('/apps/')) {
+                        if (prohibited(selectedPath) === true) {
                             if (sys.dev === false) {
                                 wm.snack(`Enable Developer Mode to make or edit files here.`);
                                 return;

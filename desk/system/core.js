@@ -545,10 +545,10 @@ var wd = {
         }, 140);
     },
     dark: function (fucker) {
-        ui.cv('ui1', 'rgb(35, 35, 35, 0.6)');
+        ui.cv('ui1', 'rgb(35, 35, 35, 0.7)');
         ui.cv('ui2', '#1f1f1f');
         ui.cv('ui3', '#2f2f2f');
-        ui.cv('bc', 'rgba(45, 45, 45, 0.5)');
+        ui.cv('bc', 'rgba(45, 45, 45, 0.6)');
         ui.cv('font', '#fff');
         ui.cv('dimfont', '#bbb');
         ui.cv('inv', '1.0');
@@ -558,7 +558,7 @@ var wd = {
         ui.light = false;
     },
     light: function (fucker) {
-        ui.cv('ui1', 'rgb(255, 255, 255, 0.6)');
+        ui.cv('ui1', 'rgb(255, 255, 255, 0.7)');
         ui.cv('ui2', '#ffffff');
         ui.cv('ui3', '#efefef');
         ui.cv('bc', 'rgb(220, 220, 220, 0.6)');
@@ -826,8 +826,10 @@ var wd = {
         }
     },
     defaultcolor: function () {
-        ui.crtheme('#4D79FF');
+        const color = "#618EFF";
+        ui.crtheme(color);
         wd.light();
+        return color;
     },
     wetter: function (setdefault) {
         const main = tk.c('div', document.body, 'cm');
@@ -963,6 +965,27 @@ var wd = {
             }`;
 
         document.head.appendChild(style);
+    },
+    setbg: async function () {
+        const img = await fs.read('/system/lib/img/wallpapers/current/wall');
+        if (img) {
+            const oldw = tk.g('wallpaper');
+            if (oldw) {
+                oldw.remove();
+            }
+            const bg = tk.c('div', document.body, 'wallpaper');
+            bg.id = "wallpaper";
+            bg.style.backgroundImage = `url(${img})`;
+            if (tk.g('background')) {
+                tk.g('background').remove();
+                tk.g('circle1').remove();
+                tk.g('circle2').remove();
+                tk.g('darkbg').style.opacity = "10%";
+            }
+            ui.getcl(img, function (color) {
+                ui.cv('accent', color.join(', '));
+            });
+        }
     },
     tbcal: async function () {
         let px = 0;

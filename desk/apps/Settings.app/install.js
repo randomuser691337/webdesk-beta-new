@@ -258,7 +258,7 @@ app['settings'] = {
             fs.del('/user/info/color');
             fs.del('/user/info/lightdark');
             fs.del('/user/info/lightdarkpref');
-            wd.defaultcolor();
+            bg1.value = wd.defaultcolor();
             wm.snack('Reset colors');
         }, appearPane); tk.cb('b1', 'Back', () => ui.sw2(appearPane, mainPane), appearPane);
         // User pane

@@ -24,6 +24,47 @@ var ui = {
             console.log(`<i> Not setting theme, opt is set to true! (crtheme)`);
         }
     },
+    getcl: function (imageSrc, callback) {
+        // If it ain't broke, don't fix it
+        var img = new Image();
+        img.crossOrigin = "Anonymous"; // to avoid CORS issue
+        img.onload = function () {
+            var canvas = document.createElement('canvas');
+            canvas.width = this.width;
+            canvas.height = this.height;
+    
+            var ctx = canvas.getContext('2d');
+            ctx.drawImage(this, 0, 0);
+    
+            var imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+            var data = imageData.data;
+            var colorCount = {};
+            var maxCount = 0;
+            var mostUsedColor = [0, 0, 0]; // RGB values
+    
+            for (var i = 0; i < data.length; i += 4) {
+                var r = data[i];
+                var g = data[i + 1];
+                var b = data[i + 2];
+                var rgb = r + ',' + g + ',' + b;
+                if (r > 50 && r < 200 && g > 50 && g < 200 && b > 50 && b < 200) {
+                    // Avoiding gray colors (too much white or black)
+                    if (!colorCount[rgb]) {
+                        colorCount[rgb] = 0;
+                    }
+                    colorCount[rgb]++;
+                    if (colorCount[rgb] > maxCount) {
+                        maxCount = colorCount[rgb];
+                        mostUsedColor = [r, g, b];
+                    }
+                }
+            }
+    
+            callback(mostUsedColor);
+        };
+    
+        img.src = imageSrc;
+    },
     sw: function (d1, d2) {
         const dr1 = document.getElementById(d1);
         const dr2 = document.getElementById(d2);
@@ -56,8 +97,13 @@ var ui = {
             }
         }
     },
-    play: async function (filename) {
-        const ok = await fs.read(filename);
+    play: async function (filename, type) {
+        let ok;
+        if (type) {
+            ok = type;
+        } else {
+            ok = await fs.read(filename);
+        }
         let audio;
         if (ok) {
             let correct;
@@ -175,14 +221,11 @@ var ui = {
     },
     hexdark: function (hex) {
         hex = hex.replace(/^#/, '');
-
-        let bigint = parseInt(hex, 16);
-        let r = (bigint >> 16) & 255;
-        let g = (bigint >> 8) & 255;
-        let b = bigint & 255;
-
-        let luminance = 0.2126 * r + 0.7152 * g + 0.0722 * b;
-        return luminance < 140;
+        let r = parseInt(hex.substring(0, 2), 16);
+        let g = parseInt(hex.substring(2, 4), 16);
+        let b = parseInt(hex.substring(4, 6), 16);
+        const luminance = 0.2126 * r + 0.7152 * g + 0.0722 * b;
+        return luminance < 128;
     },
     hextorgb: function (hex) {
         hex = hex.replace(/^#/, '');
@@ -576,20 +619,20 @@ var tk = {
         tooltip.textContent = shortened;
 
         function updateTooltipPosition() {
-            const { x, width, top, height } = tbn.getBoundingClientRect();
+            const { x, width } = tbn.getBoundingClientRect();
             tooltip.style.left = `${x + width / 2 - tooltip.offsetWidth / 2}px`;
             setTimeout(updateTooltipPosition, 200);
         }
-        
-        
+
+
         window.addEventListener("resize", updateTooltipPosition);
-        
+
         if (el.taskbar) {
             new ResizeObserver(updateTooltipPosition).observe(el.taskbar);
         }
 
         updateTooltipPosition();
-        
+
 
         const showTooltip = () => {
             tooltip.classList.add('visible');
@@ -602,7 +645,7 @@ var tk = {
         tbn.addEventListener('mouseenter', showTooltip);
         tbn.addEventListener('mouseleave', hideTooltip);
 
-        const removeTooltipListener = () => { 
+        const removeTooltipListener = () => {
             tbn.removeEventListener('mouseenter', showTooltip);
             tbn.removeEventListener('mouseleave', hideTooltip);
         };
@@ -616,7 +659,7 @@ var tk = {
                 ui.dest(tbn, 140);
                 removeTooltipListener();
                 setTimeout(async function () {
-                    const yeah = await ughfine(windowDiv);
+                    const yeah = ughfine(windowDiv);
                     if (yeah) {
                         yeah.dispatchEvent(mousedownevent);
                     } else {
@@ -685,6 +728,63 @@ var tk = {
         if (sys.mobui !== true) {
             setTimeout(function () { ui.center(windowDiv); }, 10);
         }
+
+        // resize bars are ENTIRELY copilot lmfao
+
+        const resizeBarStyles = {
+            position: 'absolute',
+            background: 'transparent',
+            zIndex: 9999,
+            cursor: 'ew-resize'
+        };
+
+        const resizeBars = [
+            { side: 'top', cursor: 'ns-resize', style: { top: 0, left: 0, right: 0, height: '3px' } },
+            { side: 'bottom', cursor: 'ns-resize', style: { bottom: 0, left: 0, right: 0, height: '3px' } },
+            { side: 'left', cursor: 'ew-resize', style: { top: 0, bottom: 0, left: 0, width: '3px' } },
+            { side: 'right', cursor: 'ew-resize', style: { top: 0, bottom: 0, right: 0, width: '3px' } }
+        ];
+
+        resizeBars.forEach(bar => {
+            const resizeBar = document.createElement('div');
+            Object.assign(resizeBar.style, resizeBarStyles, bar.style);
+            resizeBar.style.cursor = bar.cursor;
+            windowDiv.appendChild(resizeBar);
+
+            resizeBar.addEventListener('mousedown', function (e) {
+                e.preventDefault();
+                const startX = e.clientX;
+                const startY = e.clientY;
+                const startWidth = parseInt(document.defaultView.getComputedStyle(windowDiv).width, 10);
+                const startHeight = parseInt(document.defaultView.getComputedStyle(windowDiv).height, 10);
+
+                function doDrag(e) {
+                    if (bar.side === 'right') {
+                        windowDiv.style.width = (startWidth + e.clientX - startX) + 'px';
+                    } else if (bar.side === 'left') {
+                        const newWidth = startWidth - (e.clientX - startX);
+                        if (newWidth > 0) {
+                            windowDiv.style.width = newWidth + 'px';
+                            windowDiv.style.left = (windowDiv.offsetLeft + e.clientX - startX) + 'px';
+                        }
+                    } else if (bar.side === 'bottom') {
+                        windowDiv.style.height = (startHeight + e.clientY - startY) + 'px';
+                    } else if (bar.side === 'top') {
+                        windowDiv.style.height = (startHeight - e.clientY + startY) + 'px';
+                        windowDiv.style.top = (windowDiv.offsetTop + e.clientY - startY) + 'px';
+                    }
+                }
+
+                function stopDrag() {
+                    document.documentElement.removeEventListener('mousemove', doDrag, false);
+                    document.documentElement.removeEventListener('mouseup', stopDrag, false);
+                }
+
+                document.documentElement.addEventListener('mousemove', doDrag, false);
+                document.documentElement.addEventListener('mouseup', stopDrag, false);
+            }, false);
+        });
+
         return { win: windowDiv, main: contentDiv, tbn, title: titlebarDiv, closebtn: closeButtonNest, winbtns, name: titleDiv, minbtn: minimizeButtonNest };
     }
 }

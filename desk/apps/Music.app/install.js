@@ -31,6 +31,7 @@ app['music'] = {
         bar.style.fontSize = "var(--fz3)";
         tk.c('span', bar, 'time bold');
         const mainm = tk.c('div', half1);
+        let currentpath = "/apps/Music.app/Contents/library/";
         let audio;
         function stopmusic() {
             if (audio) {
@@ -40,9 +41,69 @@ app['music'] = {
             nowplay.innerHTML = "";
             nowplaytxt.innerText = "Manage what's playing";
         }
+        let tagger = await initscript('/apps/Music.app/Contents/tagger.js');
+        async function lyrics(songName, songArtist) {
+            // copied DIRECTLY from shuffler
+            const searchUrl = `https://api.lyrics.ovh/v1/${encodeURIComponent(songArtist)}/${encodeURIComponent(songName)}`;
+
+            try {
+                const response = await fetch(searchUrl);
+
+                if (!response.ok) {
+                    return "<p>Lyrics not available for this song. Check your Internet connection.</p>"
+                }
+
+                const data = await response.json();
+
+                if (!data.lyrics) {
+                    return '<p>Lyrics not available for this song.</p>';
+                }
+
+                const lyrics = data.lyrics;
+
+                return lyrics;
+            } catch (error) {
+                console.error(error.message);
+                return '<p>Failed to fetch lyrics for this song</p>';
+            }
+        }
+        async function songinfo(base64Content, path) {
+            const binaryContent = atob(base64Content.split(',')[1]);
+            const arrayBuffer = new ArrayBuffer(binaryContent.length);
+            const view = new Uint8Array(arrayBuffer);
+            for (let i = 0; i < binaryContent.length; i++) {
+                view[i] = binaryContent.charCodeAt(i);
+            }
+
+            let mimeType;
+            if (path.endsWith('.mp3') || path.endsWith('.mpeg')) {
+                mimeType = 'audio/mpeg';
+            } else if (path.endsWith('.wav')) {
+                mimeType = 'audio/wav';
+            } else {
+                mimeType = 'audio/mpeg';
+            }
+
+            let blob = new Blob([arrayBuffer], { type: mimeType });
+            return new Promise((resolve, reject) => {
+                jsmediatags.read(blob, {
+                    onSuccess: function (tag) {
+                        if (tag && tag.tags) {
+                            resolve(tag.tags);
+                        } else {
+                            resolve({ title: 'Unknown', artist: 'Unknown' });
+                        }
+                    },
+                    onError: function (error) {
+                        console.error(error);
+                        resolve({ title: 'Unknown', artist: 'Unknown' });
+                    }
+                });
+            });
+        }
         async function shuffle() {
             const div = tk.c('div', document.body, 'hide');
-            const ok = await fs.ls('/apps/Music.app/Contents/library/');
+            const ok = await fs.ls(currentpath);
             for (const item of ok.items) {
                 tk.cb('b4 b2 left', item.name, async function () {
                     stopmusic(); playmusic(item.path, item.name);
@@ -63,7 +124,8 @@ app['music'] = {
             div.remove();
         }
         async function playmusic(path2, name2, ext) {
-            audio = await ui.play(path2);
+            const sigma = await fs.read(path2);
+            audio = await ui.play(path2, sigma);
             audio.addEventListener("ended", async function () {
                 shuffle();
             });
@@ -75,6 +137,10 @@ app['music'] = {
             progressBar.value = 0;
             progressBar.style.width = "100%";
 
+            const go = await songinfo(sigma, path2);
+            console.log(go);
+            lyrics(go.title, go.artist).then(lyr => { console.log(lyr); });
+
             const playPauseBtn = tk.cb('b4', 'Pause', function () {
                 if (audio.paused) {
                     audio.play();
@@ -85,11 +151,9 @@ app['music'] = {
                 }
             }, nowplay);
 
-
             if (ext === true) {
                 tk.cb('b4', 'Add', async function () {
-                    const ok = await fs.read(path2);
-                    fs.write('/apps/Music.app/Contents/library/' + name2, ok);
+                    fs.write(currentpath + name2, sigma);
                     wm.snack('Added to Music library');
                 }, nowplay);
             }
@@ -114,11 +178,17 @@ app['music'] = {
             tk.cb('b4', 'Shuffle', function () {
                 shuffle();
             }, div);
-            const ok = await fs.ls('/apps/Music.app/Contents/library/');
+            const ok = await fs.ls(currentpath);
             for (const item of ok.items) {
-                tk.cb('b4 b2 left', item.name, async function () {
-                    stopmusic(); playmusic(item.path, item.name);
-                }, div);
+                if (item.type === "folder") {
+                    tk.cb('b4 b2 left', item.name, async function () {
+                        stopmusic(); playmusic(item.path, item.name);
+                    }, div);
+                } else {
+                    tk.cb('b4 b2 left', item.name, async function () {
+                        stopmusic(); playmusic(item.path, item.name);
+                    }, div);
+                }
             }
         }, mainm).addEventListener('mouseover', function () { show(musicthing); });
         tk.cb('b4 b2 left', 'Settings', () => showm(settingsm), mainm).addEventListener('mouseover', function () { show(settingsthing); });
@@ -139,7 +209,7 @@ app['music'] = {
             tk.p(`You're about to erase all of Music's data. This cannot be undone!`, undefined, div);
             tk.cb('b1', 'Erase', function () {
                 ui.dest(dark);
-                fs.delfold('/apps/Music.app/Contents/library/');
+                fs.delfold(currentpath);
                 win.closebtn.click();
                 wm.snack('Erase completed');
             }, div);
@@ -165,7 +235,7 @@ app['music'] = {
             }
 
             const zip = new JSZip();
-            const files = await fs.ls('/apps/Music.app/Contents/library/');
+            const files = await fs.ls(currentpath);
 
             for (const file of files.items) {
                 const base64Data = await fs.read(file.path, { encoding: "utf-8" });
@@ -228,7 +298,7 @@ app['music'] = {
         }
 
         win.closebtn.addEventListener('click', function () {
-            stopmusic();
+            stopmusic(); tagger.remove();
         });
 
         if (path && name) {

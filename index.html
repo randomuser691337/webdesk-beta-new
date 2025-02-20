@@ -79,6 +79,31 @@
                 transform: translateX(90%)
             }
         }
+
+        .loading {
+            background-color: #000 !important;
+            color: #fff !important;
+            left: 0px;
+            right: 0px;
+            top: 0px;
+            bottom: 0px;
+            position: fixed;
+        }
+
+        #loading2 {
+            animation: fade 0.5s;
+        }
+
+        .tmpb {
+            background-color: #1a1a1a;
+            color: #fff;
+            padding: 7px;
+            border-radius: 8px;
+            margin: 2px;
+            width: 100%;
+            box-sizing: border-box;
+            border: none;
+        }
     </style>
 </head>
 <script>
@@ -86,8 +111,8 @@
     let params = new URLSearchParams(window.location.search);
 
     var abt = {
-        lastmod: "Feb 16, 2025",
-        ver: "0.3.1",
+        lastmod: "Feb 17, 2025",
+        ver: "0.3.2",
     }
 
     var sys = {
@@ -156,8 +181,7 @@
     <div id="setuparea">
     </div>
     <div id="notif"></div>
-    <div id="loading"
-        style="background-color: #000 !important; color: #fff !important; left: 0px; right: 0px; top: 0px; bottom: 0px; z-index: 9999; position: fixed;">
+    <div id="loading" class="loading" style="z-index: 9998;">
         <div style="position: fixed;
         left: 50%;
         top: 50%;
@@ -183,6 +207,21 @@
         script.textContent = scriptContent;
         document.head.appendChild(script);
         return script;
+    }
+
+    async function recovery() {
+        document.body.innerHTML = `
+        <div id="loading2" class="loading"
+        style="z-index: 9999;">
+        <div style="position: fixed;
+        left: 50%;
+        top: 50%;
+        transform: translate(-50%, -50%); max-width: 80%; max-width: 250px;">
+                <p><strong>WebDesk Net Recovery</strong></p>
+                <p>WebDesk hasn't booted within 10 seconds, so recovery has been initialized. Choose an option below</p>
+                <button class="tmpb" onclick="fs.del('/system/webdesk');setTimeout(function () {reboot();}, 200);">Reinstall WebDesk (Data is kept)</button><button onclick="reboot();" class="tmpb">Reboot</button>
+            </div>
+        </div>`;
     }
 
     if ('serviceWorker' in navigator) {
@@ -213,10 +252,7 @@
         let boot = false;
         setTimeout(function () {
             if (boot === false) {
-                document.body.innerHTML = `<style>body{color:#000 !important;background:#fff !important;}</body>
-                <p><strong>WebDesk Net Recovery</strong></p>
-                <p>WebDesk hasn't booted within 10 seconds, so recovery has been initialized. Choose an option below</p>
-                <button onclick="reboot();">Reboot</button><button onclick="fs.del('/system/webdesk');setTimeout(function () {reboot();}, 200);">Reinstall WebDesk (Data is kept)</button>`;
+                recovery();
             }
         }, 10000);
         const uid2 = params.get('id');
@@ -466,6 +502,7 @@
                 boot = true;
             }
 
+            wd.setbg();
             wd.perfmon();
             ui.hide(tk.g('death'), 140);
 
@@ -579,12 +616,7 @@
                     reboot();
                 }
             } catch (error) {
-                document.body.innerHTML = `
-                <style>body{color:#000 !important;background:#fff !important;}</body>
-                <p><strong>WebDesk Net Recovery</strong></p>
-                <p>An error occured while attempting install: ${error}</p>
-                <p>Choose an option below</p>
-                <button onclick="reboot();">Reboot</button><button onclick="fs.del('/system/webdesk/');reboot();">Retry Install</button>`;
+                recovery(error);
             }
         }
     }

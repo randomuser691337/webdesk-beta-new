@@ -22,7 +22,7 @@
     --wina: 0px;
     --menubarheight: 0px;
     --hawktuah: 47px;
-    --optbox: rgba(0, 0, 0, 0.012) 0px 0px 3px 4px;
+    --optbox: rgba(0, 0, 0, 0.02) 0px 0px 5px 4px;
     --mangomango: 3px;
 }
 
@@ -66,12 +66,12 @@
 .dark {
     background: var(--ui2) !important;
     z-index: -3 !important;
-    opacity: 70%;
+    opacity: 100%;
 }
 
 body {
     background-color: #000;
-    animation: fade 0.7s;
+    animation: fade 0.3s;
     color: var(--font);
     font-family: 'Font', Arial;
     text-align: center;
@@ -119,10 +119,6 @@ button {
         opacity: 0%;
     }
 
-    10% {
-        opacity: 0%;
-    }
-
     100% {
         opacity: 100%;
     }
@@ -132,6 +128,7 @@ button {
     width: 50px;
     height: 50px;
     border-radius: 13px;
+    box-shadow: var(--optbox);
 }
 
 .weatheri {
@@ -151,15 +148,27 @@ p {
     word-wrap: break-word;
 }
 
+#setuparea {
+    position: fixed;
+    left: 0px;
+    right: 0px;
+    bottom: 0px;
+    top: 0px;
+    z-index: 10;
+    backdrop-filter: blur(var(--bl1));
+    -webkit-backdrop-filter: blur(var(--bl1));
+    overflow: hidden !important;
+}
+
 .setupbox {
     position: fixed;
     transform: translate(-50%, -50%) scale(1.0);
-    box-shadow: rgba(0, 0, 0, 0.3) 0px 0px 150px 30px;
+    box-shadow: rgba(0, 0, 0, 0.4) 0px 0px 150px 45px;
     left: 50%;
     top: 50%;
     padding: 5px;
     border: 1px solid var(--bc);
-    background-color: var(--ui1);
+    background-color: var(--ui2);
     border-radius: var(--rad1);
     max-width: 85% !important;
     max-height: 85% !important;
@@ -342,8 +351,8 @@ p {
 
 .winb:hover:before,
 .winb:hover:after {
-  top: 50%;
-  opacity: 1;
+    top: 50%;
+    opacity: 1;
 }
 
 .conticon {
@@ -451,7 +460,7 @@ p {
     border-radius: var(--rad2);
     text-align: left;
     margin-bottom: 12px;
-    background-color: var(--ui2);
+    background-color: var(--ui3);
 }
 
 .flexthing {
@@ -835,8 +844,21 @@ p {
     outline: none;
 }
 
+.wallpaper {
+    position: fixed;
+    left: 0px;
+    right: 0px;
+    bottom: 0px;
+    top: 0px;
+    z-index: -4;
+    background-position: center center;
+    background-repeat: no-repeat;
+    background-attachment: fixed;
+    background-size: cover;
+}
+
 .i1 {
-    padding: 4px 5px;
+    padding: 5px;
     border-radius: var(--rad2);
     border: 2px solid rgba(var(--accent), 0.5);
     background-color: rgba(var(--acc), 0.4);
@@ -1231,7 +1253,7 @@ p {
     gap: 4px;
 }
 
-.brick-layout-list > div {
+.brick-layout-list>div {
     background: var(--ui2);
     box-shadow: 3px 3px 6px rgba(0, 0, 0, 0.07);
     width: 100%;
