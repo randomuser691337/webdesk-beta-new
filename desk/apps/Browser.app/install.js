@@ -64,11 +64,11 @@ app['browser'] = {
             }, 200);
         }
 
-        tk.cb('b4 b6', '+', () => addtab(), searchbtns);
-        tk.cb('b4 b6', '⟳', function () {
+        tk.cb('b3', '+', () => addtab(), searchbtns);
+        tk.cb('b3', '⟳', function () {
             currentTab.src = currentTab.src;
         }, searchbtns);
-        tk.cb('b4 b6 hide', '<', function () {
+        tk.cb('b3 hide', '<', function () {
             if (thing.length > 1) {
                 const currentIndex = thing.indexOf(currentTab.src);
                 if (currentIndex > 0) {
@@ -79,7 +79,7 @@ app['browser'] = {
                 }
             }
         }, searchbtns);
-        tk.cb('b4 b6 hide', '>', function () {
+        tk.cb('b3 hide', '>', function () {
             if (thing.length > 1) {
                 const currentIndex = thing.indexOf(currentTab.src);
                 if (currentIndex < thing.length - 1) {
@@ -105,7 +105,7 @@ app['browser'] = {
             }
         }
 
-        const whocares = tk.cb('b4 b6', '…', function () {
+        const whocares = tk.cb('b3', '…', function () {
             const menu = tk.c('div', document.body, 'rightclick');
             const pos = whocares.getBoundingClientRect();
             const thing2 = { clientX: pos.left, clientY: pos.top };
@@ -166,7 +166,7 @@ app['browser'] = {
         if (background === false) {
             tab.style.background = "rgba(0, 0, 0, 0)";
         }
-        tk.cb('b4 b6', '⟳', function () {
+        tk.cb('b3', '⟳', function () {
             tab.src = tab.src;
         }, win.name);
         setTimeout(function () {

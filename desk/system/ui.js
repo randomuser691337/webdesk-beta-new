@@ -32,23 +32,27 @@ var ui = {
             var canvas = document.createElement('canvas');
             canvas.width = this.width;
             canvas.height = this.height;
-    
+
             var ctx = canvas.getContext('2d');
             ctx.drawImage(this, 0, 0);
-    
+
             var imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
             var data = imageData.data;
             var colorCount = {};
             var maxCount = 0;
             var mostUsedColor = [0, 0, 0]; // RGB values
-    
+
             for (var i = 0; i < data.length; i += 4) {
                 var r = data[i];
                 var g = data[i + 1];
                 var b = data[i + 2];
                 var rgb = r + ',' + g + ',' + b;
-                if (r > 50 && r < 200 && g > 50 && g < 200 && b > 50 && b < 200) {
-                    // Avoiding gray colors (too much white or black)
+                if ((r > 100 && g < 100 && b < 100) || // Prefer vibrant colors
+                    (r < 100 && g > 100 && b < 100) ||
+                    (r < 100 && g < 100 && b > 100) ||
+                    (r > 100 && g > 100 && b < 100) ||
+                    (r > 100 && g < 100 && b > 100) ||
+                    (r < 100 && g > 100 && b > 100)) {
                     if (!colorCount[rgb]) {
                         colorCount[rgb] = 0;
                     }
@@ -59,10 +63,10 @@ var ui = {
                     }
                 }
             }
-    
+
             callback(mostUsedColor);
         };
-    
+
         img.src = imageSrc;
     },
     sw: function (d1, d2) {

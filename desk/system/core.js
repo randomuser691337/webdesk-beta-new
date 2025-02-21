@@ -551,6 +551,7 @@ var wd = {
         ui.cv('bc', 'rgba(60, 60, 60, 0.6)');
         ui.cv('font', '#fff');
         ui.cv('dimfont', '#bbb');
+        ui.cv('darkbg', '0.15');
         ui.cv('inv', '1.0');
         if (fucker !== "nosave") {
             fs.write('/user/info/lightdark', 'dark');
@@ -565,6 +566,7 @@ var wd = {
         ui.cv('font', '#000');
         ui.cv('dimfont', '#444');
         ui.cv('inv', '0');
+        ui.cv('darkbg', '0');
         if (fucker !== "nosave") {
             fs.write('/user/info/lightdark', 'light');
         }
@@ -980,7 +982,8 @@ var wd = {
                 tk.g('background').remove();
                 tk.g('circle1').remove();
                 tk.g('circle2').remove();
-                tk.g('darkbg').style.opacity = "10%";
+                tk.g('darkbg').style.opacity = "var(--darkbg)";
+                tk.g('darkbg').style.background = "#000";
             }
             ui.getcl(img, function (color) {
                 ui.cv('accent', color.join(', '));

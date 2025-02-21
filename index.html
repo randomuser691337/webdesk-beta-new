@@ -218,7 +218,7 @@
         top: 50%;
         transform: translate(-50%, -50%); max-width: 80%; max-width: 250px;">
                 <p><strong>WebDesk Net Recovery</strong></p>
-                <p>WebDesk hasn't booted within 10 seconds, so recovery has been initialized. Choose an option below</p>
+                <p>WebDesk took too long to boot, or an error occured.</p>
                 <button class="tmpb" onclick="fs.del('/system/webdesk');setTimeout(function () {reboot();}, 200);">Reinstall WebDesk (Data is kept)</button><button onclick="reboot();" class="tmpb">Reboot</button>
             </div>
         </div>`;
@@ -254,7 +254,7 @@
             if (boot === false) {
                 recovery();
             }
-        }, 10000);
+        }, 12000);
         const uid2 = params.get('id');
         const eepysleepy = await fs.read('/system/eepysleepy');
         const migcheck = await fs.read('/system/migval');
@@ -443,6 +443,7 @@
                 await initapps();
                 console.log('<i> Boot stage 4: Load desktop, check for updates');
                 await wd.desktop(sd, deskid, 'wait');
+                await wd.setbg();
                 ui.dest(tk.g('loading', 220));
                 try {
                     const skibidi = await fetch('/target.json');
@@ -475,6 +476,7 @@
                 boot = true;
             } else if (migcheck === "echo") {
                 await initapps();
+                awaitwd.setbg();
                 const id = gen(7);
                 await ptp.go(id);
                 ui.crtheme('#010101', true);
@@ -489,7 +491,8 @@
                 ui.dest(tk.g('loading', 220));
             } else {
                 await initapps();
-                wd.seasonal();
+                await wd.seasonal();
+                await wd.setbg();
                 const id = await wd.newid();
                 await ptp.go(id);
                 if (uid2) {
@@ -502,7 +505,6 @@
                 boot = true;
             }
 
-            wd.setbg();
             wd.perfmon();
             ui.hide(tk.g('death'), 140);
 

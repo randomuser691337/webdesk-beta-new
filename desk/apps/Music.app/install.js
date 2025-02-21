@@ -175,7 +175,7 @@ app['music'] = {
                 ui.dest(div);
                 showm(mainm);
             }, div);
-            tk.cb('b4', 'Shuffle', function () {
+            tk.cb('b4', 'New playlist', function () {
                 shuffle();
             }, div);
             const ok = await fs.ls(currentpath);
@@ -263,11 +263,11 @@ app['music'] = {
         }, settingsm);
 
         const settingsthing = tk.c('div', half2, 'hide');
-        tk.img('/apps/Settings.app/icon.svg', 'setupi', settingsthing);
+        tk.img('/apps/Settings.app/Contents/icon.svg', 'setupi', settingsthing);
         tk.p('Settings', 'bold', settingsthing);
         tk.p(`Manage your settings/library`, 'smtxt', settingsthing);
         const plaything = tk.c('div', half2, 'hide');
-        tk.img('/apps/Iris.app/icon.svg', 'setupi', plaything);
+        tk.img('/apps/Iris.app/Contents/icon.svg', 'setupi', plaything);
         tk.p('Now Playing', 'bold', plaything);
         const nowplaytxt = tk.p(`Manage what's playing`, 'smtxt', plaything);
         const nowplay = tk.c('div', plaything);

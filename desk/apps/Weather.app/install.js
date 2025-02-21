@@ -25,16 +25,16 @@ app['wetter'] = {
                 win.main.innerHTML = "";
                 const skibidi = tk.c('div', win.main);
                 win.name.innerHTML = "";
-                tk.cb('b4 b6', 'Settings', () => app.settings.locset.init(), win.name);
+                tk.cb('b3', 'Settings', () => app.settings.locset.init(), win.name);
                 if (sys.dev === true) {
-                    tk.cb('b4 b6', 'JSON', async function () {
+                    tk.cb('b3', 'JSON', async function () {
                         const ok = JSON.stringify(info);
                         app.textedit.init(ok, undefined, true);
                     }, win.name);
                 }
                 if (archive !== true) {
                     tk.p(`${sys.city}`, 'med', skibidi);
-                    tk.cb('b4 b6', 'Archive', async function () {
+                    tk.cb('b3', 'Archive', async function () {
                         const the = await app.files.pick('new', 'Save weather archive file... (JSON)');
                         const silly = info;
                         silly.timestamp = Date.now();
@@ -54,7 +54,7 @@ app['wetter'] = {
                     }
                     tk.ps('Archived: ' + wd.timec(info.timestamp), undefined, skibidi);
                 }
-                tk.cb('b4 b6', '⟳', function () {
+                tk.cb('b3', '⟳', function () {
                     refresh(); wm.snack('Refreshed');
                 }, win.name);
                 const userl = tk.c('div', skibidi, 'list flexthing');

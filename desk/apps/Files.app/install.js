@@ -257,6 +257,7 @@ app['files'] = {
                                     } else if (item.name.endsWith('.svg')) {
                                         thing = tk.img(item.path, 'embed', menu, false, false);
                                         (await thing).img.style.marginBottom = "4px";
+                                    } else if (item.name.endsWith('.zip')) {
                                     } else {
                                         thing = tk.c('div', menu, 'embed resizeoff');
                                         const genit = gen(8);
