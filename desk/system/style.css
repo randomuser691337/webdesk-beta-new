@@ -62,7 +62,6 @@
     opacity: 85% !important;
 }
 
-
 .dark {
     background: var(--ui2) !important;
     z-index: -3 !important;

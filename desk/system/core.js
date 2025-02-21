@@ -548,7 +548,7 @@ var wd = {
         ui.cv('ui1', 'rgb(35, 35, 35, 0.7)');
         ui.cv('ui2', '#1f1f1f');
         ui.cv('ui3', '#2f2f2f');
-        ui.cv('bc', 'rgba(45, 45, 45, 0.6)');
+        ui.cv('bc', 'rgba(60, 60, 60, 0.6)');
         ui.cv('font', '#fff');
         ui.cv('dimfont', '#bbb');
         ui.cv('inv', '1.0');
