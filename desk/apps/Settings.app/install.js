@@ -186,8 +186,8 @@ app['settings'] = {
         tk.p('Personalize', undefined, appearPane);
         const bg1 = tk.c('input', appearPane, 'i1');
         bg1.setAttribute("data-jscolor", "{}");
-        bg1.addEventListener('input', function () {
-            ui.crtheme(event.target.value);
+        bg1.addEventListener('input', function (e) {
+            ui.crtheme(e.target.value);
         });
         bg1.value = await fs.read('/user/info/color');
         new JSColor(bg1, undefined);
@@ -208,16 +208,34 @@ app['settings'] = {
             ui.crtheme(killyourselfapplesheep);
             sys.autodarkacc = true;
         }, modething);
-        tk.cb('b1', 'Clear (light)', function () {
-            fs.del('/user/info/lightdarkpref');
-            sys.autodarkacc = false;
-            wd.clearm2();
-        }, modething);
-        const btn2 = tk.cb('b1', 'Clear (dark)', function () {
-            fs.del('/user/info/lightdarkpref');
-            sys.autodarkacc = false;
-            wd.clearm();
-        }, modething);
+        tk.p('Wallpaper', undefined, appearPane);
+        const wallp = tk.p('', undefined, appearPane);
+        wallp.style = "display: flex; justify-content: space-between; padding: 0px; margin: 0px;";
+        const wbtn1 = tk.cb('b1 b2', 'Manage', function () {
+            app.settings.wallpapers.init();
+        }, wallp);
+        wbtn1.style = "flex: 1 1; margin-right: 1px !important;";
+        const wbtn2 = tk.cb('b1 b2', 'Upload', function () {
+            const input = document.createElement('input');
+            input.type = 'file';
+            input.style.display = 'none';
+            input.addEventListener('change', function (event) {
+                const file = event.target.files[0];
+                if (file) {
+                    const reader = new FileReader();
+
+                    reader.onload = async function (e) {
+                        const silly = e.target.result;
+                        wd.setwall(silly, true);
+                    };
+
+                    reader.readAsDataURL(file);
+                }
+            });
+
+            input.click();
+        }, wallp);
+        wbtn2.style = "flex: 1 1; margin-left: 1px !important;";
         tk.p('Sounds', undefined, appearPane);
         const p4 = tk.c('div', appearPane, 'list');
         const ok4 = tk.c('span', p4);
@@ -254,11 +272,11 @@ app['settings'] = {
             }, menu);
         }, p4);
         p4.style.marginBottom = '6px';
-        tk.cb('b1', 'Reset Colors', function () {
+        tk.cb('b1', 'Reset Colors', async function () {
             fs.del('/user/info/color');
             fs.del('/user/info/lightdark');
             fs.del('/user/info/lightdarkpref');
-            bg1.value = wd.defaultcolor();
+            bg1.value = await wd.defaulttheme();
             wm.snack('Reset colors');
         }, appearPane); tk.cb('b1', 'Back', () => ui.sw2(appearPane, mainPane), appearPane);
         // User pane
@@ -380,6 +398,62 @@ app['settings'] = {
             tk.cb('b1 b2', 'Update Location', async function () {
                 wd.wetter(false);
             }, ok.main);
+        }
+    },
+    wallpapers: {
+        runs: false,
+        init: async function () {
+            const ok = tk.mbw('Wallpapers', '480px', 'auto', true, undefined, undefined);
+            const wallpapers = await fs.ls('/system/lib/img/wallpapers/current/');
+            const grid = tk.c('div', ok.main, 'brick-layout-list');
+            let currentPage = 0;
+            const itemsPerPage = 2;
+
+            async function renderPage(page) {
+                grid.innerHTML = '';
+                const start = page * itemsPerPage;
+                const end = start + itemsPerPage;
+                const pageItems = wallpapers.items.slice(start, end);
+
+                for (const wallpaper of pageItems) {
+                    if (wallpaper.type === "file") {
+                        console.log('<!> Loading');
+                        const img = tk.c('div', grid, 'wallpapericon');
+                        const navi = tk.c('div', img, 'wallpapericonnav left');
+                        const thing = await fs.read(wallpaper.path);
+                        navi.style = "padding: 4px; margin: 4px; background-color: var(--ui1); box-sizing: border-box; border-radius: var(--rad2); backdrop-filter: blur(var(--bl2)); -webkit-backdrop-filter: blur(var(--bl2));";
+                        tk.cb('b4', 'Delete', async function () {
+                            await fs.del(wallpaper.path);
+                            ui.slidehide(img);
+                            const index = wallpapers.items.indexOf(wallpaper);
+                            if (index > -1) {
+                                wallpapers.items.splice(index, 1);
+                            }
+                        }, navi);
+                        tk.cb('b4', 'Set', async function () {
+                            wd.setwall(thing, true, false);
+                            await fs.del(wallpaper.path);
+                        }, navi);
+                        img.style.backgroundImage = `url(${thing})`;
+                    }
+                }
+            }
+
+            const nav = tk.c('div', ok.main, 'nav-buttons');
+            nav.style.marginTop = "4px";
+            tk.cb('b1', 'Back', async function () {
+                if (currentPage > 0) {
+                    currentPage--;
+                    await renderPage(currentPage);
+                }
+            }, nav);
+            tk.cb('b1', 'Forward', async function () {
+                if ((currentPage + 1) * itemsPerPage < wallpapers.items.length) {
+                    currentPage++;
+                    await renderPage(currentPage);
+                }
+            }, nav);
+            renderPage(currentPage);
         }
     },
 };

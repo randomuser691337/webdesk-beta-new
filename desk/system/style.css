@@ -1,8 +1,4 @@
 :root {
-    --sh1: #7799FF;
-    --sh2: #99bbff;
-    --bg1: #eeeeff;
-    --bg2: #aaccff;
     --ui1: rgb(255, 255, 255, 0.5);
     --ui2: #ffffff;
     --ui3: #ededed;
@@ -41,34 +37,6 @@
     opacity: 80%;
 }
 
-.circle {
-    position: fixed;
-    background: linear-gradient(45deg, var(--sh1), var(--sh2));
-    border-radius: 50%;
-    z-index: 0;
-    box-shadow: var(--bg2) 0px 0px 300px 60px;
-    animation: circle 1.35s ease;
-    transition: 0.02s;
-    opacity: 85% !important;
-}
-
-.circle2 {
-    position: fixed;
-    background: linear-gradient(45deg, var(--sh1), var(--sh2));
-    border-radius: 50%;
-    z-index: 0;
-    box-shadow: var(--bg2) 0px 0px 300px 60px;
-    animation: circle2 1.35s ease;
-    transition: 0.02s;
-    opacity: 85% !important;
-}
-
-.dark {
-    background: var(--ui2) !important;
-    z-index: -3 !important;
-    opacity: 100%;
-}
-
 body {
     background-color: #000;
     animation: fade 0.3s;
@@ -77,6 +45,17 @@ body {
     text-align: center;
     font-size: var(--fz1);
     overflow: hidden;
+}
+
+.wallpapericon {
+    width: 100%;
+    box-sizing: border-box;
+    border-radius: var(--rad2);
+    background-position: center center;
+    background-repeat: no-repeat;
+    background-attachment: fixed;
+    background-size: cover;
+    height: 250px;
 }
 
 .bold {
@@ -672,135 +651,6 @@ p {
 
 .hide {
     display: none;
-}
-
-@media (max-width:1030px) {
-
-    .circle,
-    .circle2 {
-        width: 35vw !important;
-        height: 35vw !important;
-    }
-
-    .circle {
-        left: -13vw;
-        top: -13vw;
-    }
-
-    .circle2 {
-        bottom: -13vw;
-        right: -13vw;
-    }
-
-    @keyframes circle2 {
-        0% {
-            right: -70vw;
-            bottom: -70vw;
-        }
-
-        100% {
-            right: -13vw;
-            bottom: -13vw;
-        }
-    }
-
-    @keyframes circle {
-        0% {
-            left: -70vw;
-            top: -70vw;
-        }
-
-        100% {
-            left: -13vw;
-            top: -13vw;
-        }
-    }
-}
-
-@media (max-width:600px) {
-
-    .circle,
-    .circle2 {
-        width: 50vw !important;
-        height: 50vw !important;
-    }
-
-    .circle {
-        left: -17vw;
-        top: -17vw;
-    }
-
-    .circle2 {
-        bottom: -17vw;
-        right: -17vw;
-    }
-
-    @keyframes circle2 {
-        0% {
-            right: -70vw;
-            bottom: -70vw;
-        }
-
-        100% {
-            right: -17vw;
-            bottom: -17vw;
-        }
-    }
-
-    @keyframes circle {
-        0% {
-            left: -70vw;
-            top: -70vw;
-        }
-
-        100% {
-            left: -17vw;
-            top: -17vw;
-        }
-    }
-}
-
-@media (min-width: 1030px) {
-
-    .circle,
-    .circle2 {
-        width: 24vw;
-        height: 24vw;
-    }
-
-    .circle {
-        left: -10vw;
-        top: -10vw;
-    }
-
-    .circle2 {
-        right: -10vw;
-        bottom: -10vw;
-    }
-
-    @keyframes circle {
-        0% {
-            left: -38vw;
-            top: -38vw;
-        }
-
-        100% {
-            left: -10vw;
-            top: -10vw;
-        }
-    }
-
-    @keyframes circle2 {
-        0% {
-            right: -38vw;
-            bottom: -38vw;
-        }
-
-        100% {
-            right: -10vw;
-            bottom: -10vw;
-        }
-    }
 }
 
 ::-webkit-scrollbar {

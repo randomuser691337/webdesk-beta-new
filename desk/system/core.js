@@ -21,7 +21,7 @@
 let clickCount = 0;
 let clickStartTime = null;
 const pageStartTime = Date.now();
-const circle = document.querySelector('.circle');
+const circle = document.getElementById('background');
 
 const resetClicks = () => {
     clickCount = 0;
@@ -572,26 +572,6 @@ var wd = {
         }
         ui.light = true;
     },
-    clearm: function (fucker) {
-        ui.cv('ui1', 'rgb(255, 255, 255, 0.2)');
-        ui.cv('ui2', 'rgba(var(--accent), 0.1)');
-        ui.cv('ui3', 'rgba(var(--accent) 0.2)');
-        ui.cv('bc', 'rgb(255, 255, 255, 0)');
-        ui.cv('font', '#000');
-        ui.cv('inv', '0');
-        if (fucker !== "nosave") {
-            fs.write('/user/info/lightdark', 'clear');
-        }
-        ui.light = true;
-    },
-    clearm2: function (fucker) {
-        wd.clearm();
-        ui.cv('font', '#fff');
-        if (fucker !== "nosave") {
-            fs.write('/user/info/lightdark', 'clear2');
-        }
-        ui.light = false;
-    },
     notifsrc: async function (src, play) {
         sys.notifsrc = src;
         await fs.write('/user/info/notifsrc', src);
@@ -794,16 +774,16 @@ var wd = {
             ui.crtheme('#694700');
             wd.dark();
             wm.notif(`Happy Halloween!`, `To those who celebrate it. If you don't like the color, you can use the default.`, function () {
-                wd.defaultcolor();
+                wd.defaulttheme();
             }, 'Set defaults');
         } else if (today.getMonth() === 11 && today.getDate() === 25) {
             ui.crtheme('#00412A');
             wd.dark();
             wm.notif(`Merry Christmas!`, `To those who celebrate it. If you don't like the color, you can use the default.`, function () {
-                wd.defaultcolor();
+                wd.defaulttheme();
             }, 'Set defaults');
         } else {
-            wd.defaultcolor();
+            wd.defaulttheme();
         }
     },
     savecity: async function (city2) {
@@ -827,9 +807,12 @@ var wd = {
             }
         }
     },
-    defaultcolor: function () {
-        const color = "#618EFF";
-        ui.crtheme(color);
+    defaulttheme: async function () {
+        const color = "68, 161, 254";
+        const restore = await fs.read('/system/lib/img/wallpapers/restore/default');
+        ui.cv('acccent', color);
+        await fs.write('/user/info/color', color);
+        await wd.setwall(restore);
         wd.light();
         return color;
     },
@@ -968,7 +951,17 @@ var wd = {
 
         document.head.appendChild(style);
     },
-    setbg: async function () {
+    setwall: async function (silly, setaccent, nosave) {
+        if (nosave !== true) {
+            const wall = await fs.read('/system/lib/img/wallpapers/current/wall');
+            if (wall) {
+                await fs.write(`/system/lib/img/wallpapers/current/${gen(16)}`, wall);
+            }
+        }
+        await fs.write(`/system/lib/img/wallpapers/current/wall`, silly);
+        wd.setbg(setaccent);
+    },
+    setbg: async function (setcol) {
         const img = await fs.read('/system/lib/img/wallpapers/current/wall');
         if (img) {
             const oldw = tk.g('wallpaper');
@@ -980,14 +973,16 @@ var wd = {
             bg.style.backgroundImage = `url(${img})`;
             if (tk.g('background')) {
                 tk.g('background').remove();
-                tk.g('circle1').remove();
-                tk.g('circle2').remove();
                 tk.g('darkbg').style.opacity = "var(--darkbg)";
                 tk.g('darkbg').style.background = "#000";
             }
-            ui.getcl(img, function (color) {
-                ui.cv('accent', color.join(', '));
-            });
+            if (setcol === true) {
+                if (sys.dev === true) console.log('<i> Setting accent to wallpaper');
+                ui.getcl(img, function (color) {
+                    ui.cv('accent', color.join(', '));
+                    fs.write('/user/info/color', color.join(', '));
+                });
+            }
         }
     },
     tbcal: async function () {

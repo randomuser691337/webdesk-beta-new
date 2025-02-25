@@ -8,12 +8,11 @@ var ui = {
         ui.cv('accent', accent);
     },
     crtheme: async function (hex, opt) {
-        const a = ui.hextool(hex, 45);
-        ui.theme(ui.hextool(hex, 25), a, ui.hextool(hex, 45), ui.hextool(hex, 55), ui.hextorgb(ui.hextool(hex, 55)));
         if (!opt === true) {
+            ui.cv('accent', ui.hextorgb(hex));
             await fs.write('/user/info/color', hex);
             if (sys.autodarkacc === true) {
-                const silly = ui.hexdark(a);
+                const silly = ui.hexdark(hex);
                 if (silly === true) {
                     wd.dark();
                 } else {
@@ -40,14 +39,14 @@ var ui = {
             var data = imageData.data;
             var colorCount = {};
             var maxCount = 0;
-            var mostUsedColor = [0, 0, 0]; // RGB values
+            var mostUsedColor = [0, 0, 0];
 
             for (var i = 0; i < data.length; i += 4) {
                 var r = data[i];
                 var g = data[i + 1];
                 var b = data[i + 2];
                 var rgb = r + ',' + g + ',' + b;
-                if ((r > 100 && g < 100 && b < 100) || // Prefer vibrant colors
+                if ((r > 100 && g < 100 && b < 100) ||
                     (r < 100 && g > 100 && b < 100) ||
                     (r < 100 && g < 100 && b > 100) ||
                     (r > 100 && g > 100 && b < 100) ||
@@ -62,6 +61,16 @@ var ui = {
                         mostUsedColor = [r, g, b];
                     }
                 }
+            }
+
+            // Make the color slightly darker if it's bright
+            var [r, g, b] = mostUsedColor;
+            var brightness = (r * 0.299 + g * 0.587 + b * 0.114);
+            if (brightness > 200) { // Adjust threshold as needed
+                r = Math.max(0, r - r * 0.1);
+                g = Math.max(0, g - g * 0.1);
+                b = Math.max(0, b - b * 0.1);
+                mostUsedColor = [r, g, b];
             }
 
             callback(mostUsedColor);
@@ -560,7 +569,7 @@ var tk = {
                 const rect = e.target.getBoundingClientRect();
                 const x = e.clientX - rect.left;
                 const y = e.clientY - rect.top;
-                e.target.style.background = `radial-gradient(circle at ${x}px ${y}px , rgba(var(--accent), 0.62),rgba(var(--accent), 0.53))`;
+                e.target.style.background = `radial-gradient(circle at ${x}px ${y}px , rgba(var(--accent), 0.63),rgba(var(--accent), 0.53))`;
             });
         }
 

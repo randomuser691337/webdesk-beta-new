@@ -32,7 +32,7 @@ app['files'] = {
             });
         });
         function prohibited(path) {
-            if ((path.startsWith('/system/') || path.startsWith('/apps/') || path.startsWith('/user/info/')) && sys.dev === false) {
+            if ((path.startsWith('/system/') || path.startsWith('/apps/') || path.startsWith('/user/info/')) && !path.startsWith('/system/lib/img/wallpapers/') && sys.dev === false) {
                 return true;
             } else {
                 return false;
@@ -316,11 +316,15 @@ app['files'] = {
                                     app.wetter.init(true, filecontent);
                                     ui.dest(menu2);
                                 }, btnmenu2);
+                                tk.cb('b3', 'Wallpaper', function () {
+                                    wd.setwall(filecontent, true);
+                                    ui.dest(menu2);
+                                }, btnmenu2);
                                 tk.cb('b3', 'console.log', function () {
                                     console.log(filecontent);
                                     ui.dest(menu2);
                                 }, btnmenu2);
-                                tk.cb('b1', 'Cancel', () => ui.dest(menu2), menu2);
+                                tk.cb('b1', 'Cancel', () => ui.dest(menu2), menu2).style.marginTop = "4px";
                             }, btnmenu);
                             tk.cb('b3', 'Download', () => {
                                 wd.download(filecontent, `WebDesk File ${gen(4)}`);

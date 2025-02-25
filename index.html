@@ -24,7 +24,7 @@
     <title>WebDesk</title>
     <style>
         :root {
-            --accent: 0, 60, 255;
+            --accent: 68, 161, 254;
             --acc: var(--accent);
         }
 
@@ -175,8 +175,6 @@
     <div id="contain">
         <div class="dark background" id="darkbg"></div>
         <div id="background" class="background"></div>
-        <div class="circle" id="circle1"></div>
-        <div class="circle2" id="circle2"></div>
     </div>
     <div id="setuparea">
     </div>
@@ -425,12 +423,6 @@
                 }
                 if (lightdark === "dark") {
                     wd.dark('nosave');
-                } else if (lightdark === "clear") {
-                    wd.clearm('nosave');
-                } else if (lightdark === "clear2") {
-                    wd.clearm2('nosave');
-                } else if (lightdark === "light") {
-                    wd.light('nosave');
                 } else {
                     wd.light('nosave');
                 }
@@ -476,7 +468,7 @@
                 boot = true;
             } else if (migcheck === "echo") {
                 await initapps();
-                awaitwd.setbg();
+                await wd.setbg(true, false);
                 const id = gen(7);
                 await ptp.go(id);
                 ui.crtheme('#010101', true);
