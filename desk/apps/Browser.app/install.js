@@ -20,13 +20,10 @@ app['browser'] = {
         let currentName = tk.c('div', win.main, 'hide');
         win.main.classList = "browsercont";
         const searchInput = tk.c('input', okiedokie, 'i1 b6');
-        function addtab(ok) {
+        
+        function addtab(url) {
             const tab = tk.c('embed', win.main, 'browsertab browserREALtab');
-            if (ok) {
-                tab.src = ok;
-            } else {
-                tab.src = "https://meower.xyz";
-            }
+            tab.src = url || "https://meower.xyz";
             ui.sw2(currentTab, tab, 100);
             currentTab = tab;
             let lastUrl = "";
@@ -34,33 +31,29 @@ app['browser'] = {
             thing = [...urls];
 
             const tabBtn = tk.cb('b4 browserpad', '', function () {
-                ui.sw2(currentTab, tab, 100);
-                currentTab = tab;
-                currentBtn = tabTitle;
-                thing = [...urls];
+            ui.sw2(currentTab, tab, 100);
+            currentTab = tab;
+            currentBtn = tabTitle;
+            thing = [...urls];
             }, win.winbtns);
             const tabTitle = tk.c('span', tabBtn);
-            if (ok) {
-                tabTitle.innerText = ok;
-            } else {
-                tabTitle.innerText = "meower.xyz";
-            }
+            tabTitle.innerText = url || "meower.xyz";
             currentName = tabTitle;
             currentBtn = tabTitle;
 
             const closeTabBtn = tk.cb('browserclosetab', 'x', function () {
-                ui.dest(tabBtn);
-                ui.dest(currentTab);
+            ui.dest(tabBtn);
+            ui.dest(currentTab);
             }, tabBtn);
             setInterval(function () {
-                const currentUrl = currentTab.src;
-                if (currentUrl !== lastUrl) {
-                    lastUrl = currentUrl;
-                    urls.push(currentUrl);
-                    thing = [...urls];
-                    searchInput.innerText = currentUrl;
-                    currentName.innerText = currentUrl;
-                }
+            const currentUrl = currentTab.src;
+            if (currentUrl !== lastUrl) {
+                lastUrl = currentUrl;
+                urls.push(currentUrl);
+                thing = [...urls];
+                searchInput.innerText = currentUrl;
+                currentName.innerText = currentUrl;
+            }
             }, 200);
         }
 
@@ -68,40 +61,38 @@ app['browser'] = {
         tk.cb('b3', '⟳', function () {
             currentTab.src = currentTab.src;
         }, searchbtns);
-        tk.cb('b3 hide', '<', function () {
+        tk.cb('b3', '<', function () {
             if (thing.length > 1) {
-                const currentIndex = thing.indexOf(currentTab.src);
-                if (currentIndex > 0) {
-                    const li = thing[currentIndex - 1];
-                    searchInput.value = li;
-                    currentTab.src = li;
-                    currentName.innerText = li;
-                }
+            const currentIndex = thing.indexOf(currentTab.src);
+            if (currentIndex > 0) {
+                const li = thing[currentIndex - 1];
+                searchInput.value = li;
+                currentTab.src = li;
+                currentName.innerText = li;
+            }
             }
         }, searchbtns);
-        tk.cb('b3 hide', '>', function () {
+        tk.cb('b3', '>', function () {
             if (thing.length > 1) {
-                const currentIndex = thing.indexOf(currentTab.src);
-                if (currentIndex < thing.length - 1) {
-                    const li = thing[currentIndex + 1];
-                    searchInput.value = li;
-                    currentTab.src = li;
-                    currentName.innerText = li;
-                }
+            const currentIndex = thing.indexOf(currentTab.src);
+            if (currentIndex < thing.length - 1) {
+                const li = thing[currentIndex + 1];
+                searchInput.value = li;
+                currentTab.src = li;
+                currentName.innerText = li;
+            }
             }
         }, searchbtns);
         searchInput.placeholder = "Enter URL";
+        
         function load() {
-            if (searchInput.value.includes('https://')) {
-                currentTab.src = searchInput.value;
-            } else {
-                currentTab.src = "https://" + searchInput.value;
-            }
+            const url = searchInput.value.includes('https://') ? searchInput.value : "https://" + searchInput.value;
+            currentTab.src = url;
             currentBtn.innerText = searchInput.value;
-            if (searchInput.value.includes('porn') || searchInput.value.includes('e621') || searchInput.value.includes('rule34') || searchInput.value.includes('r34') || searchInput.value.includes('xvideos') || searchInput.value.includes('c.ai') || searchInput.value.includes('webtoon')) {
-                app.ach.unlock('The Gooner', `We won't judge — we promise.`);
+            if (['porn', 'e621', 'rule34', 'r34', 'xvideos', 'c.ai', 'webtoon'].some(term => searchInput.value.includes(term))) {
+            app.ach.unlock('The Gooner', `We won't judge — we promise.`);
             } else if (searchInput.value.includes(window.origin)) {
-                app.ach.unlock('Webception!', `Just know that the other WebDesk will probably end up erased.`);
+            app.ach.unlock('Webception!', `Just know that the other WebDesk will probably end up erased.`);
             }
         }
 
@@ -111,44 +102,40 @@ app['browser'] = {
             const thing2 = { clientX: pos.left, clientY: pos.top };
             ui.rightclick(menu, thing2, whocares, true);
             tk.cb('b3 b2', 'Install As Web App', async function () {
-                const id = gen(12);
-                const path = '/apps/' + id + '.app/';
-                const filt = currentTab.src.replace("https://", "").replace("http://", "");
-                const name = ui.truncater(filt, 18);
-                const newen = { name: name, ver: 1.0, installedon: Date.now(), dev: 'Browser', appid: id, system: false, lastpath: path, };
-                await fs.write(`${path}install.js`, `app['${id}'] = {
-     runs: true,
-     name: '${name}',
-     init: function () {
-          app.browser.view('${currentTab.src}', '${name}');
-     }
-}`);
-                await fs.write(`${path}manifest.json`, newen);
-                wm.notif(name + ' was installed');
-                app.browser.view(currentTab.src);
-                ui.dest(menu, 0);
+            const id = gen(12);
+            const path = '/apps/' + id + '.app/';
+            const filt = currentTab.src.replace("https://", "").replace("http://", "");
+            const name = ui.truncater(filt, 18);
+            const newen = { name: name, ver: 1.0, installedon: Date.now(), dev: 'Browser', appid: id, system: false, lastpath: path };
+            await fs.write(`${path}install.js`, `app['${id}'] = {
+                runs: true,
+                name: '${name}',
+                init: function () {
+                app.browser.view('${currentTab.src}', '${name}');
+                }
+            }`);
+            await fs.write(`${path}manifest.json`, newen);
+            wm.notif(name + ' was installed');
+            app.browser.view(currentTab.src);
+            ui.dest(menu, 0);
             }, menu);
             tk.cb('b3 b2', 'Go!', function () {
-                load(); ui.dest(menu, 0);
+            load(); ui.dest(menu, 0);
             }, menu);
         }, okiedokie);
 
         const listener = async function (event) {
             if (event.key === "Enter") {
-                event.preventDefault();
-                load();
-                document.removeEventListener('keydown', listener);
+            event.preventDefault();
+            load();
+            document.removeEventListener('keydown', listener);
             }
         };
 
         document.addEventListener('keydown', listener);
 
         setTimeout(function () {
-            if (typeof path2 === "string") {
-                addtab(path2);
-            } else {
-                addtab();
-            }
+            addtab(typeof path2 === "string" ? path2 : undefined);
         }, 250);
         wd.win();
     },

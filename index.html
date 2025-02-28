@@ -135,6 +135,7 @@
         dev: false,
         mob: false,
         mobui: false,
+        socket: undefined,
         city: "Paris, France",
         unit: "Metric",
         defaultloc: true,
@@ -259,12 +260,13 @@
         const sd = await fs.read('/user/info/name');
         const installed = await fs.read('/system/webdesk');
         if (installed) {
-            console.log(`<i> Boot stage 1: Read system files`);
+            console.log(`<i> Boot stage 1: Read system files, start socket`);
             try {
                 await initscript('/system/apps.js');
                 await initcss('/system/lib/layout1.css');
                 await initcss('/system/lib/crop/cropper.css');
                 await initscript('/system/lib/jq.js');
+                await initscript('/system/lib/socket.io.js');
                 await initscript('/system/lib/peer.js');
                 await initscript('/system/lib/qrcode.js');
                 await initscript('/system/lib/ace/ace.js');
@@ -276,6 +278,11 @@
                 await initscript('/system/services.js');
                 await initscript('/system/ui.js');
                 await initscript('/system/lib/crop/cropper.js');
+                try {
+                    sys.socket = io("wss://webdesk.meower.xyz/");
+                } catch (error) {
+                    console.log(error);
+                }
                 abt.ver = await fs.read('/system/info/currentver');
                 abt.lastmod = await fs.read('/system/info/currentveredit');
                 await initcss('/system/style.css');
@@ -451,6 +458,19 @@
                         tk.cb('b1', 'Later', () => ui.dest(dark), menu); tk.cb('b1', 'Update', async function () {
                             await fs.del('/system/webdesk');
                             reboot();
+                        }, menu);
+                    }
+                    const token = await fs.read('/user/info/token');
+                    if (!token) {
+                        const dark = ui.darken();
+                        const menu = tk.c('div', dark, 'cm');
+                        tk.img('/system/lib/img/icons/update.svg', 'setupi', menu);
+                        tk.p('Create/log into a WebDesk account', 'bold', menu);
+                        tk.p('Accounts will gradually replace DeskID-based services.', undefined, menu);
+                        const useri = tk.c('input', menu, 'i1').placeholder = 'Username';
+                        const passi = tk.c('input', menu, 'i1').placeholder = 'Password';
+                        tk.cb('b1', 'Create/log in', async function () {
+                            
                         }, menu);
                     }
                 } catch (error) {

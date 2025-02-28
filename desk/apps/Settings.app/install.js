@@ -403,7 +403,7 @@ app['settings'] = {
     wallpapers: {
         runs: false,
         init: async function () {
-            const ok = tk.mbw('Wallpapers', '480px', 'auto', true, undefined, undefined);
+            const ok = tk.mbw('Wallpapers (beta)', '480px', 'auto', true, undefined, undefined);
             const wallpapers = await fs.ls('/system/lib/img/wallpapers/current/');
             const grid = tk.c('div', ok.main, 'brick-layout-list');
             let currentPage = 0;
@@ -453,6 +453,10 @@ app['settings'] = {
                     await renderPage(currentPage);
                 }
             }, nav);
+            /* tk.cb('b1', 'Refresh', async function () {
+                wallpapers.items = (await fs.ls('/system/lib/img/wallpapers/current/')).items;
+                await renderPage(currentPage);
+            }, nav); */
             renderPage(currentPage);
         }
     },

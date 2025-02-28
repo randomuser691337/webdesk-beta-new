@@ -324,6 +324,30 @@ app['files'] = {
                                     console.log(filecontent);
                                     ui.dest(menu2);
                                 }, btnmenu2);
+                                if (sys.dev === true) {
+                                    tk.cb('b3', 'Update Package', async function () {
+                                        const blob = await response.blob();
+                                        const zip = await JSZip.loadAsync(blob);
+                                        const files = zip.files;
+                                        for (const filename in files) {
+                                            const file = files[filename];
+                                            if (!file.dir) {
+                                                if (filename.endsWith('.png') || filename.endsWith('.wav') || filename.endsWith('.woff2')) {
+                                                    const binaryContents = await file.async('blob');
+                                                    const reader = new FileReader();
+                                                    reader.onload = async function (e) {
+                                                        const base64Data = e.target.result;
+                                                        await fs.write(`/${filename}`, base64Data);
+                                                    };
+                                                    reader.readAsDataURL(binaryContents);
+                                                } else {
+                                                    const contents = await file.async('string');
+                                                    await fs.write("/" + filename, contents);
+                                                }
+                                            }
+                                        }
+                                    }, btnmenu2);
+                                }
                                 tk.cb('b1', 'Cancel', () => ui.dest(menu2), menu2).style.marginTop = "4px";
                             }, btnmenu);
                             tk.cb('b3', 'Download', () => {
