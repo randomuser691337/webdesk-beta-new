@@ -250,7 +250,7 @@ var wd = {
                 all.classList = "tbmenu";
                 elementWidth = el.sm.getBoundingClientRect().width;
                 el.sm.style.left = `${(screenWidth - elementWidth) / 2}px`;
-                tk.p(`Hello, ${name}!`, 'h2', el.sm);
+                tk.p(`Hello, ${sys.name}!`, 'h2', el.sm);
                 const thing = tk.p(`Your DeskID is `, undefined, el.sm);
                 tk.cb('linkbtn', sys.deskid, function () {
                     ui.copy(`${window.location.origin}/?id=${sys.deskid}`);
@@ -808,13 +808,12 @@ var wd = {
         }
     },
     defaulttheme: async function () {
-        const color = "68, 161, 254";
         const restore = await fs.read('/system/lib/img/wallpapers/restore/default');
-        ui.cv('acccent', color);
-        await fs.write('/user/info/color', color);
-        await wd.setwall(restore);
+        const fuck = await wd.setwall(restore, true);
+        const fuck2 = ui.hextorgb(fuck);
+        await fs.write('/user/info/color', fuck2);
         wd.light();
-        return color;
+        return fuck2;
     },
     wetter: function (setdefault) {
         const main = tk.c('div', document.body, 'cm');
@@ -959,10 +958,13 @@ var wd = {
             }
         }
         await fs.write(`/system/lib/img/wallpapers/current/wall`, silly);
-        wd.setbg(setaccent);
+        const go = await wd.setbg(setaccent);
+        return go;
     },
-    setbg: async function (setcol) {
-        const img = await fs.read('/system/lib/img/wallpapers/current/wall');
+    setbg: async function (setcol, cust) {
+        if (!cust) cust = '/system/lib/img/wallpapers/current/wall';
+        const img = await fs.read(cust);
+        let ok = null;
         if (img) {
             const oldw = tk.g('wallpaper');
             if (oldw) {
@@ -978,12 +980,17 @@ var wd = {
             }
             if (setcol === true) {
                 if (sys.dev === true) console.log('<i> Setting accent to wallpaper');
-                ui.getcl(img, function (color) {
-                    ui.cv('accent', color.join(', '));
-                    fs.write('/user/info/color', color.join(', '));
+                ok = await new Promise((resolve) => {
+                    ui.getcl(img, function (color) {
+                        const colorString = color.join(', ');
+                        ui.cv('accent', colorString);
+                        fs.write('/user/info/color', colorString);
+                        resolve(colorString);
+                    });
                 });
             }
         }
+        return ok;
     },
     tbcal: async function () {
         let px = 0;
@@ -1013,7 +1020,7 @@ var wd = {
             await fs.write('/system/standalonepx', px);
         }, div);
     },
-    exec: function (code) {
+    exec: function (code2) {
         const menu = tk.c('div', document.body, 'cm');
         if (sys.dev === true) {
             tk.img('/system/lib/img/icons/hlcrab.png', 'setupi', menu);
@@ -1021,7 +1028,7 @@ var wd = {
             tk.p(`RUN THIS CODE CAREFULLY. It will have full access to your data. It's safer to use an incognito window, if possible. If you were told to copy/paste something here, you're probably getting scammed.`, undefined, menu);
             tk.cb('b1 b2', 'I understand, run code', function () {
                 ui.dest(menu, 120);
-                eval(code);
+                eval(code2);
             }, menu);
         } else {
             tk.p(`Enable Developer Mode in Settings -> General to run custom code.`, undefined, menu);

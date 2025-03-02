@@ -4,6 +4,13 @@ app['webcomm'] = {
     runs: true,
     name: 'WebComm',
     init: async function (isid, id) {
+        if (webid.priv === 0) {
+            const div = tk.c('div', document.body, 'cm');
+            tk.p(`Your account is currently limited.`, 'bold', div);
+            tk.p(`Contact support for more information.`, undefined, div);
+            tk.cb('b1', 'Close', () => ui.dest(div), div);
+            return;
+        }
         let win;
         if (isid === true) {
             win = tk.mbw('WebComm (Autofilled)', '320px', 'auto', true);

@@ -148,7 +148,7 @@ To use WebDesk, or copy data, hit "Continue".`, undefined, true), first);
             const id2 = tk.c('div', split, 'splititem');
             tk.p('--------', 'h2 deskid', id2);
             sys.model = tk.p(`Waiting for other WebDesk`, undefined, id2);
-            tk.cb('b1', `No thanks`, () => ui.sw2(transfer, warn), id2);
+            tk.cb('b1', `No thanks`, () => ui.sw2(transfer, user), id2);
             const ok = tk.c('div', split, 'splititem');
             var qrcode = new QRCode(ok, {
                 text: `${window.location.origin}?deskid=${sys.deskid}`,
@@ -172,38 +172,11 @@ To use WebDesk, or copy data, hit "Continue".`, undefined, true), first);
             el.migstat = tk.p('Starting...', 'restpg', copy);
             tk.cb('b1', 'Cancel', function () { fs.erase('reboot'); }, copy);
             copy.id = "quickstartwdgoing";
-            // warn menu
-            const warn = tk.c('div', main, 'setb hide');
-            tk.img('/system/lib/img/noround.png', 'setupi', warn);
-            tk.p(`WebDesk Online services`, 'h2', warn);
-            tk.p('WebDesk makes a DeskID for you. Others can use this ID to send you files or call you.', undefined, warn);
-            tk.p(`Keep your WebDesk open when possible. <span class="bold">When WebDesk isn't open, anyone's able to take your DeskID and you can't receive things.</span> You are your own server.`, undefined, warn);
-            tk.cb('b1', `What's my DeskID?`, function () {
-                const box = wm.cm();
-                tk.p(`Your DeskID is <span class="med">${sys.deskid}</span>. You'll need to finish setup to use it.`, undefined, box);
-                tk.cb('b1', 'Got it', undefined, box);
-            }, warn); tk.cb('b1', 'Got it', function () {
-                const ua = navigator.userAgent;
-                const ios = /iPad|iPhone|iPod/.test(ua) && !window.MSStream;
-                const safari = ua.includes('Safari') && !ua.includes('CriOS') && !ua.includes('FxiOS') && !ua.includes('EdgiOS');
-                if (ios && safari && window.navigator.standalone !== false) {
-                    const supportmsg = tk.c('div', document.body, 'cm');
-                    tk.p('Install WebDesk as a web app?', 'bold', supportmsg);
-                    tk.p('To install, tap the Share icon, scroll, hit "Add To Home Screen", and open the WebDesk app.', undefined, supportmsg);
-                    tk.p('Installing WebDesk as one gives you more screen space, and a better experience.', undefined, supportmsg);
-                    tk.cb('b1', 'No thanks', async function () {
-                        await fs.write('/system/info/standalone', 'false');
-                        ui.sw2(warn, user);
-                    }, supportmsg)
-                } else {
-                    ui.sw2(warn, user);
-                }
-            }, warn);
             // user menu
             const user = tk.c('div', main, 'setb hide');
             tk.img('/system/lib/img/setup/user.svg', 'setupi', user);
-            tk.p('Create User', 'h2', user);
-            tk.p(`Data is stored on your device only. WebDesk does not collect any data from you. The name you enter is visible to anyone with your DeskID.`, undefined, user);
+            tk.p('Create/log into WebDesk account', 'h2', user);
+            tk.p(`Misuse targeting others may result in account limitations. The developer is not liable for your actions.`, undefined, user);
             const p = tk.c('div', user, 'list flexthing');
             const ok2 = tk.c('div', p, 'tnav');
             const p2 = tk.c('div', p, 'title');
@@ -224,12 +197,27 @@ To use WebDesk, or copy data, hit "Continue".`, undefined, true), first);
             }, p2);
             const input = tk.c('input', user, 'i1');
             input.placeholder = "Enter a name to use with WebDesk";
+            const input2 = tk.c('input', user, 'i1');
+            input2.placeholder = "Enter a strong password";
+            input2.type = "password";
+            sys.socket.on("token", ({ token }) => {
+                fs.write('/user/info/token', token);
+                wd.finishsetup(input.value, user, sum);
+                console.log('<i> Token received: ' + ui.truncater(token, 7));
+            });
+
             tk.cb('b1', 'Done!', function () {
-                if (input.value.length > 14) {
-                    wm.snack(`Set a name under 14 characters`, 3200);
+                if (input.value.length > 16) {
+                    wm.snack(`Set a name under 16 characters`, 3200);
                     return;
                 }
-                wd.finishsetup(input.value, user, sum);
+
+                if (input2.value.length < 8) {
+                    wm.snack(`Set a password over 8 characters.`, 3200);
+                    return;
+                }
+
+                sys.socket.emit("newacc", { user: input.value, pass: input2.value });
             }, user);
             // summary
             const sum = tk.c('div', main, 'setb hide');

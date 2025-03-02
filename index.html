@@ -153,6 +153,11 @@
         contained: false,
     }
 
+    var webid = {
+        priv: 1,
+        userid: undefined,
+    }
+
     var el = {
         taskbar: undefined,
         migstat: undefined,
@@ -257,7 +262,7 @@
         const uid2 = params.get('id');
         const eepysleepy = await fs.read('/system/eepysleepy');
         const migcheck = await fs.read('/system/migval');
-        const sd = await fs.read('/user/info/name');
+        var sd = await fs.read('/user/info/name');
         const installed = await fs.read('/system/webdesk');
         if (installed) {
             console.log(`<i> Boot stage 1: Read system files, start socket`);
@@ -422,28 +427,6 @@
 
                 fs.write('/user/files/Welcome to WebDesk!.txt', `Welcome to WebDesk! This is your Files folder, where things you upload are stored. Use the buttons at the top to navigate between folders, right-click/tap and hold a file to see it's info, and normal tap/click it to open it.`);
                 sys.setupd = true;
-                sys.name = sd;
-                if (darkpref === "auto") {
-                    sys.autodarkacc = true;
-                } else {
-                    sys.autodarkacc = false;
-                }
-                if (lightdark === "dark") {
-                    wd.dark('nosave');
-                } else {
-                    wd.light('nosave');
-                }
-                if (color) {
-                    ui.crtheme(color);
-                } else {
-                    wd.seasonal();
-                }
-                console.log('<i> Boot stage 3: Load apps');
-                await initapps();
-                console.log('<i> Boot stage 4: Load desktop, check for updates');
-                await wd.desktop(sd, deskid, 'wait');
-                await wd.setbg();
-                ui.dest(tk.g('loading', 220));
                 try {
                     const skibidi = await fetch('/target.json');
                     const fucker = await skibidi.text();
@@ -465,18 +448,81 @@
                         const dark = ui.darken();
                         const menu = tk.c('div', dark, 'cm');
                         tk.img('/system/lib/img/icons/update.svg', 'setupi', menu);
-                        tk.p('Create/log into a WebDesk account', 'bold', menu);
-                        tk.p('Accounts will gradually replace DeskID-based services.', undefined, menu);
-                        const useri = tk.c('input', menu, 'i1').placeholder = 'Username';
-                        const passi = tk.c('input', menu, 'i1').placeholder = 'Password';
+                        tk.p('Create/log into WebDesk account', 'bold', menu);
+                        tk.p(`Misuse targeting others may result in account limitations. The developer is not liable for your actions.`, undefined, menu);
+                        const useri = tk.c('input', menu, 'i1');
+                        const passi = tk.c('input', menu, 'i1');
+                        useri.placeholder = 'Username';
+                        passi.placeholder = 'Password';
+                        passi.type = 'password';
                         tk.cb('b1', 'Create/log in', async function () {
-                            
+                            if (useri.value.length > 16) {
+                                wm.snack(`Set a name under 16 characters`, 3200);
+                                return;
+                            }
+
+                            if (passi.value.length < 8) {
+                                wm.snack(`Set a password over 8 characters.`, 3200);
+                                return;
+                            }
+
+                            sys.socket.emit("newacc", { user: useri.value, pass: passi.value });
                         }, menu);
+                        sys.socket.on("token", ({ token }) => {
+                            fs.write('/user/info/token', token);
+                            wd.reboot();
+                        });
+                    } else {
+                        await new Promise((resolve) => {
+                            sys.socket.emit("login", token);
+                            sys.socket.on("checkback", async (thing) => {
+                                if (thing.error === true) {
+                                    await fs.del('/user/info/token');
+                                    window.location.reload();
+                                } else {
+                                    sys.name = thing.username;
+                                    sd = thing.username;
+                                    await fs.write('/user/info/name', thing.username);
+                                    webid.token = token;
+                                    webid.priv = thing.priv;
+                                    webid.userid = thing.userid;
+                                    if (thing.priv === 0) {
+                                        wm.notif('Your account has been limited.', `You can still use WebDesk normally, but you can't use online services.`);
+                                    }
+                                }
+                                resolve();
+                            });
+                        });
                     }
                 } catch (error) {
                     console.log(error);
                 }
+                if (sys.name === "Default User") {
+                    sys.name = sd;
+                }
+                if (darkpref === "auto") {
+                    sys.autodarkacc = true;
+                } else {
+                    sys.autodarkacc = false;
+                }
+                if (lightdark === "dark") {
+                    wd.dark('nosave');
+                } else {
+                    wd.light('nosave');
+                }
+                if (color) {
+                    ui.crtheme(color);
+                } else {
+                    wd.seasonal();
+                }
+                console.log('<i> Boot stage 3: Load apps');
+                await initapps();
+                console.log('<i> Boot stage 4: Load desktop, check for updates');
+                await wd.desktop(sys.name, deskid, 'wait');
+                await wd.setbg();
+                ui.dest(tk.g('loading', 220));
             } else if (migcheck === "down") {
+                await wd.setbg(undefined, '/system/lib/img/wallpapers/restore/recovery.png');
                 await initapps();
                 const id = gen(7);
                 await ptp.go(id);
@@ -487,6 +533,7 @@
                 ui.dest(tk.g('loading', 220));
                 boot = true;
             } else if (migcheck === "echo") {
+                await wd.setbg(undefined, '/system/lib/img/wallpapers/restore/recovery.png');
                 await initapps();
                 await wd.setbg(true, false);
                 const id = gen(7);
@@ -498,6 +545,7 @@
                 ui.dest(tk.g('loading', 220));
                 boot = true;
             } else if (migcheck === "rec") {
+                await wd.setbg(undefined, '/system/lib/img/wallpapers/restore/recovery.png');
                 await initapps();
                 await app.system.recovery.init();
                 ui.dest(tk.g('loading', 220));
@@ -519,6 +567,25 @@
 
             wd.perfmon();
             ui.hide(tk.g('death'), 140);
+
+            try {
+                sys.socket.emit('load');
+
+                sys.socket.on("servmsg", (data) => {
+                    wm.snack(data);
+                });
+
+                sys.socket.on("error", (data) => {
+                    wm.snack(data);
+                });
+
+                sys.socket.on("force_update", (data) => {
+                    window.location.reload();
+                });
+            } catch (error) {
+                console.log(error);
+                wm.notif('Error starting WebDesk Online Services.', 'You might need to update.');
+            }
 
             const dropZone = document.body;
             ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {

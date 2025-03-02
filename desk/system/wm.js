@@ -11,7 +11,7 @@ var wm = {
         const thing2 = document.createElement('div');
         win.main.appendChild(thing);
         win.main.appendChild(thing2);
-        function closewal() { 
+        function closewal() {
             ui.dest(win.win, 130); ui.dest(win.tbn, 130);
             if (opt === "urgent") {
                 ui.dest(dark, 130);
@@ -20,7 +20,7 @@ var wm = {
                 }
             }
         }
-        
+
         if (opt === "urgent") {
             dark = tk.c('div', document.body, 'darkscreen');
             if (sys.light === true) {
@@ -31,7 +31,7 @@ var wm = {
             tk.cb('b1', 'Close', () => closewal(), thing2);
         } else if (opt !== "noclose") {
             tk.cb('b1', 'Close', () => closewal(), thing2);
-        } 
+        }
 
         if (btn1 !== undefined) {
             const btn = tk.cb('b1', name, () => closewal(), thing2);
@@ -103,6 +103,7 @@ var wm = {
                 $animatedDiv.animate({
                     top: endOffset.bottom,
                     left: endOffset.x - (endOffset.width / 2),
+                    opacity: 0
                 }, 260, function () {
                     $animatedDiv.hide();
                     $animatedDiv.removeClass("windowanim");
@@ -120,6 +121,7 @@ var wm = {
             $animatedDiv.show().animate({
                 top: original.top,
                 left: original.left,
+                opacity: 1
             }, 260, function () {
                 $animatedDiv.removeClass("minimized");
             });

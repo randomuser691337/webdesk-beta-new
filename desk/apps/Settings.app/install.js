@@ -21,7 +21,7 @@ app['settings'] = {
             const title = tk.c('div', userl, 'title');
             tnav.style.marginLeft = "4px";
             tnav.innerText = ui.filter(sys.name);
-            tk.cb('b3', 'Manage data', () => ui.sw2(mainPane, userPane), title);
+            tk.cb('b3', 'Manage user/info', () => ui.sw2(mainPane, userPane), title);
             tk.cb('b1 b2', 'General', () => ui.sw2(mainPane, generalPane), mainPane);
         } else {
             tk.p(`Some options are disabled, because you're in Guest mode.`, undefined, mainPane);
@@ -281,11 +281,8 @@ app['settings'] = {
         }, appearPane); tk.cb('b1', 'Back', () => ui.sw2(appearPane, mainPane), appearPane);
         // User pane
         tk.p('WebDesk User', undefined, userPane);
-        tk.p(`Keep your WebDesk open when possible. <span class="bold">When WebDesk isn't open, anyone's able to take your DeskID.</span>`, undefined, userPane);
-        tk.cb('b1 b2', 'Location', function () {
-            app.settings.locset.init();
-        }, userPane);
-        tk.cb('b1 b2', 'Change DeskID', function () {
+        tk.p(`Account created on ${wd.timec(webid.userid)}`, undefined, userPane);
+        /* tk.cb('b1 b2', 'Change DeskID', function () {
             const ok = tk.mbw('Change DeskID', '300px', 'auto', true, undefined, undefined);
             tk.p(`Changing your DeskID will make your WebDesk unreachable to those without your new ID.`, undefined, ok.main);
             let yeah = false;
@@ -301,20 +298,28 @@ app['settings'] = {
                     app.ach.unlock('Nevermind', 'Your dark reputation follows you.');
                 }
             });
-        }, userPane);
-        tk.cb('b1 b2', 'Change Name', function () {
+        }, userPane); */
+        tk.cb('b1 b2', 'Change Username', function () {
             const ok = tk.mbw('Change Username', '300px', 'auto', true, undefined, undefined);
             const inp = tk.c('input', ok.main, 'i1');
             inp.placeholder = "New name here";
             tk.cb('b1', 'Change name', async function () {
-                if (inp.value.length > 14) {
-                    wm.snack(`Set a name under 14 characters`, 3200);
+                if (inp.value.length > 16) {
+                    wm.snack(`Set a name under 16 characters`, 3200);
                     return;
                 }
-                await fs.write('/user/info/name', inp.value);
-                ok.main.innerHTML = `<p>Reboot WebDesk to finish changing your username.</p><p>All unsaved data will be lost.</p>`;
-                tk.cb('b1', 'Reboot', () => wd.reboot(), ok.main);
+
+                sys.socket.emit("changeusername", { token: webid.token, name: inp.value });
             }, ok.main);
+            sys.socket.on("changeuserdone", async () => {
+                sys.name = inp.value;
+                await fs.write('/user/info/name', inp.value);
+                wm.snack(`Name changed to ${inp.value}`);
+                wm.close(ok.win);
+            });
+        }, userPane);
+        tk.cb('b1 b2', 'Location', function () {
+            app.settings.locset.init();
         }, userPane);
         tk.cb('b1', 'Back', () => ui.sw2(userPane, mainPane), userPane);
         // Access pane
