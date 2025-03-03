@@ -10,7 +10,7 @@ var ui = {
     crtheme: async function (hex, opt) {
         if (!opt === true) {
             ui.cv('accent', ui.hextorgb(hex));
-            await fs.write('/user/info/color',  ui.hextorgb(hex));
+            await fs.write('/user/info/color', ui.hextorgb(hex));
             if (sys.autodarkacc === true) {
                 const silly = ui.hexdark(ui.hextorgb(hex));
                 if (silly === true) {
@@ -247,6 +247,9 @@ var ui = {
         let g = (bigint >> 8) & 255;
         let b = bigint & 255;
         return `${r}, ${g}, ${b}`;
+    },
+    rgbtohex: function (r, g, b) {
+        return "#" + ((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1);
     },
     download: function (filename, data) {
         const blob = new Blob([data], { type: 'text/plain' });

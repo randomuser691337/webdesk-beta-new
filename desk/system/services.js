@@ -406,7 +406,7 @@ async function refreshfriends() {
         let ids = [];
         const notifiedDeskIds = {};
 
-        data = await fs.read('/user/info/contactlist.json');
+        data = await fs.read('/user/info/contacts.json');
         parsed = JSON.parse(data);
 
         const refint = setInterval(async function () {
@@ -414,7 +414,7 @@ async function refreshfriends() {
                 clearInterval(refint);
                 return;
             }
-            data = await fs.read('/user/info/contactlist.json');
+            data = await fs.read('/user/info/contacts.json');
             parsed = JSON.parse(data);
         }, 20000);
 

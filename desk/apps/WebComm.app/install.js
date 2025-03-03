@@ -4,13 +4,7 @@ app['webcomm'] = {
     runs: true,
     name: 'WebComm',
     init: async function (isid, id) {
-        if (webid.priv === 0) {
-            const div = tk.c('div', document.body, 'cm');
-            tk.p(`Your account is currently limited.`, 'bold', div);
-            tk.p(`Contact support for more information.`, undefined, div);
-            tk.cb('b1', 'Close', () => ui.dest(div), div);
-            return;
-        }
+        if (wd.checkperms() === false) return;
         let win;
         if (isid === true) {
             win = tk.mbw('WebComm (Autofilled)', '320px', 'auto', true);
@@ -18,16 +12,16 @@ app['webcomm'] = {
             win = tk.mbw('WebComm', '320px', 'auto', true);
         }
         const inp = tk.c('input', win.main, 'i1');
-        inp.placeholder = "Enter a DeskID";
+        inp.placeholder = "Enter a username";
         if (isid === true) {
             inp.value = id;
-            wm.snack('Autofilled DeskID', 3000);
+            wm.snack('Autofilled username', 3000);
         }
         const skibidiv = tk.c('div', win.main);
         let extraid = undefined;
         const dropbtn = tk.cb('b1', 'WebDrop', async function () {
             if (inp.value === sys.deskid) {
-                wm.snack(`Type a DeskID that isn't yours.`);
+                wm.snack(`Type a username that isn't yours.`);
                 app.ach.unlock('So lonely...', 'So lonely, you tried calling yourself.');
             } else {
                 const file = await app.files.pick(undefined, 'Select file to send');
@@ -62,7 +56,7 @@ app['webcomm'] = {
         }, win.main);
         const callbtn = tk.cb('b1', 'Voice Call', async function () {
             if (inp.value === sys.deskid) {
-                wm.snack(`Type a DeskID that isn't yours.`);
+                wm.snack(`Type a username that isn't yours.`);
                 app.ach.unlock('So lonely...', 'So lonely, you tried calling yourself.');
             } else {
                 await ptp.getname(inp.value)
@@ -83,29 +77,15 @@ app['webcomm'] = {
             }
         }, win.main);
         const chatbtn = tk.cb('b1', 'Message', async function () {
-            if (inp.value === sys.deskid) {
-                wm.snack(`Type a DeskID that isn't yours.`);
+            if (inp.value === sys.name) {
+                wm.snack(`Type a username that isn't yours.`);
                 app.ach.unlock('So lonely...', 'So lonely, you tried messaging yourself.');
             } else {
-                await ptp.getname(inp.value)
-                    .then(name => {
-                        app.webcomm.webchat.init(inp.value, undefined, name);
-                    })
-                    .catch(error => {
-                        if (extraid) {
-                            wm.snack(`First ID failed, trying their second ID...`);
-                            inp.value = extraid;
-                            chatbtn.click();
-                            extraid = undefined;
-                        } else {
-                            console.log(error);
-                            wm.snack(`User isn't online or your Internet isn't working`);
-                        }
-                    });
+                await app.webcomm.webchat.init(inp.value, '');
             }
         }, win.main);
         async function ok() {
-            const data = await fs.read('/user/info/contactlist.json');
+            const data = await fs.read('/user/info/contacts.json');
             skibidiv.innerHTML = "";
             tk.cb('b3 b2 webcomm dash', 'Manage or edit contacts', () => app.webcomm.contacts.init(), skibidiv);
 
@@ -115,38 +95,36 @@ app['webcomm'] = {
 
                 for (const entry of parsed) {
                     let btn;
-                    if (entry.name === entry.deskid) {
-                        btn = tk.cb('b3 b2 webcomm', entry.deskid, function () {
-                            inp.value = entry.deskid;
-                            if (entry.deskid2) extraid = entry.deskid2;
-                        }, skibidiv);
-                    } else {
-                        btn = tk.cb('b3 b2 webcomm', entry.name + " - " + entry.deskid + " | Loading", function () {
-                            inp.value = entry.deskid;
-                            if (entry.deskid2) extraid = entry.deskid2;
+                    if (entry.name) {
+                        btn = tk.cb('b3 b2 webcomm', entry.name, function () {
+                            inp.value = entry.name;
                         }, skibidiv);
                     }
 
-                    buttons.push({ btn, deskid: entry.deskid, deskid2: entry.deskid2 });
+                    buttons.push({ btn, name: entry.name,});
                 }
 
                 await Promise.all(
-                    buttons.map(async ({ btn, deskid, deskid2 }) => {
-                        try {
-                            await ptp.getname(deskid);
-                            btn.innerText = ui.filter(btn.innerText.slice(0, -9) + " | Online");
-                        } catch (error) {
-                            if (deskid2 !== undefined) {
-                                try {
-                                    await ptp.getname(deskid);
-                                    btn.innerText = ui.filter(btn.innerText.slice(0, -9) + " | Online");
-                                } catch (error) {
-                                    btn.innerText = ui.filter(btn.innerText.slice(0, -10) + " | Offline");
+                    buttons.map(({ btn, name }) => {
+                        return new Promise((resolve) => {
+                            sys.socket.emit('status', { token: webid.token, username: name }, (response) => {
+                                if (response.status === 'online') {
+                                    btn.innerText = ui.filter(`${name} - Online`);
+                                } else if (name !== undefined) {
+                                    sys.socket.emit('status', { token: webid.token, username: name }, (response2) => {
+                                        if (response2.status === 'online') {
+                                            btn.innerText = ui.filter(`${name} - Online`);
+                                        } else {
+                                            btn.innerText = ui.filter(`${name} - Offline`);
+                                        }
+                                        resolve();
+                                    });
+                                } else {
+                                    btn.innerText = ui.filter(`${name} - Offline`);
+                                    resolve();
                                 }
-                            } else {
-                                btn.innerText = ui.filter(btn.innerText.slice(0, -10) + " | Offline");
-                            }
-                        }
+                            });
+                        });
                     })
                 );
             }
@@ -159,71 +137,58 @@ app['webcomm'] = {
     },
     webchat: {
         runs: false,
-        init: async function (deskid, chat, name) {
-            if (el.webchat !== undefined) {
-                wd.win(el.webchat.win, el.webchat.closebtn, el.webchat.minbtn, el.webchat.tbn);
-                el.currentid = deskid;
+        init: async function (name, message) {
+            if (random[name]) {
+                wd.win(random[name].win);
+                const msg = tk.c('div', random[name].chatting, 'flist othersent');
+                msg.style.marginBottom = "3px";
+                msg.innerText = ui.filter(`${name}: ` + message);
+                random[name].chatting.scrollTop = random[name].chatting.scrollHeight;
             } else {
-                el.webchat = tk.mbw('WebChat', '300px', 'auto', true);
-                let otherid = undefined;
-                wc.messaging = tk.c('div', el.webchat.main);
-                wc.chatting = tk.c('div', wc.messaging, 'embed nest');
-                wc.chatting.style.overflow = "auto";
-                wc.chatting.style.height = "400px";
-                el.currentid = deskid;
-                tk.ps(`Talking with ${name} - ${deskid}`, 'smtxt', wc.chatting);
-                if (sys.filter === true) {
-                    tk.ps(`PLEASE NOTE: Some filters can detect things YOU send, as they monitor your typing.`, 'smtxt', wc.chatting);
-                }
+                if (wd.checkperms() === false) {
+                    wm.notif(name, `sent you a message, but your account is limited. View anyways?`, async function () {
 
-                if (deskid && !chat) {
-                    otherid = deskid;
-                    el.currentid = deskid;
-                }
-
-                if (deskid) {
-                    otherid = deskid;
-                }
-
-                wc.messagein = tk.c('input', wc.messaging, 'i1');
-                wc.messagein.placeholder = "Message";
-
-                function send() {
-                    const msg = wc.messagein.value;
-                    if (msg && otherid) {
-                        custf(otherid, 'Message-WebKey', msg);
-                        wc.sendmsg = tk.c('div', wc.chatting, 'msg mesent');
-                        wc.sendmsg.innerText = ui.filter(`${sys.name}: ` + msg);
-                        wc.sendmsg.style.marginBottom = "3px";
-                        wc.messagein.value = '';
-                        wc.chatting.scrollTop = wc.chatting.scrollHeight;
+                    }, 'Show message');
+                    return;
+                };
+                wm.notif(name, message, async function () {
+                    random[name] = tk.mbw('WebChat', '300px', 'auto', true);
+                    random[name].messaging = tk.c('div', random[name].main);
+                    random[name].chatting = tk.c('div', random[name].messaging, 'embed nest');
+                    random[name].chatting.style.overflow = "auto";
+                    random[name].chatting.style.height = "320px";
+                    tk.ps(`Talking with ${name}`, 'smtxt', random[name].chatting);
+                    if (sys.filter === true) {
+                        tk.ps(`Some filters can detect things YOU send, as they monitor your typing.`, 'smtxt', random[name].chatting);
                     }
-                }
 
-                tk.cb('b1', 'Send', () => send(), wc.messaging);
+                    random[name].input = tk.c('input', random[name].messaging, 'i1');
+                    random[name].input.placeholder = "Message " + name;
 
-                ui.key(wc.messagein, "Enter", () => send());
+                    function send() {
+                        const msg = random[name].input.value;
+                        if (msg) {
+                            sys.socket.emit("message", { token: webid.token, username: name, contents: msg });
+                            const div = tk.c('div', random[name].chatting, 'msg mesent');
+                            div.innerText = ui.filter(`${sys.name}: ` + msg);
+                            div.style.marginBottom = "3px";
+                            random[name].input.value = '';
+                            random[name].chatting.scrollTop = random[name].chatting.scrollHeight;
+                        }
+                    }
+
+                    tk.cb('b1', 'Send', () => send(), random[name].messaging);
+
+                    ui.key(random[name].input, "Enter", () => send());
+
+                    random[name].closebtn.addEventListener('mousedown', function () {
+                        random[name] = undefined;
+                    });
+
+                    app.webcomm.add(name);
+                    app.webcomm.webchat.init(name, message);
+                }, 'Open');
             }
-
-            el.webchat.closebtn.addEventListener('mousedown', function () {
-                el.webchat = undefined;
-                custf(el.currentid, 'Message-WebKey', `End chat with ${el.currentid}`);
-            });
-
-            app.webcomm.add(deskid, name);
-
-            return new Promise((resolve) => {
-                let checkDeskAndChat = setInterval(() => {
-                    if (typeof deskid === "string" && typeof chat === "string") {
-                        clearInterval(checkDeskAndChat);
-                        const msg = tk.c('div', wc.chatting, 'flist othersent');
-                        msg.style.marginBottom = "3px";
-                        msg.innerText = ui.filter(`${name}: ` + chat);
-                        wc.chatting.scrollTop = wc.chatting.scrollHeight;
-                        resolve();
-                    }
-                }, 100);
-            });
         }
     },
     webcall: {
@@ -311,22 +276,23 @@ app['webcomm'] = {
             });
         }
     },
-    add: async function (deskid, name) {
+    add: async function (name) {
         try {
             if (!name) {
-                name = deskid;
+                console.log('<!> No name provided');
+                return;
             }
-            const data = await fs.read('/user/info/contactlist.json');
+            const data = await fs.read('/user/info/contacts.json');
             if (data) {
-                const newen = { deskid: deskid, name: name, time: Date.now() };
+                const newen = { name: name, time: Date.now() };
                 const jsondata = JSON.parse(data);
-                const check = jsondata.some(entry => entry.deskid === newen.deskid);
+                const check = jsondata.some(entry => entry.name === newen.name);
                 if (check !== true) {
                     jsondata.push(newen);
-                    fs.write('/user/info/contactlist.json', jsondata);
+                    fs.write('/user/info/contacts.json', jsondata);
                 }
             } else {
-                await fs.write('/user/info/contactlist.json', [{ deskid: deskid, name: name, time: Date.now() }]);
+                await fs.write('/user/info/contacts.json', [{ name: name, time: Date.now() }]);
             }
         } catch (error) {
             console.log(`<!> Couldn't add contact: `, error);
@@ -345,21 +311,19 @@ app['webcomm'] = {
             }
             async function load() {
                 try {
-                    const data = await fs.read('/user/info/contactlist.json');
+                    const data = await fs.read('/user/info/contacts.json');
                     if (data) {
                         ok = JSON.parse(data);
                         ok.forEach((entry) => {
                             const notif = tk.c('div', win.main, 'notif2');
                             tk.ps(entry.name, 'bold', notif);
                             if (entry.deskid2) {
-                                tk.ps(`DeskID: ${entry.deskid} | DeskID 2: ${entry.deskid2}`, undefined, notif);
-                            } else {
-                                tk.ps(`DeskID: ${entry.deskid} | DeskID 2: Not set`, undefined, notif);
+                                tk.ps(`${entry.name}`, undefined, notif);
                             }
                             tk.cb('b4', 'Remove', async function () {
                                 const update = ok.filter(item => item.time !== entry.time);
                                 const updated = JSON.stringify(update);
-                                await fs.write('/user/info/contactlist.json', updated);
+                                await fs.write('/user/info/contacts.json', updated);
                                 ui.slidehide(notif);
                                 ui.dest(notif);
                                 ok = update;
@@ -371,30 +335,22 @@ app['webcomm'] = {
                                 const name = tk.c('input', menu, 'i1');
                                 name.placeholder = "User's username";
                                 if (update && update.name) name.value = update.name;
-                                const deskid = tk.c('input', menu, 'i1');
-                                deskid.placeholder = "User's default/main DeskID";
-                                if (update && update.deskid) deskid.value = update.deskid;
-                                const deskid2 = tk.c('input', menu, 'i1');
-                                deskid2.placeholder = "Second ID if first is offline";
-                                if (update && update.deskid2) deskid2.value = update.deskid2;
                                 tk.cb('b1', 'Close', () => ui.dest(menu), menu);
                                 tk.cb('b1', 'Save', async function () {
                                     const updatedData = ok.filter(item => item.time !== entry.time);
                                     const newEntry = {
-                                        deskid: deskid.value,
                                         name: name.value,
                                         time: Date.now()
                                     };
-                                    if (deskid2.value) newEntry.deskid2 = deskid2.value;
                                     updatedData.push(newEntry);
-                                    await fs.write('/user/info/contactlist.json', updatedData);
+                                    await fs.write('/user/info/contacts.json', updatedData);
                                     ui.dest(menu);
                                     reload();
                                 }, menu);
                             }, notif);
                         });
                     } else {
-                        await fs.write('/user/info/contactlist.json', '[]');
+                        await fs.write('/user/info/contacts.json', '[]');
                         await load();
                     }
                 } catch (error) {
@@ -407,26 +363,21 @@ app['webcomm'] = {
             tk.cb('b1 b2', 'Add Contact', function () {
                 const menu = tk.c('div', document.body, 'cm');
                 const name = tk.c('input', menu, 'i1');
-                name.placeholder = "User's name";
-                const deskid = tk.c('input', menu, 'i1');
-                deskid.placeholder = "User's default DeskID";
-                const deskid2 = tk.c('input', menu, 'i1');
-                deskid2.placeholder = "User's second DeskID";
+                name.placeholder = "Username";
                 tk.cb('b1', 'Close', () => ui.dest(menu), menu);
                 tk.cb('b1', 'Save', async function () {
                     const newEntry = {
-                        deskid: deskid.value,
                         name: name.value,
                         time: Date.now()
                     };
-                    const update = ok.find(item => item.deskid === newEntry.deskid);
+                    const update = ok.find(item => item.name === newEntry.name);
                     console.log(update);
                     if (update !== undefined) {
                         wm.snack('Already saved that person');
                     } else {
                         if (deskid2.value) newEntry.deskid2 = deskid2.value;
                         ok.push(newEntry);
-                        await fs.write('/user/info/contactlist.json', ok);
+                        await fs.write('/user/info/contacts.json', ok);
                         ui.dest(menu);
                         reload();
                     }

@@ -276,7 +276,7 @@ app['settings'] = {
             fs.del('/user/info/color');
             fs.del('/user/info/lightdark');
             fs.del('/user/info/lightdarkpref');
-            bg1.value = await wd.defaulttheme();
+            bg1.value = await ui.rgbtohex(wd.defaulttheme());
             wm.snack('Reset colors');
         }, appearPane); tk.cb('b1', 'Back', () => ui.sw2(appearPane, mainPane), appearPane);
         // User pane
@@ -320,6 +320,19 @@ app['settings'] = {
         }, userPane);
         tk.cb('b1 b2', 'Location', function () {
             app.settings.locset.init();
+        }, userPane);
+        tk.cb('b1 b2', 'Log out', function () {
+            const dark = ui.darken();
+            const menu = tk.c('div', dark, 'cm');
+            tk.img('/system/lib/img/icons/warn.svg', 'setupi', menu);
+            tk.p(`Are you sure?`, 'bold', menu);
+            tk.p(`You'll need to log back in/create another account.`, undefined, menu);
+            tk.cb('b1', 'Log out', async function () {
+                await fs.del('/user/info/token');
+                await fs.write('/user/info/name', 'User');
+                wd.reboot();
+            }, menu);
+            tk.cb('b1', `Close`, () => ui.dest(dark), menu);
         }, userPane);
         tk.cb('b1', 'Back', () => ui.sw2(userPane, mainPane), userPane);
         // Access pane

@@ -727,6 +727,11 @@ p {
     box-shadow: var(--optbox);
 }
 
+.i1::placeholder {
+    color: var(--dimfont);
+    opacity: 1;
+}
+
 .i1:focus {
     background-color: rgba(var(--accent), 0.38);
     box-shadow: rgba(0, 0, 0, 0.2) 0px 0px 20px 4px;

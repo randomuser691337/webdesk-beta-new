@@ -158,6 +158,11 @@
         userid: undefined,
     }
 
+    // this is where other apps fuck with each other ig
+    var random = {
+
+    }
+
     var el = {
         taskbar: undefined,
         migstat: undefined,
@@ -519,7 +524,7 @@
                 await initapps();
                 console.log('<i> Boot stage 4: Load desktop, check for updates');
                 await wd.desktop(sys.name, deskid, 'wait');
-                await wd.setbg();
+                await wd.setbg(false);
                 ui.dest(tk.g('loading', 220));
             } else if (migcheck === "down") {
                 await wd.setbg(undefined, '/system/lib/img/wallpapers/restore/recovery.png');
@@ -568,6 +573,8 @@
             wd.perfmon();
             ui.hide(tk.g('death'), 140);
 
+            let fire = false;
+
             try {
                 sys.socket.emit('load');
 
@@ -581,6 +588,24 @@
 
                 sys.socket.on("force_update", (data) => {
                     window.location.reload();
+                });
+
+                sys.socket.on("connect_error", () => {
+                    webid.priv = -1;
+                    resolve();
+                });
+
+                sys.socket.on("connect", async () => {
+                    if (fire === false) {
+                        fire = true;
+                    } else {
+                        const token = await fs.read('/user/info/token');
+                        sys.socket.emit("login", token);
+                    }
+                });
+
+                sys.socket.on("umsg", async (msg) => {
+                    app.webcomm.webchat.init(msg.username, msg.contents);
                 });
             } catch (error) {
                 console.log(error);

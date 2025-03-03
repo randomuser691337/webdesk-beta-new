@@ -810,10 +810,9 @@ var wd = {
     defaulttheme: async function () {
         const restore = await fs.read('/system/lib/img/wallpapers/restore/default');
         const fuck = await wd.setwall(restore, true);
-        const fuck2 = ui.hextorgb(fuck);
-        await fs.write('/user/info/color', fuck2);
+        console.log(fuck);
         wd.light();
-        return fuck2;
+        return fuck;
     },
     wetter: function (setdefault) {
         const main = tk.c('div', document.body, 'cm');
@@ -913,6 +912,23 @@ var wd = {
             sys.resume = resolve;
         });
     },
+    checkperms: function () {
+        if (webid.priv === 0) {
+            const div = tk.c('div', document.body, 'cm');
+            tk.p(`Your account is currently limited.`, 'bold', div);
+            tk.p(`Contact support for more information.`, undefined, div);
+            tk.cb('b1', 'Close', () => ui.dest(div), div);
+            return false;
+        } else if (webid.priv === -1) {
+            const div = tk.c('div', document.body, 'cm');
+            tk.p(`WebDesk's servers are offline.`, 'bold', div);
+            tk.p(`You can still use WebDesk normally.`, undefined, div);
+            tk.cb('b1', 'Close', () => ui.dest(div), div);
+            return false;
+        } else {
+            return true;
+        }
+    },
     fontsw: async function (normal, medium, bold, mono) {
         const existingStyle = tk.g('dynamic-font');
         if (existingStyle) {
@@ -959,6 +975,7 @@ var wd = {
         }
         await fs.write(`/system/lib/img/wallpapers/current/wall`, silly);
         const go = await wd.setbg(setaccent);
+        console.log(go);
         return go;
     },
     setbg: async function (setcol, cust) {
@@ -984,10 +1001,10 @@ var wd = {
                     ui.getcl(img, function (color) {
                         const colorString = color.join(', ');
                         ui.cv('accent', colorString);
-                        fs.write('/user/info/color', colorString);
                         resolve(colorString);
                     });
                 });
+                await fs.write('/user/info/color', ui.rgbtohex(ok));
             }
         }
         return ok;
