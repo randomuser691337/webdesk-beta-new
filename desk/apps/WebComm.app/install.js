@@ -55,25 +55,12 @@ app['webcomm'] = {
             }
         }, win.main);
         const callbtn = tk.cb('b1', 'Voice Call', async function () {
-            if (inp.value === sys.deskid) {
+            if (inp.value === sys.name) {
                 wm.snack(`Type a username that isn't yours.`);
                 app.ach.unlock('So lonely...', 'So lonely, you tried calling yourself.');
             } else {
-                await ptp.getname(inp.value)
-                    .then(name => {
-                        app.webcomm.webcall.init(inp.value, name);
-                    })
-                    .catch(error => {
-                        if (extraid) {
-                            wm.snack(`First ID failed, trying their second ID...`);
-                            inp.value = extraid;
-                            callbtn.click();
-                            extraid = undefined;
-                        } else {
-                            console.log(error);
-                            wm.snack(`User isn't online or your Internet isn't working`);
-                        }
-                    });
+                sys.socket.emit("call", { token: webid.token, username: inp.value, deskid: sys.deskid });
+                app.webcomm.webcall.init(inp.value);
             }
         }, win.main);
         const chatbtn = tk.cb('b1', 'Message', async function () {
@@ -101,7 +88,7 @@ app['webcomm'] = {
                         }, skibidiv);
                     }
 
-                    buttons.push({ btn, name: entry.name,});
+                    buttons.push({ btn, name: entry.name, });
                 }
 
                 await Promise.all(
@@ -193,7 +180,7 @@ app['webcomm'] = {
     },
     webcall: {
         runs: false,
-        init: async function (deskid, name) {
+        init: async function (name, deskid, answering) {
             const win = tk.mbw('WebCall', '260px', 'auto', true, undefined, undefined);
             const callStatus = tk.p(`Connecting...`, undefined, win.main);
             let oncall = false;

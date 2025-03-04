@@ -544,8 +544,13 @@ var wd = {
             }
         }, 140);
     },
-    dark: function (fucker) {
-        ui.cv('ui1', 'rgb(35, 35, 35, 0.7)');
+    dark: async function (fucker) {
+        const access = await fs.read('/user/info/blur');
+        if (access === "false") {
+            ui.cv('ui1', 'var(--ui2)');
+        } else {
+            ui.cv('ui1', 'rgb(35, 35, 35, 0.7)');
+        }
         ui.cv('ui2', '#1f1f1f');
         ui.cv('ui3', '#2f2f2f');
         ui.cv('bc', 'rgba(60, 60, 60, 0.6)');
@@ -558,8 +563,13 @@ var wd = {
         }
         ui.light = false;
     },
-    light: function (fucker) {
-        ui.cv('ui1', 'rgb(255, 255, 255, 0.7)');
+    light: async function (fucker) {
+        const access = await fs.read('/user/info/blur');
+        if (access === "false") {
+            ui.cv('ui1', 'var(--ui2)');
+        } else {
+            ui.cv('ui1', 'rgb(255, 255, 255, 0.7)');
+        }   
         ui.cv('ui2', '#ffffff');
         ui.cv('ui3', '#efefef');
         ui.cv('bc', 'rgb(220, 220, 220, 0.6)');
@@ -807,13 +817,6 @@ var wd = {
             }
         }
     },
-    defaulttheme: async function () {
-        const restore = await fs.read('/system/lib/img/wallpapers/restore/default');
-        const fuck = await wd.setwall(restore, true);
-        console.log(fuck);
-        wd.light();
-        return fuck;
-    },
     wetter: function (setdefault) {
         const main = tk.c('div', document.body, 'cm');
         tk.img('/system/lib/img/setup/location.svg', 'setupi', main);
@@ -966,6 +969,13 @@ var wd = {
 
         document.head.appendChild(style);
     },
+    defaulttheme: async function () {
+        const restore = await fs.read('/system/lib/img/wallpapers/restore/default');
+        const fuck = await wd.setwall(restore, true);
+        console.log(fuck);
+        wd.light();
+        return fuck;
+    },
     setwall: async function (silly, setaccent, nosave) {
         if (nosave !== true) {
             const wall = await fs.read('/system/lib/img/wallpapers/current/wall');
@@ -1008,6 +1018,31 @@ var wd = {
             }
         }
         return ok;
+    },
+    blurcheck: async function (perf) {
+        const access = await fs.read('/user/info/blur');
+        if (perf === "true") {
+            sys.lowgfx = true;
+            ui.cv('bl1', '3px');
+            ui.cv('bl2', '3px');
+            ui.cv('optbox', 'none');
+            ui.cv('mangomango', '0px');
+        } else if (perf === "half") {
+            ui.cv('bl1', '7px');
+            ui.cv('bl2', '4px');
+            ui.cv('optbox', 'none');
+            ui.cv('mangomango', '1px');
+        } else if (perf === "epic") {
+            ui.cv('bl1', '15px');
+            ui.cv('bl2', '12px');
+            ui.cv('mangomango', '4px');
+        }
+           
+        if (access === "false") {
+            ui.cv('ui1', 'var(--ui2)');
+            ui.cv('bl1', '0px');
+            ui.cv('bl2', '0px');
+        }
     },
     tbcal: async function () {
         let px = 0;

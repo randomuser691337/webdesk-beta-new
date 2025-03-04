@@ -276,7 +276,9 @@ app['settings'] = {
             fs.del('/user/info/color');
             fs.del('/user/info/lightdark');
             fs.del('/user/info/lightdarkpref');
-            bg1.value = await ui.rgbtohex(wd.defaulttheme());
+            const raiseyopawifyouafuckingfaggot = await wd.defaulttheme();
+            console.log(raiseyopawifyouafuckingfaggot);
+            bg1.value = await ui.rgbtohex(raiseyopawifyouafuckingfaggot);
             wm.snack('Reset colors');
         }, appearPane); tk.cb('b1', 'Back', () => ui.sw2(appearPane, mainPane), appearPane);
         // User pane
@@ -352,6 +354,7 @@ app['settings'] = {
             wd.smft();
             fs.write('/user/info/font', 'small');
         }, p2);
+        
         const p3 = tk.c('div', accPane, 'list');
         const ok3 = tk.c('span', p3);
         ok3.innerHTML = `SFW mode (Filters text before it's seen to help stop things like <a href="https://www.gaggle.net/" target="_blank">this</a>) `;
@@ -373,6 +376,27 @@ app['settings'] = {
             fs.del('/user/info/filter');
             wm.snack('SFW mode turned off');
         }, p3);
+        tk.p('Transparency/blur effects', undefined, accPane);
+        const blurp = tk.p('', undefined, accPane);
+        blurp.style = "display: flex; justify-content: space-between; padding: 0px; margin: 0px;";
+        const blur1 = tk.cb('b1 b2', 'Disable', function () {
+            fs.write('/user/info/blur', 'false');
+            ui.cv('ui1', 'var(--ui2)');
+            ui.cv('bl1', '0px');
+            ui.cv('bl2', '0px');
+        }, blurp);
+        blur1.style = "flex: 1 1; margin-right: 1px !important;";
+        const blur2 = tk.cb('b1 b2', 'Enable', async function () {
+            await fs.del('/user/info/blur');
+            const perf = await fs.read('/system/info/lowgfx');
+            wd.blurcheck(perf);
+            if (ui.light === false) {
+                wd.dark();
+            } else {
+                wd.light();
+            }
+        }, blurp);
+        blur2.style = "flex: 1 1; margin-left: 1px !important;";
         tk.cb('b1', 'Back', () => ui.sw2(accPane, mainPane), accPane);
         // App pane
         tk.cb('b1', 'Back', () => ui.sw2(appPane, mainPane), appPane);
