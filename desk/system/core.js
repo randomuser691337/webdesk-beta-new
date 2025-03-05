@@ -1037,7 +1037,7 @@ var wd = {
             ui.cv('bl2', '12px');
             ui.cv('mangomango', '4px');
         }
-           
+        
         if (access === "false") {
             ui.cv('ui1', 'var(--ui2)');
             ui.cv('bl1', '0px');
