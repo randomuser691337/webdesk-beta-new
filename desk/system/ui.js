@@ -564,7 +564,7 @@ var tk = {
             ele.appendChild(button);
         }
 
-        if ((classn.includes('b1') || classn.includes('b3')) && sys.lowgfx === false) {
+        if ((classn.includes('b1') || classn.includes('b3')) && (sys.lowgfx === false && !classn.includes('nodont'))) {
             button.onmouseleave = (e) => {
                 e.target.style.background = "rgba(var(--accent), 0.4)";
             };
@@ -582,7 +582,7 @@ var tk = {
     a: function (ele1, ele2) {
         ele1.appendChild(ele2);
     },
-    mbw: function (title, wid, hei, full, min, quit, icon) {
+    mbw: function (title, wid, hei, full, min, quit, icon, resize) {
         var windowDiv = document.createElement('div');
         windowDiv.classList.add('window');
         windowDiv.setAttribute('wdname', title);
@@ -745,63 +745,64 @@ var tk = {
         if (sys.mobui !== true) {
             setTimeout(function () { ui.center(windowDiv); }, 10);
         }
-
-        // resize bars are ENTIRELY copilot lmfao
-
-        const resizeBarStyles = {
-            position: 'absolute',
-            background: 'transparent',
-            zIndex: 9999,
-            cursor: 'ew-resize'
-        };
-
-        const resizeBars = [
-            { side: 'top', cursor: 'ns-resize', style: { top: 0, left: 0, right: 0, height: '3px' } },
-            { side: 'bottom', cursor: 'ns-resize', style: { bottom: 0, left: 0, right: 0, height: '3px' } },
-            { side: 'left', cursor: 'ew-resize', style: { top: 0, bottom: 0, left: 0, width: '3px' } },
-            { side: 'right', cursor: 'ew-resize', style: { top: 0, bottom: 0, right: 0, width: '3px' } }
-        ];
-
-        resizeBars.forEach(bar => {
-            const resizeBar = document.createElement('div');
-            Object.assign(resizeBar.style, resizeBarStyles, bar.style);
-            resizeBar.style.cursor = bar.cursor;
-            windowDiv.appendChild(resizeBar);
-
-            resizeBar.addEventListener('mousedown', function (e) {
-                e.preventDefault();
-                const startX = e.clientX;
-                const startY = e.clientY;
-                const startWidth = parseInt(document.defaultView.getComputedStyle(windowDiv).width, 10);
-                const startHeight = parseInt(document.defaultView.getComputedStyle(windowDiv).height, 10);
-
-                function doDrag(e) {
-                    if (bar.side === 'right') {
-                        windowDiv.style.width = (startWidth + e.clientX - startX) + 'px';
-                    } else if (bar.side === 'left') {
-                        const newWidth = startWidth - (e.clientX - startX);
-                        if (newWidth > 0) {
-                            windowDiv.style.width = newWidth + 'px';
-                            windowDiv.style.left = (windowDiv.offsetLeft + e.clientX - startX) + 'px';
+        if (resize !== true) {
+            const resizeBarStyles = {
+                position: 'absolute',
+                background: 'transparent',
+                zIndex: 9999,
+                cursor: 'ew-resize'
+            };
+    
+            const resizeBars = [
+                { side: 'top', cursor: 'ns-resize', style: { top: '-1px', left: 0, right: 0, height: '7px' } },
+                { side: 'bottom', cursor: 'ns-resize', style: { bottom: '-1px', left: 0, right: 0, height: '7px' } },
+                { side: 'left', cursor: 'ew-resize', style: { top: 0, bottom: 0, left: '-1px', width: '7px' } },
+                { side: 'right', cursor: 'ew-resize', style: { top: 0, bottom: 0, right: '-1px', width: '7px' } }
+            ];
+    
+            resizeBars.forEach(bar => {
+                const resizeBar = document.createElement('div');
+                Object.assign(resizeBar.style, resizeBarStyles, bar.style);
+                resizeBar.style.cursor = bar.cursor;
+                windowDiv.appendChild(resizeBar);
+    
+                resizeBar.addEventListener('mousedown', function (e) {
+                    e.preventDefault();
+                    const startX = e.clientX;
+                    const startY = e.clientY;
+                    const startWidth = parseInt(document.defaultView.getComputedStyle(windowDiv).width, 10);
+                    const startHeight = parseInt(document.defaultView.getComputedStyle(windowDiv).height, 10);
+    
+                    function doDrag(e) {
+                        if (bar.side === 'right') {
+                            windowDiv.style.width = (startWidth + e.clientX - startX) + 'px';
+                        } else if (bar.side === 'left') {
+                            const newWidth = startWidth - (e.clientX - startX);
+                            if (newWidth > 0) {
+                                windowDiv.style.width = newWidth + 'px';
+                                windowDiv.style.left = e.clientX + 'px';
+                            }
+                        } else if (bar.side === 'bottom') {
+                            windowDiv.style.height = (startHeight + e.clientY - startY) + 'px';
+                        } else if (bar.side === 'top') {
+                            const newHeight = startHeight - (e.clientY - startY);
+                            if (newHeight > 0) {
+                                windowDiv.style.height = newHeight + 'px';
+                                windowDiv.style.top = e.clientY + 'px';
+                            }
                         }
-                    } else if (bar.side === 'bottom') {
-                        windowDiv.style.height = (startHeight + e.clientY - startY) + 'px';
-                    } else if (bar.side === 'top') {
-                        windowDiv.style.height = (startHeight - e.clientY + startY) + 'px';
-                        windowDiv.style.top = (windowDiv.offsetTop + e.clientY - startY) + 'px';
                     }
-                }
-
-                function stopDrag() {
-                    document.documentElement.removeEventListener('mousemove', doDrag, false);
-                    document.documentElement.removeEventListener('mouseup', stopDrag, false);
-                }
-
-                document.documentElement.addEventListener('mousemove', doDrag, false);
-                document.documentElement.addEventListener('mouseup', stopDrag, false);
-            }, false);
-        });
-
+    
+                    function stopDrag() {
+                        document.documentElement.removeEventListener('mousemove', doDrag, false);
+                        document.documentElement.removeEventListener('mouseup', stopDrag, false);
+                    }
+    
+                    document.documentElement.addEventListener('mousemove', doDrag, false);
+                    document.documentElement.addEventListener('mouseup', stopDrag, false);
+                }, false);
+            });
+        }
         return { win: windowDiv, main: contentDiv, tbn, title: titlebarDiv, closebtn: closeButtonNest, winbtns, name: titleDiv, minbtn: minimizeButtonNest };
     }
 }

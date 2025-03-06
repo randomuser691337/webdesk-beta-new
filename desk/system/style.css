@@ -133,7 +133,7 @@ p {
     right: 0px;
     bottom: 0px;
     top: 0px;
-    z-index: 10;
+    z-index: 4;
     backdrop-filter: blur(var(--bl1));
     -webkit-backdrop-filter: blur(var(--bl1));
     overflow: hidden !important;
@@ -142,7 +142,7 @@ p {
 .setupbox {
     position: fixed;
     transform: translate(-50%, -50%) scale(1.0);
-    box-shadow: rgba(0, 0, 0, 0.4) 0px 0px 150px 45px;
+    box-shadow: rgba(0, 0, 0, 0.6) 0px 0px 170px 30px;
     left: 50%;
     top: 50%;
     padding: 5px;
@@ -151,7 +151,7 @@ p {
     border-radius: var(--rad1);
     max-width: 85% !important;
     max-height: 85% !important;
-    animation: setup 1.4s cubic-bezier(0.25, 1, 0.5, 1) forwards;
+    animation: setup 1s ease;
     width: 550px;
     height: 420px;
     overflow: auto !important;
@@ -185,7 +185,7 @@ p {
 .window {
     position: absolute;
     border-radius: var(--rad1);
-    box-shadow: rgba(0, 0, 0, 0.3) 0px 0px 100px 20px;
+    box-shadow: rgba(0, 0, 0, 0.3) 0px 0px 80px 20px;
     border: 1px solid var(--bc);
     width: auto;
     height: auto;
@@ -245,7 +245,7 @@ p {
     align-items: center;
     justify-content: space-between;
     padding: 9px;
-    padding-left: 8px;
+    padding-left: 7px;
     padding-right: 11px;
     background-color: var(--ui2);
     width: 100%;
@@ -258,6 +258,10 @@ p {
     z-index: 9999 !important;
     cursor: default !important;
     flex-wrap: wrap;
+}
+
+.tb button {
+    font-size: var(--fz3) !important;
 }
 
 .winbnest {
@@ -471,15 +475,13 @@ p {
 
 @keyframes setup {
     0% {
-        transform: translate(-50%, -50%) scale(0.1);
-    }
-
-    5% {
-        transform: translate(-50%, -50%) scale(0.1);
+        transform: translate(-50%, -50%) scale(0.3);
+        opacity: 0%;
     }
 
     100% {
         transform: translate(-50%, -50%) scale(1);
+        opacity: 100%;
     }
 }
 
@@ -494,6 +496,37 @@ p {
     margin-left: 0px !important;
     margin-right: 0px !important;
     margin-bottom: 2px !important;
+}
+
+.nodont {
+    background-color: rgba(240, 30, 30, 0.45) !important;
+}
+
+.nodont:hover {
+    border: 2px solid rgba(240, 30, 30, 0.85) !important;
+    background-color: rgba(240, 30, 30, 0.6) !important;
+    box-shadow: rgba(240, 30, 30, 0.33) 0px 0px 25px 5px !important;
+    animation: shake 0.2s infinite;
+}
+
+@keyframes shake {
+    0%, 100% {
+        transform: translate(0, 0);
+    }
+    25% {
+        transform: translate(-2px, 1px);
+    }
+    50% {
+        transform: translate(2px, -2px);
+    }
+    75% {
+        transform: translate(-2px, 1px);
+    }
+}
+
+.nodont:active {
+    background-color: rgba(240, 30, 30, 0.45, 0.5) !important;
+    animation: shake 0.15s infinite;
 }
 
 .b1 {

@@ -113,23 +113,26 @@ function ughfine(targetElement) {
 }
 
 document.addEventListener('keydown', async function (event) {
-    if (event.altKey && event.key.toLowerCase() === 'q' && focused.closebtn !== undefined) {
+    const isMac = navigator.platform.toUpperCase().indexOf('MAC') >= 0;
+    const altKey = isMac ? event.metaKey : event.altKey;
+
+    if (altKey && event.key.toLowerCase() === 'q' && focused.closebtn !== undefined) {
         event.preventDefault();
         await wm.close(focused.window, focused.tbn);
     }
-    if (event.altKey && event.key.toLowerCase() === 'm' && focused.minbtn !== undefined) {
+    if (altKey && event.key.toLowerCase() === 'm' && focused.minbtn !== undefined) {
         event.preventDefault();
         await wm.minimize(focused.window, focused.tbn);
     }
-    if (event.altKey && event.key.toLowerCase() === 'l') {
+    if (altKey && event.key.toLowerCase() === 'l') {
         event.preventDefault();
         app.lockscreen.init();
     }
-    if (event.altKey && event.key.toLowerCase() === 'r' && focused.window !== undefined) {
+    if (altKey && event.key.toLowerCase() === 'r' && focused.window !== undefined) {
         event.preventDefault();
         ui.center(focused.window);
     }
-    if (event.altKey && event.key.toLowerCase() === '/') {
+    if (altKey && event.key.toLowerCase() === '/') {
         event.preventDefault();
         const keys = tk.c('div', document.body, 'cm');
         tk.p('Keybinds', 'bold', keys);
@@ -531,8 +534,12 @@ var wd = {
             elements[i].innerText = formattedTime;
         }
     },
-    finishsetup: function (name, div1, div2) {
-        ui.sw2(div1, div2); ui.masschange('name', name); fs.write('/user/info/name', name); fs.write('/system/info/setuptime', Date.now()); fs.write('/system/info/setupver', abt.ver);
+    finishsetup: async function (name) {
+        ui.masschange('name', name); 
+        await fs.write('/user/info/name', name); 
+        await fs.write('/system/info/setuptime', Date.now()); 
+        await fs.write('/system/info/setupver', abt.ver); 
+        await wd.reboot();
     },
     reboot: function () {
         ui.show(tk.g('death'), 140);

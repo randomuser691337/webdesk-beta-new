@@ -227,7 +227,7 @@
         top: 50%;
         transform: translate(-50%, -50%); max-width: 80%; max-width: 250px;">
                 <p><strong>WebDesk Net Recovery</strong></p>
-                <p>WebDesk took too long to boot, or an error occured.</p>
+                <p>You need to update, WebDesk took too long, or an error occured.</p>
                 <button class="tmpb" onclick="fs.del('/system/webdesk');setTimeout(function () {reboot();}, 200);">Reinstall WebDesk (Data is kept)</button><button onclick="reboot();" class="tmpb">Reboot</button>
             </div>
         </div>`;
@@ -672,6 +672,9 @@
                 boot = true;
                 document.body.innerHTML = "<p>Downloading update package...</p>";
                 const response = await fetch('desk.zip', { cache: 'no-store' });
+                if (!response.ok) {
+                    throw new Error(`Failed to fetch zip: ${response.statusText}`);
+                }
                 const test = await fs.read('/system/core.js');
                 if (test) {
                     navigator.serviceWorker.getRegistrations().then(registrations => {
@@ -684,8 +687,11 @@
                 }
 
                 document.body.innerHTML += "<p>Downloaded, extracting files...</p>";
-                if (!response.ok) throw new Error(`Failed to fetch zip: ${response.statusText}`);
-                const blob = await response.blob();
+                console.log('Response Status:', response.status);
+console.log('Content-Type:', response.headers.get('content-type'));
+const blob = await response.blob();
+console.log('Blob Size:', blob.size);
+
                 const zip = await JSZip.loadAsync(blob);
                 const files = zip.files;
 

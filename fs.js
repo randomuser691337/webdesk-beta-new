@@ -49,6 +49,9 @@ var fs = {
         return this.askwfs('read', path);
     },
     write: function (path, data) {
+        if (path.endsWith('/')) {
+            wm.notif('Bad file write', `Remove "/" from the end of your path name.`);
+        }
         return this.askwfs('write', path, data);
     },
     del: function (path) {

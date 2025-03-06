@@ -129,7 +129,6 @@ app['music'] = {
             audio.addEventListener("ended", async function () {
                 shuffle();
             });
-            nowplaytxt.innerText = ui.truncater(name2, 20);
             const progressBar = tk.c('input', nowplay);
             progressBar.type = "range";
             progressBar.min = 0;
@@ -139,6 +138,7 @@ app['music'] = {
 
             const go = await songinfo(sigma, path2);
             console.log(go);
+            nowplaytxt.innerText = ui.truncater(go.title, 18, true);
             lyrics(go.title, go.artist).then(lyr => { console.log(lyr); });
 
             const playPauseBtn = tk.cb('b4', 'Pause', function () {
@@ -207,7 +207,7 @@ app['music'] = {
             tk.img('/system/lib/img/icons/warn.svg', 'setupi', div, true);
             tk.p('Warning', 'bold', div);
             tk.p(`You're about to erase all of Music's data. This cannot be undone!`, undefined, div);
-            tk.cb('b1', 'Erase', function () {
+            tk.cb('b1 nodont', 'Erase', function () {
                 ui.dest(dark);
                 fs.delfold(currentpath);
                 win.closebtn.click();

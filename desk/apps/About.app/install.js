@@ -2,7 +2,7 @@ app['about'] = {
     runs: true,
     name: 'About',
     init: async function () {
-        const win = tk.mbw('About', undefined, 'auto', true, undefined, undefined, '/system/lib/img/noround.png');
+        const win = tk.mbw('About', undefined, 'auto', true, undefined, undefined, '/system/lib/img/noround.png', true);
         tk.css('/apps/About.app/Contents/abt.css');
         const main = tk.c('div', win.main, 'abtcont');
         const side = tk.c('div', main, 'abtlogo');

@@ -410,7 +410,7 @@ app['settings'] = {
             tk.img('/system/lib/img/icons/warn.svg', 'setupi', menu);
             tk.p(`Are you sure?`, 'bold', menu);
             tk.p(`You're about to erase this WebDesk. This can't be undone, everything will be deleted forever.`, undefined, menu);
-            tk.cb('b1', 'Erase', () => fs.erase('reboot'), menu);
+            tk.cb('b1 nodont', 'Erase', () => fs.erase('reboot'), menu);
             tk.cb('b1', `Close`, () => ui.dest(dark), menu);
         }
     },

@@ -2,21 +2,20 @@ app['files'] = {
     runs: true,
     name: 'Files',
     init: async function () {
-        const win = tk.mbw(`Files`, '340px', 'auto', true, undefined, undefined, '/apps/Files.app/Contents/icon.svg');
+        const win = tk.mbw(`Files`, '340px', '480px', true, undefined, undefined, '/apps/Files.app/Contents/icon.svg', true);
         const search = tk.c('input', win.main, 'i1');
         win.name.innerHTML = "";
         const breadcrumbs = tk.c('div', win.name);
         search.style.marginBottom = "5px";
         const items = tk.c('div', win.main);
-        if (sys.mobui === true) {
-            items.style.maxHeight = screen.height - 180 + "px";
-        } else {
-            items.style.maxHeight = "370px";
-        }
         items.style.overflow = "auto";
+        items.style.flexGrow = "1";
         items.style.borderRadius = "12px";
         items.style.padding = "6px";
         items.style.paddingTop = "0px";
+        win.main.style.display = "flex";
+        win.main.style.flexDirection = "column";
+        win.main.style.height = "100%";
         win.main.style.padding = "8px";
         let items2;
         search.placeholder = "Search for a file...";
@@ -258,6 +257,7 @@ app['files'] = {
                                         thing = tk.img(item.path, 'embed', menu, false, false);
                                         (await thing).img.style.marginBottom = "4px";
                                     } else if (item.name.endsWith('.zip')) {
+                                    } else if (item.name.endsWith('.mp3')) {
                                     } else {
                                         thing = tk.c('div', menu, 'embed resizeoff');
                                         const genit = gen(8);
