@@ -77,6 +77,22 @@ app['system'] = {
     setup: {
         runs: false,
         init: function (isid, id) {
+            function skip() {
+                const dark = ui.darken();
+                const div = tk.c('div', dark, 'cm');
+                tk.img('/system/lib/img/icons/warn.svg', 'setupi', div);
+                tk.p(`Setup Error`, 'bold', div);
+                tk.p(`WebDesk can't reach its server, so WebDesk can't be set up right now.`, undefined, div);
+                tk.cb('b1', 'Reboot', function () {
+                    wd.reboot();
+                }, div);
+                tk.cb('b1', 'Skip for now', function () {
+                    wd.desktop();
+                    wm.notif('WebDesk is in single-use mode', `Some features may be limited, and you might encounter bugs.`);
+                    ui.dest(dark);
+                    webid.priv = -1;
+                }, div);
+            }
             try {
                 const main = tk.c('div', tk.g('setuparea'), 'setupbox');
                 // create setup menubar
@@ -176,8 +192,8 @@ To use WebDesk, or copy data, hit "Continue".`, undefined, true), first);
                 // user menu
                 const user = tk.c('div', main, 'setb hide');
                 tk.img('/system/lib/img/setup/user.svg', 'setupi', user);
-                tk.p('Create/log into WebDesk account', 'h2', user);
-                tk.p(`Misuse targeting others may result in account limitations. The developer is not liable for your actions. If you have an account, enter your username & password below.`, undefined, user);
+                tk.p('Log into/make WebDesk account', 'h2', user);
+                tk.p(`If you have an account, enter your username & password below. Misuse targeting others may result in account limitations. The developer is not liable for your actions.`, undefined, user);
                 const p = tk.c('div', user, 'list flexthing');
                 const ok2 = tk.c('div', p, 'tnav');
                 const p2 = tk.c('div', p, 'title');
@@ -197,9 +213,9 @@ To use WebDesk, or copy data, hit "Continue".`, undefined, true), first);
                     fs.write('/user/info/font', 'small');
                 }, p2);
                 const input = tk.c('input', user, 'i1');
-                input.placeholder = "Enter a name to use with WebDesk";
+                input.placeholder = "Username";
                 const input2 = tk.c('input', user, 'i1');
-                input2.placeholder = "Enter a strong password";
+                input2.placeholder = "Password";
                 input2.type = "password";
                 sys.socket.on("token", ({ token }) => {
                     fs.write('/user/info/token', token);
@@ -219,23 +235,13 @@ To use WebDesk, or copy data, hit "Continue".`, undefined, true), first);
                     }
 
                     sys.socket.emit("newacc", { user: input.value, pass: input2.value });
+                    if (sys.socket === "down") {
+                        skip();
+                    }
                 }, user);
             } catch (error) {
                 console.log(error);
-                const dark = ui.darken();
-                const div = tk.c('div', dark, 'cm');
-                tk.img('/system/lib/img/icons/warn.svg', 'setupi', div);
-                tk.p(`Setup Error`, 'bold', div);
-                tk.p(`WebDesk's servers are down, so WebDesk can't be set up right now.`, undefined, div);
-                tk.cb('b1', 'Reboot', function () {
-                    wd.reboot();
-                }, div);
-                tk.cb('b1', 'Skip for now', function () {
-                    wd.desktop();
-                    wm.notif('WebDesk is in single-use mode', `Some features may be limited, and you might encounter bugs.`);
-                    ui.dest(dark);
-                    webid.priv = -1;
-                }, div);
+                skip();
             }
         }
     },

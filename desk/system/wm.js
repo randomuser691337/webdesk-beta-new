@@ -164,9 +164,9 @@ var wm = {
             $(div).css({ opacity: 1 })
                 .animate(
                     { opacity: 0 },
-                    { duration: 260, queue: false }
+                    { duration: 220, queue: false }
                 )
-                .slideUp(260, function () {
+                .slideUp(220, function () {
                     ui.dest(div, 0);
                 });
         }

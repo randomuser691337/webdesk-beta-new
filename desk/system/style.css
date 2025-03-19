@@ -812,6 +812,7 @@ p {
     backdrop-filter: blur(var(--bl1));
     pointer-events: auto;
     box-shadow: rgba(0, 0, 0, 0.12) 0px 0px 40px 8px;
+    cursor: default !important;
 }
 
 .notif:hover .b4 {

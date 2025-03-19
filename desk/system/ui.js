@@ -672,7 +672,7 @@ var tk = {
             closeButtonNest.addEventListener('click', async function () {
                 const mousedownevent = new MouseEvent('click');
                 windowDiv.dispatchEvent(mousedownevent);
-                ui.dest(windowDiv, 140);
+                ui.dest(windowDiv, 0);
                 ui.dest(tbn, 140);
                 removeTooltipListener();
                 setTimeout(async function () {

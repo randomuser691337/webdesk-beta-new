@@ -50,7 +50,7 @@ var ptp = {
                     ptp.go(gen(7));
                     return;
                 } else if (err.message.includes(`Error: Could not connect to peer ` + sys.echoid)) {
-                    wm.wal(`<p class="bold">EchoDesk Connection Interrupted</p><p>The other WebDesk might have rebooted, or is encountering network issues.</p><p>Check your Internet on this side too.</p>`);
+                    wm.wal(`<p class="bold">EchoDesk Connection Interrupted</p><p>The other WebDesk might have resys.webdeskbooted, or is encountering network issues.</p><p>Check your Internet on this side too.</p>`);
                 }
 
                 notify = true;

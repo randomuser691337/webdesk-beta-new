@@ -326,26 +326,36 @@ app['files'] = {
                                 }, btnmenu2);
                                 if (sys.dev === true) {
                                     tk.cb('b3', 'Update Package', async function () {
-                                        const blob = await response.blob();
-                                        const zip = await JSZip.loadAsync(blob);
-                                        const files = zip.files;
-                                        for (const filename in files) {
-                                            const file = files[filename];
-                                            if (!file.dir) {
-                                                if (filename.endsWith('.png') || filename.endsWith('.wav') || filename.endsWith('.woff2')) {
-                                                    const binaryContents = await file.async('blob');
-                                                    const reader = new FileReader();
-                                                    reader.onload = async function (e) {
-                                                        const base64Data = e.target.result;
-                                                        await fs.write(`/${filename}`, base64Data);
-                                                    };
-                                                    reader.readAsDataURL(binaryContents);
-                                                } else {
-                                                    const contents = await file.async('string');
-                                                    await fs.write("/" + filename, contents);
+                                        const menu = tk.c('div', document.body, 'cm');
+                                        tk.img('apps/Files.app/Contents/update.svg', 'icon', menu);
+                                        tk.p('Install this WebDesk?', 'bold', menu);
+                                        tk.p(`This will overwrite WebDesk with it's own files, which could add viruses.`, undefined, menu);
+                                        tk.p(`Make sure you have a backup. Official WebDesk updates will overwrite this version.`, undefined, menu);
+                                        tk.cb('b1 nodontdoit', 'Install', async function () {
+                                            await fs.write('/system/custom', 'true');
+                                            const blob = await (await fetch(filecontent)).blob();
+                                            const zip = await JSZip.loadAsync(blob);
+                                            const files = zip.files;
+                                            for (const filename in files) {
+                                                const file = files[filename];
+                                                if (!file.dir) {
+                                                    if (filename.endsWith('.png') || filename.endsWith('.wav') || filename.endsWith('.woff2')) {
+                                                        const binaryContents = await file.async('blob');
+                                                        const reader = new FileReader();
+                                                        reader.onload = async function (e) {
+                                                            const base64Data = e.target.result;
+                                                            await fs.write(`/${filename}`, base64Data);
+                                                        };
+                                                        reader.readAsDataURL(binaryContents);
+                                                    } else {
+                                                        const contents = await file.async('string');
+                                                        await fs.write("/" + filename, contents);
+                                                    }
                                                 }
                                             }
-                                        }
+                                            wd.reboot();
+                                        }, menu);
+                                        tk.cb('b1', 'Cancel', () => ui.dest(menu), menu);
                                     }, btnmenu2);
                                 }
                                 tk.cb('b1', 'Cancel', () => ui.dest(menu2), menu2).style.marginTop = "4px";
