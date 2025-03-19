@@ -79,7 +79,13 @@ function idbop(operation, params, opt, requestId) {
                 });
             break;
         case 'erase':
-            fs2.erase(params);
+            fs2.erase(params)
+                .then(() => {
+                    self.postMessage({ type: 'result', data: true, requestId });
+                })
+                .catch(error => {
+                    self.postMessage({ type: 'error', data: error, requestId });
+                });
             break;
         case 'list':
             fs2.list(params);

@@ -931,9 +931,9 @@ var wd = {
             return false;
         } else if (webid.priv === -1) {
             const div = tk.c('div', document.body, 'cm');
-            tk.p(`WebDesk's servers are offline.`, 'bold', div);
-            tk.p(`You can still use WebDesk normally.`, undefined, div);
-            tk.cb('b1', 'Close', () => ui.dest(div), div);
+            tk.p(`Not connected to WebDesk servers`, 'bold', div);
+            tk.p(`You can still use WebDesk normally. The servers might be down, or you need to reboot.`, undefined, div);
+            tk.cb('b1', 'Close', () => ui.dest(div), div); tk.cb('b1', 'Reboot', () => wd.reboot(), div);
             return false;
         } else {
             return true;

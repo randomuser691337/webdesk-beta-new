@@ -11,6 +11,16 @@ app['webcomm'] = {
         } else {
             win = tk.mbw('WebComm', '320px', 'auto', true);
         }
+        tk.cb('b4', 'Privacy', function () {
+            const menu = tk.c('div', document.body, 'cm');
+            tk.img('/system/lib/img/icons/update.svg', 'setupi', menu);
+            tk.ps('Data & Privacy', 'bold', menu);
+            tk.ps('With WebDesk, it never happened.', undefined, menu);
+            tk.ps(`WebDesk's server keeps no record of what you do.`, undefined, menu);
+            tk.ps('All data from WebDrop, WebCall, and WebChat is erased after use.', undefined, menu);
+            tk.ps('Contacts are auto-created, with no server involvement.', undefined, menu);
+            tk.cb('b1', 'Got it', () => ui.dest(menu), menu);
+        }, win.title);
         const inp = tk.c('input', win.main, 'i1');
         inp.placeholder = "Enter a username";
         if (isid === true) {
@@ -59,8 +69,9 @@ app['webcomm'] = {
                 wm.snack(`Type a username that isn't yours.`);
                 app.ach.unlock('So lonely...', 'So lonely, you tried calling yourself.');
             } else {
-                sys.socket.emit("call", { token: webid.token, username: inp.value, deskid: sys.deskid });
-                app.webcomm.webcall.init(inp.value);
+                sys.callid = gens(32);
+                sys.socket.emit("call", { token: webid.token, username: inp.value, deskid: sys.deskid, id: `${sys.callid}` });
+                // app.webcomm.webcall.init(inp.value);
             }
         }, win.main);
         const chatbtn = tk.cb('b1', 'Message', async function () {
@@ -122,65 +133,9 @@ app['webcomm'] = {
             clearInterval(yeah);
         });
     },
-    webchat: {
-        runs: false,
-        init: async function (name, message) {
-            if (random[name]) {
-                wd.win(random[name].win);
-                const msg = tk.c('div', random[name].chatting, 'flist othersent');
-                msg.style.marginBottom = "3px";
-                msg.innerText = ui.filter(`${name}: ` + message);
-                random[name].chatting.scrollTop = random[name].chatting.scrollHeight;
-            } else {
-                if (wd.checkperms() === false) {
-                    wm.notif(name, `sent you a message, but your account is limited. View anyways?`, async function () {
-
-                    }, 'Show message');
-                    return;
-                };
-                wm.notif(name, message, async function () {
-                    random[name] = tk.mbw('WebChat', '300px', 'auto', true);
-                    random[name].messaging = tk.c('div', random[name].main);
-                    random[name].chatting = tk.c('div', random[name].messaging, 'embed nest');
-                    random[name].chatting.style.overflow = "auto";
-                    random[name].chatting.style.height = "320px";
-                    tk.ps(`Talking with ${name}`, 'smtxt', random[name].chatting);
-                    if (sys.filter === true) {
-                        tk.ps(`Some filters can detect things YOU send, as they monitor your typing.`, 'smtxt', random[name].chatting);
-                    }
-
-                    random[name].input = tk.c('input', random[name].messaging, 'i1');
-                    random[name].input.placeholder = "Message " + name;
-
-                    function send() {
-                        const msg = random[name].input.value;
-                        if (msg) {
-                            sys.socket.emit("message", { token: webid.token, username: name, contents: msg });
-                            const div = tk.c('div', random[name].chatting, 'msg mesent');
-                            div.innerText = ui.filter(`${sys.name}: ` + msg);
-                            div.style.marginBottom = "3px";
-                            random[name].input.value = '';
-                            random[name].chatting.scrollTop = random[name].chatting.scrollHeight;
-                        }
-                    }
-
-                    tk.cb('b1', 'Send', () => send(), random[name].messaging);
-
-                    ui.key(random[name].input, "Enter", () => send());
-
-                    random[name].closebtn.addEventListener('mousedown', function () {
-                        random[name] = undefined;
-                    });
-
-                    app.webcomm.add(name);
-                    app.webcomm.webchat.init(name, message);
-                }, 'Open');
-            }
-        }
-    },
     webcall: {
         runs: false,
-        init: async function (name, deskid, answering) {
+        init: async function (name, deskid, answering, id) {
             const win = tk.mbw('WebCall', '260px', 'auto', true, undefined, undefined);
             const callStatus = tk.p(`Connecting...`, undefined, win.main);
             let oncall = false;
@@ -261,6 +216,62 @@ app['webcomm'] = {
                 crashout();
                 selfkill.removeEventListener();
             });
+        }
+    },
+    webchat: {
+        runs: false,
+        init: async function (name, message) {
+            if (random[name]) {
+                wd.win(random[name].win);
+                const msg = tk.c('div', random[name].chatting, 'flist othersent');
+                msg.style.marginBottom = "3px";
+                msg.innerText = ui.filter(`${name}: ` + message);
+                random[name].chatting.scrollTop = random[name].chatting.scrollHeight;
+            } else {
+                if (wd.checkperms() === false) {
+                    wm.notif(name, `sent you a message, but your account is limited. View anyways?`, async function () {
+
+                    }, 'Show message');
+                    return;
+                };
+                wm.notif(name, message, async function () {
+                    random[name] = tk.mbw('WebChat', '300px', 'auto', true);
+                    random[name].messaging = tk.c('div', random[name].main);
+                    random[name].chatting = tk.c('div', random[name].messaging, 'embed nest');
+                    random[name].chatting.style.overflow = "auto";
+                    random[name].chatting.style.height = "320px";
+                    tk.ps(`Talking with ${name}`, 'smtxt', random[name].chatting);
+                    if (sys.filter === true) {
+                        tk.ps(`Some filters can detect things YOU send, as they monitor your typing.`, 'smtxt', random[name].chatting);
+                    }
+
+                    random[name].input = tk.c('input', random[name].messaging, 'i1');
+                    random[name].input.placeholder = "Message " + name;
+
+                    function send() {
+                        const msg = random[name].input.value;
+                        if (msg) {
+                            sys.socket.emit("message", { token: webid.token, username: name, contents: msg });
+                            const div = tk.c('div', random[name].chatting, 'msg mesent');
+                            div.innerText = ui.filter(`${sys.name}: ` + msg);
+                            div.style.marginBottom = "3px";
+                            random[name].input.value = '';
+                            random[name].chatting.scrollTop = random[name].chatting.scrollHeight;
+                        }
+                    }
+
+                    tk.cb('b1', 'Send', () => send(), random[name].messaging);
+
+                    ui.key(random[name].input, "Enter", () => send());
+
+                    random[name].closebtn.addEventListener('mousedown', function () {
+                        random[name] = undefined;
+                    });
+
+                    app.webcomm.add(name);
+                    app.webcomm.webchat.init(name, message);
+                }, 'Open');
+            }
         }
     },
     add: async function (name) {

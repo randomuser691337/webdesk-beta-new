@@ -7,9 +7,9 @@
     --dimfont: #444;
     --bl1: 10px;
     --bl2: 6px;
-    --rad1: 16px;
-    --rad2: 13px;
-    --rad3: 10px;
+    --rad1: 15px;
+    --rad2: 12px;
+    --rad3: 9px;
     --fz1: 15px;
     --fz2: 14px;
     --fz3: 13px;
@@ -319,7 +319,7 @@ p {
     position: relative;
     overflow: hidden;
     cursor: pointer;
-    padding: 0px;
+    padding: 0px !important;
     justify-content: center;
     align-items: center;
 }
@@ -777,7 +777,7 @@ p {
     bottom: 0px;
     width: 250px;
     padding: 7px;
-    overflow-x: visible;
+    overflow-x: hidden;
     overflow-y: auto !important;
     padding-left: 50px;
     z-index: 1000;
@@ -789,16 +789,12 @@ p {
 @keyframes notif {
     0% {
         opacity: 0%;
-        transform: scale(0.3);
-    }
-
-    62% {
-        transform: scale(1.05);
+        transform: translateX(100%);
     }
 
     100% {
         opacity: 100%;
-        transform: scale(1.0);
+        transform: translateX(0);
     }
 }
 
@@ -810,7 +806,7 @@ p {
     padding: 9px;
     border-radius: var(--rad1);
     margin-bottom: 5px;
-    animation: notif 0.45s ease-out;
+    animation: notif 0.32s ease;
     text-align: left;
     -webkit-backdrop-filter: blur(var(--bl1));
     backdrop-filter: blur(var(--bl1));
@@ -1071,7 +1067,7 @@ p {
     transform: translate(-50%, -50%);
     box-shadow: rgba(0, 0, 0, 0.3) 0px 0px 75px 15px;
     z-index: 9998;
-    width: 280px;
+    width: 270px;
     max-width: 85%;
     max-height: 85%;
     overflow: auto !important;

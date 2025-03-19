@@ -1,5 +1,6 @@
 var globcall;
 // This is a clusterfuck of bullshit that needs to be rewritten eventually
+var authcallids = [];
 var ptp = {
     go: async function (id) {
         let retryCount = 0;
@@ -81,7 +82,7 @@ var ptp = {
                     try {
                         const parsedData = JSON.parse(data);
                         if (parsedData.type === 'request') {
-                            const response = { response: sys.name, deskid: sys.deskid };
+                            const response = { response: sys.name, deskid: sys.deskid, id: sys.callid };
                             dataConnection.send(JSON.stringify(response));
                             dataConnection.close();
                         }
@@ -108,8 +109,9 @@ var ptp = {
                 showYourself.on('data', (data) => {
                     try {
                         const parsedData = JSON.parse(data);
+                        console.log(parsedData);
                         if (parsedData.response) {
-                            wm.notif(`Call from ${parsedData.response}`, `Their DeskID is ${parsedData.deskid}`, function () {
+                            if (authcallids.includes(parsedData.id)) {
                                 navigator.mediaDevices.getUserMedia({ audio: true })
                                     .then((stream) => {
                                         call.answer(stream);
@@ -121,7 +123,9 @@ var ptp = {
                                         wm.notif('WebCall Error', 'Microphone access is denied, calling/answering might fail.');
                                         console.log(`<!> ${err}`);
                                     });
-                            }, 'Answer');
+                            }
+                        } else {
+                            console.log(`<!> Call IDs don't match, giving up.`);
                         }
                     } catch (err) {
                         console.error('Failed to parse data:', err);

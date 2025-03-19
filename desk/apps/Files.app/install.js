@@ -317,7 +317,7 @@ app['files'] = {
                                     ui.dest(menu2);
                                 }, btnmenu2);
                                 tk.cb('b3', 'Wallpaper', function () {
-                                    wd.setwall(filecontent, true);
+                                    wd.setwall(filecontent, undefined, true);
                                     ui.dest(menu2);
                                 }, btnmenu2);
                                 tk.cb('b3', 'console.log', function () {

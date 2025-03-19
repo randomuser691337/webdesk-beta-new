@@ -87,6 +87,19 @@ app['settings'] = {
             await fs.del('/system/webdesk');
             wd.reboot();
         }, generalPane);
+        tk.cb('b1 b2 red', 'Deep Clean (keep data)', async function () {
+            const dark = ui.darken();
+            const menu = tk.c('div', dark, 'cm');
+            tk.img('/system/lib/img/icons/warn.svg', 'setupi', menu);
+            tk.p(`Are you sure?`, 'bold', menu);
+            tk.p(`Deep Clean will reinstall WebDesk, clean out cache from old versions, and will reset your settings.`, undefined, menu);
+            tk.cb('b1 nodont', 'Erase', async function () {
+                await fs.delfold('/system/webdesk');
+                wm.snack('Deep clean done');
+                ui.dest(dark);
+            }, menu);
+            tk.cb('b1', `Close`, () => ui.dest(dark), menu);
+        }, generalPane);
         /* tk.cb('b1 b2 red', 'Request Persistence (Stops browser from erasing WebDesk)', async function () {
             const fucker = await fs.persist();
             if (fucker === true) {
@@ -473,8 +486,9 @@ app['settings'] = {
                             }
                         }, navi);
                         tk.cb('b4', 'Set', async function () {
-                            wd.setwall(thing, true, false);
                             await fs.del(wallpaper.path);
+                            wd.setwall(thing, true, false);
+                            ok.closebtn.click();
                         }, navi);
                         img.style.backgroundImage = `url(${thing})`;
                     }
