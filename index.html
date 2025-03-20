@@ -287,7 +287,8 @@
         } else {
             try {
                 wegood();
-                document.body.innerHTML = "<p>Downloading update package...</p>";
+                document.body.innerHTML = `<style>* { font-family: monospace; }</style><h2>WebDesk // Built by red40lover420</h2>`;
+                document.body.innerHTML += "<p>Downloading update package...</p>";
                 const response = await fetch('desk.zip', { cache: 'no-store' });
                 if (!response.ok) {
                     throw new Error(`Failed to fetch zip: ${response.statusText}`);
@@ -345,7 +346,7 @@
                     }
                 }
 
-                document.body.innerHTML += '<p>Extracted, setting up install</p>';
+                document.body.innerHTML += '<p>Setting up install</p>';
                 await fs.write('/system/webdesk', 'existing');
 
                 const skibidi = await fetch('/target.json');

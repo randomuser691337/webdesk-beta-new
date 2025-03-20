@@ -190,14 +190,14 @@ async function bootstage2(uid2, eepysleepy, migcheck, sd, installed) {
             }
             const token = await fs.read('/user/info/token');
             if (sys.socket === undefined) {
-                wm.notif('WebDesk servers are down', `You can still use WebDesk normally, but you can't use online services.`);
+                wm.notif(`Can't connect to server`, `You can still use WebDesk normally, but you can't use online services.`);
                 webid.priv = -1;
             } else {
                 if (!token) {
                     const dark = ui.darken();
                     const menu = tk.c('div', dark, 'cm');
                     tk.img('/system/lib/img/icons/update.svg', 'setupi', menu);
-                    tk.p('Create/log into WebDesk account', 'bold', menu);
+                    tk.p('Log into/make WebDesk account', 'bold', menu);
                     tk.p(`Misuse targeting others may result in account limitations. The developer is not liable for your actions.`, undefined, menu);
                     const useri = tk.c('input', menu, 'i1');
                     const passi = tk.c('input', menu, 'i1');
@@ -414,4 +414,7 @@ async function bootstage2(uid2, eepysleepy, migcheck, sd, installed) {
     }
     wegood();
     await app.appmark.checkforup();
+    if (navigator.onLine === false) {
+        wm.notif("Offline", "You are offline, some features may not work.");
+    }
 }
