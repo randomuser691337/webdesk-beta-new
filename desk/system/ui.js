@@ -673,7 +673,7 @@ var tk = {
                 const mousedownevent = new MouseEvent('click');
                 windowDiv.dispatchEvent(mousedownevent);
                 ui.dest(windowDiv, 0);
-                ui.dest(tbn, 140);
+                ui.dest(tbn, 0);
                 removeTooltipListener();
                 setTimeout(async function () {
                     const yeah = ughfine(windowDiv);

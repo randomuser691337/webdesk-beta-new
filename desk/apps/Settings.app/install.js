@@ -367,7 +367,7 @@ app['settings'] = {
             wd.smft();
             fs.write('/user/info/font', 'small');
         }, p2);
-        
+
         const p3 = tk.c('div', accPane, 'list');
         const ok3 = tk.c('span', p3);
         ok3.innerHTML = `SFW mode (Filters text before it's seen to help stop things like <a href="https://www.gaggle.net/" target="_blank">this</a>) `;

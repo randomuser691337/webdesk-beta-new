@@ -1,3 +1,6 @@
+// if you want to make a contribution,
+// make the offline mode work please
+
 const CACHE_NAME = 'v2';
 const FILES_TO_CACHE = [
     'index.html',
@@ -82,7 +85,7 @@ self.addEventListener('activate', (event) => {
 
 self.addEventListener('fetch', (event) => {
     const url = new URL(event.request.url);
-    const cachedFiles = ['index.html', 'fs.js', 'wfs.js', 'jszip.js', 'target.json'];
+    const cachedFiles = ['index.html', 'fs.js', 'wfs.js', 'jszip.js', 'target.json', 'https://webdesk-again.vercel.app/', 'https://webdesk.vercel.app/'];
 
     if (cachedFiles.includes(url.pathname.split('/').pop())) {
         console.log('<i> Fetching from cache:', event.request.url);
@@ -102,8 +105,5 @@ self.addEventListener('fetch', (event) => {
                 });
             })
         );
-    } else {
-        console.log('<i> Bypassing service worker for:', event.request.url);
-        event.respondWith(fetch(event.request));
     }
 });
