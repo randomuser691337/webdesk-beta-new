@@ -289,7 +289,7 @@ var wd = {
                 el.sm = undefined;
             }
         }
-        function controlcenter() {
+        async function controlcenter() {
             if (el.cc == undefined) {
                 resetall();
                 el.cc = all;
@@ -359,19 +359,19 @@ var wd = {
                 tk.img('/system/lib/img/icons/fs.svg', 'contimg', screenicon, false);
                 const notificon = tk.cb('conticon', '', async function () {
                     if (sys.nvol === 0) {
-                        notifimg.src = "/system/lib/img/icons/notify.svg";
+                        (await notifimg).edit.load("/system/lib/img/icons/notify.svg");
                         sys.nvol = 1.0;
                         ui.play(sys.notifsrc);
-                        await fs.del('/user/info/silent');
+                        await set.del('silent');
                     } else {
-                        notifimg.src = "/system/lib/img/icons/silent.svg";
+                        (await notifimg).edit.load("/system/lib/img/icons/silent.svg");
                         sys.nvol = 0.0;
-                        await fs.write('/user/info/silent', 'true');
+                        await set.set('silent', 'true');
                     }
                     el.contb.classList.toggle('silentbtn');
                 }, ok);
                 const notifimg = tk.img('/system/lib/img/icons/notify.svg', 'contimg', notificon, false);
-                if (sys.nvol === 0) notifimg.src = "/system/lib/img/icons/silent.svg";
+                if (sys.nvol === 0) (await notifimg).edit.load("/system/lib/img/icons/silent.svg");;
                 ui.tooltip(notificon, 'Silent toggle');
                 ui.show(el.cc, 0);
             } else {
@@ -536,9 +536,9 @@ var wd = {
     },
     finishsetup: async function (name) {
         ui.masschange('name', name); 
-        await fs.write('/user/info/name', name); 
-        await fs.write('/system/info/setuptime', Date.now()); 
-        await fs.write('/system/info/setupver', abt.ver); 
+        await set.set('name', name); 
+        await set.set('setuptime', Date.now()); 
+        await set.set('setupver', abt.ver); 
         await wd.reboot();
     },
     reboot: function () {
@@ -552,7 +552,7 @@ var wd = {
         }, 140);
     },
     dark: async function (fucker) {
-        const access = await fs.read('/user/info/blur');
+        const access = await set.read('blur');
         if (access === "false") {
             ui.cv('ui1', 'var(--ui2)');
         } else {
@@ -566,12 +566,12 @@ var wd = {
         ui.cv('darkbg', '0.15');
         ui.cv('inv', '1.0');
         if (fucker !== "nosave") {
-            fs.write('/user/info/lightdark', 'dark');
+            set.set('lightdark', 'dark');
         }
         ui.light = false;
     },
     light: async function (fucker) {
-        const access = await fs.read('/user/info/blur');
+        const access = await set.read('blur');
         if (access === "false") {
             ui.cv('ui1', 'var(--ui2)');
         } else {
@@ -585,17 +585,17 @@ var wd = {
         ui.cv('inv', '0');
         ui.cv('darkbg', '0');
         if (fucker !== "nosave") {
-            fs.write('/user/info/lightdark', 'light');
+            set.set('lightdark', 'light');
         }
         ui.light = true;
     },
     notifsrc: async function (src, play) {
         sys.notifsrc = src;
-        await fs.write('/user/info/notifsrc', src);
+        await set.set('notifsrc', src);
         if (play === true) {
             ui.play(src);
             wm.snack('Saved', 1500);
-            await fs.del('/user/info/cnotifurl');
+            await set.del('cnotifurl');
         }
     },
     timec: function (id) {
@@ -1021,13 +1021,13 @@ var wd = {
                         resolve(colorString);
                     });
                 });
-                await fs.write('/user/info/color', ui.rgbtohex(ok));
+                await set.set('color', ui.rgbtohex(ok));
             }
         }
         return ok;
     },
     blurcheck: async function (perf) {
-        const access = await fs.read('/user/info/blur');
+        const access = await set.read('blur');
         if (perf === "true") {
             sys.lowgfx = true;
             ui.cv('bl1', '3px');

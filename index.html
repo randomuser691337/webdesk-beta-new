@@ -151,8 +151,9 @@
         lockscreen: true,
         contained: false,
         socket: undefined,
-        webdeskbooted: false
-    }
+        webdeskbooted: false,
+        config: {},
+    };
 
     var webid = {
         priv: 1,
@@ -191,7 +192,7 @@
     <div id="setuparea">
     </div>
     <div id="notif"></div>
-    <div id="loading" class="loading" style="z-index: 9998;">
+    <div id="loading" class="loading" style="z-index: 9997;">
         <div style="position: fixed;
         left: 50%;
         top: 50%;
@@ -244,7 +245,7 @@
         </div>`;
     }
 
-    if ('serviceWorker' in navigator) {
+    /* if ('serviceWorker' in navigator) {
         navigator.serviceWorker.register('/offline.js')
             .then((registration) => {
                 console.log('Service Worker registered with scope:', registration.scope);
@@ -252,7 +253,7 @@
             .catch((error) => {
                 console.error('Service Worker registration failed:', error);
             });
-    }
+    } */
 
     async function initapps() {
         const contents = await fs.ls('/apps/');
@@ -270,16 +271,19 @@
 
     async function boot() {
         const uid2 = params.get('id');
+        const lebronjames = await fs.read("/user/info/config.json");
+        if (lebronjames) {
+            sys.config = JSON.parse(lebronjames);
+        }
         const eepysleepy = await fs.read('/system/eepysleepy');
         const migcheck = await fs.read('/system/migval');
-        var sd = await fs.read('/user/info/name');
         const installed = await fs.read('/system/webdesk');
         if (installed) {
             console.log(`<i> Boot stage 1: Initialize bootloader`);
             const go = await fs.read('/system/boot.js');
             if (go) {
                 await initscript('/system/boot.js');
-                await bootstage2(uid2, eepysleepy, migcheck, sd, installed);
+                await bootstage2(uid2, eepysleepy, migcheck, undefined, installed, lebronjames);
             } else {
                 fs.del('/system/webdesk');
                 window.location.reload();
@@ -293,7 +297,8 @@
                 if (!response.ok) {
                     throw new Error(`Failed to fetch zip: ${response.statusText}`);
                 }
-                const test = await fs.read('/system/core.js');
+
+                /* const test = await fs.read('/system/core.js');
                 if (test) {
                     fs.del('/system/custom');
                     navigator.serviceWorker.getRegistrations().then(registrations => {
@@ -303,7 +308,7 @@
                             }
                         }
                     });
-                }
+                } */
 
                 document.body.innerHTML += "<p>Downloaded, extracting files...</p>";
                 console.log('Response Status:', response.status);

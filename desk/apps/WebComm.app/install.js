@@ -11,6 +11,7 @@ app['webcomm'] = {
         } else {
             win = tk.mbw('WebComm', '320px', 'auto', true);
         }
+        win.name.innerHTML = ""
         tk.cb('b4', 'Privacy', function () {
             const menu = tk.c('div', document.body, 'cm');
             tk.img('/system/lib/img/icons/update.svg', 'setupi', menu);
@@ -20,7 +21,7 @@ app['webcomm'] = {
             tk.ps('All data from WebDrop, WebCall, and WebChat is erased after use.', undefined, menu);
             tk.ps('Contacts are auto-created, with no server involvement.', undefined, menu);
             tk.cb('b1', 'Got it', () => ui.dest(menu), menu);
-        }, win.title);
+        }, win.name);
         const inp = tk.c('input', win.main, 'i1');
         inp.placeholder = "Enter a username";
         if (isid === true) {

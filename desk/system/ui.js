@@ -10,7 +10,7 @@ var ui = {
     crtheme: async function (hex, opt) {
         if (!opt === true) {
             ui.cv('accent', ui.hextorgb(hex));
-            await fs.write('/user/info/color', hex);
+            await set.set('color', hex);
             if (sys.autodarkacc === true) {
                 const silly = ui.hexdark(ui.hextorgb(hex));
                 if (silly === true) {

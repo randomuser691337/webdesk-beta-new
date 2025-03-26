@@ -1,4 +1,62 @@
-async function bootstage2(uid2, eepysleepy, migcheck, sd, installed) {
+let fire = false;
+async function startsockets() {
+    const devsocket = await fs.read('/system/info/devsocket');
+    return new Promise((resolve) => {
+        try {
+            if (devsocket === "true") {
+                sys.socket = io('wss://webdeskbeta.meower.xyz/');
+                wm.notif('Using beta socket server', 'This is for testing purposes only.');
+            } else {
+                sys.socket = io("wss://webdesk.meower.xyz/");
+            }
+
+            sys.socket.on('connect_error', (error) => {
+                console.log('Connection error:', error);
+                sys.socket = undefined;
+                resolve(false);
+                webid.priv = -1;
+            });
+
+            sys.socket.on("servmsg", (data) => {
+                wm.snack(data);
+            });
+
+            sys.socket.on("error", (data) => {
+                wm.snack(data);
+            });
+
+            sys.socket.on("force_update", (data) => {
+                window.location.reload();
+            });
+
+            sys.socket.on("connect", async () => {
+                if (fire === false) {
+                    fire = true;
+                } else {
+                    const token = await set.read('/token');
+                    sys.socket.emit("login", token);
+                }
+            });
+
+            sys.socket.on("webcall", async (call) => {
+                wm.notif(call.username, 'is calling you', function () {
+                    sys.callid = `${call.id}`;
+                    app.webcomm.webcall.init(call.username, call.deskid, true);
+                }, 'Pick up');
+            });
+
+            sys.socket.on("umsg", async (msg) => {
+                app.webcomm.webchat.init(msg.username, msg.contents);
+            });
+        } catch (error) {
+            console.log(error);
+            sys.socket = undefined;
+            resolve(false);
+        }
+    });
+}
+
+async function bootstage2(uid2, eepysleepy, migcheck, sd, installed, lebronjames) {
     try {
         await initscript('/system/apps.js');
         await initcss('/system/lib/layout1.css');
@@ -16,39 +74,15 @@ async function bootstage2(uid2, eepysleepy, migcheck, sd, installed) {
         await initscript('/system/services.js');
         await initscript('/system/ui.js');
         await initscript('/system/lib/crop/cropper.js');
+        sd = await set.read('name');
         abt.ver = await fs.read('/system/info/currentver');
         abt.lastmod = await fs.read('/system/info/currentveredit');
         await initcss('/system/style.css');
         await wd.fontsw('/system/lib/fonts/Poppins-Regular.woff2', '/system/lib/fonts/Poppins-Medium.woff2', '/system/lib/fonts/Poppins-Bold.woff2', '/system/lib/fonts/mono.woff2');
-        const devsocket = await fs.read('/system/info/devsocket');
-        async function startsockets() {
-            return new Promise((resolve) => {
-                try {
-                    if (devsocket === "true") {
-                        sys.socket = io('wss://webdeskbeta.meower.xyz/');
-                        wm.notif('Using beta socket server', 'This is for testing purposes only.');
-                    } else {
-                        sys.socket = io("wss://webdesk.meower.xyz/");
-                    }
-                    sys.socket.on('connect', () => {
-                        console.log('Socket connected');
-                        resolve(true);
-                    });
-                    sys.socket.on('connect_error', (error) => {
-                        console.log('Connection error:', error);
-                        sys.socket = undefined;
-                        resolve(false);
-                    });
-                } catch (error) {
-                    console.log(error);
-                    sys.socket = undefined;
-                    resolve(false);
-                }
-            });
-        }
 
         const socketworks = await startsockets();
         if (!socketworks) {
+            console.log(socketworks);
             console.log('<!> Socket connection failed, proceeding without socket');
         }
 
@@ -83,19 +117,19 @@ async function bootstage2(uid2, eepysleepy, migcheck, sd, installed) {
         const [
             darkpref, lightdark, color, font, dev, mob, city, clocksec, apprepo, filtering, notifsound, silent, perf
         ] = await Promise.all([
-            fs.read('/user/info/lightdarkpref'),
-            fs.read('/user/info/lightdark'),
-            fs.read('/user/info/color'),
-            fs.read('/user/info/font'),
+            set.read('lightdarkpref'),
+            set.read('lightdark'),
+            set.read('color'),
+            set.read('font'),
             fs.read('/system/info/devmode'),
-            fs.read('/user/info/mobile'),
+            set.read('mobile'),
             fs.read('/user/info/location.json'),
-            fs.read('/user/info/clocksec'),
+            set.read('clocksec'),
             fs.read('/system/appurl'),
-            fs.read('/user/info/filter'),
-            fs.read('/user/info/notifsrc'),
-            fs.read('/user/info/silent'),
-            fs.read('/system/info/lowgfx'),
+            set.read('filter'),
+            set.read('notifsrc'),
+            set.read('silent'),
+            set.read('lowgfx'),
         ]);
 
         await wd.blurcheck(perf);
@@ -126,6 +160,42 @@ async function bootstage2(uid2, eepysleepy, migcheck, sd, installed) {
         }
 
         await ptp.go(deskid);
+
+        if (!lebronjames) {
+            const [
+                darkpref, lightdark, color, font, mob, clocksec, filtering, notifsound, silent
+            ] = await Promise.all([
+                fs.read('/user/info/lightdarkpref'),
+                fs.read('/user/info/lightdark'),
+                fs.read('/user/info/color'),
+                fs.read('/user/info/font'),
+                fs.read('/user/info/mobile'),
+                fs.read('/user/info/clocksec'),
+                fs.read('/user/info/filter'),
+                fs.read('/user/info/notifsrc'),
+                fs.read('/user/info/silent'),
+            ]);
+            await set.set('lightdarkpref', darkpref);
+            await set.set('lightdark', lightdark);
+            await set.set('color', color);
+            await set.set('font', font);
+            await set.set('devmode', dev);
+            await set.set('mobile', mob);
+            await set.set('clocksec', clocksec);
+            await set.set('filter', filtering);
+            await set.set('notifsrc', notifsound);
+            await set.set('silent', silent);
+            await fs.del('/user/info/lightdarkpref');
+            await fs.del('/user/info/lightdark');
+            await fs.del('/user/info/color');
+            await fs.del('/user/info/font');
+            await fs.del('/user/info/mobile');
+            await fs.del('/user/info/clocksec');
+            await fs.del('/user/info/filter');
+            await fs.del('/user/info/notifsrc');
+            await fs.del('/user/info/silent');
+            await wd.reboot();
+        }
 
         if (eepysleepy === "true") {
             ui.hide(tk.g('contain'), 0);
@@ -319,60 +389,17 @@ async function bootstage2(uid2, eepysleepy, migcheck, sd, installed) {
     wd.perfmon();
     ui.hide(tk.g('death'), 140);
 
-    let fire = false;
-
     try {
         if (sys.socket !== undefined) {
-            sys.socket.on("servmsg", (data) => {
-                wm.snack(data);
-            });
-
-            sys.socket.on("error", (data) => {
-                wm.snack(data);
-            });
-
-            sys.socket.on("force_update", (data) => {
-                window.location.reload();
-            });
-
-            sys.socket.on("connect_error", () => {
-                webid.priv = -1;
-                resolve();
-            });
-
-            sys.socket.on("connect", async () => {
-                if (fire === false) {
-                    fire = true;
-                } else {
-                    const token = await fs.read('/user/info/token');
-                    sys.socket.emit("login", token);
-                }
-            });
-
-            sys.socket.on("webcall", async (call) => {
-                wm.notif(call.username, 'is calling you', function () {
-                    sys.callid = `${call.id}`;
-                    app.webcomm.webcall.init(call.username, call.deskid, true);
-                }, 'Pick up');
-            });
-
-            sys.socket.on("umsg", async (msg) => {
-                app.webcomm.webchat.init(msg.username, msg.contents);
-            });
-            setInterval(function () {
+            setInterval(async function () {
                 if (sys.socket === undefined) {
-                    ui.play('/system/lib/other/error.wav');
-                    webid.priv = -1;
-                    sys.socket = "down";
-                    const dark = ui.darken();
-                    const menu = tk.c('div', dark, 'cm');
-                    tk.img('/system/lib/img/icons/update.svg', 'setupi', menu);
-                    tk.p('WebDesk disconnected from server', 'bold', menu);
-                    tk.p(`You can still use WebDesk normally, but you can't use online services. A reboot might fix this, or the servers are down.`, undefined, menu);
-                    tk.cb('b1', 'Reboot', () => reboot(), menu);
-                    tk.cb('b1', 'Close', () => ui.dest(dark), menu);
+                    console.log('<!> Trying to reconnect');
+                    const sock = await startsockets();
+                    if (sock === true) {
+                        console.log('<i> Reconnected successfully');
+                    }
                 }
-            }, 2000);
+            }, 3000);
         }
     } catch (error) {
         console.log(error);

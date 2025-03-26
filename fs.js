@@ -82,8 +82,8 @@ var fs = {
         const div = tk.c('div', document.body, 'cm');
         tk.p(`Copying ${oldplace} to ${newplace}`, undefined, div);
         const status = tk.p(`Starting...`, undefined, div);
-        for (const path of ok.items) { 
-            if (path.type === "folder") { 
+        for (const path of ok.items) {
+            if (path.type === "folder") {
                 await fs.copyfold(path.path, newplace + path.name + "/");
             }
             const fileContent = await fs.read(path.path);
@@ -101,4 +101,34 @@ var fs = {
     usedspace: function () {
         return this.askwfs('space');
     },
+};
+
+var set = {
+    set: async function (key, value) {
+        try {
+            sys.config[key] = value;
+            await fs.write("/user/info/config.json", JSON.stringify(sys.config));
+            return true;
+        } catch (error) {
+            console.log(error);
+            return false;
+        }
+    },
+    del: async function (key) {
+        try {
+            delete sys.config[key];
+            await fs.write("/user/info/config.json", JSON.stringify(sys.config));
+            return true;
+        } catch (error) {
+            console.log(error);
+            return false;
+        }
+    },
+    read: async function (key) {
+        try {
+            return key in sys.config ? sys.config[key] : undefined;
+        } catch (error) {
+            return undefined;
+        }
+    }
 };

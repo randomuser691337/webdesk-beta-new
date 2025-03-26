@@ -17,17 +17,18 @@ app['settings'] = {
         // Main pane
         if (sys.guest !== true) {
             const userl = tk.c('div', mainPane, 'list flexthing');
+            userl.style.padding = "5px";
             const tnav = tk.c('div', userl, 'tnav med');
             const title = tk.c('div', userl, 'title');
             tnav.style.marginLeft = "4px";
             tnav.innerText = ui.filter(sys.name);
             tk.cb('b3', 'Manage user/info', () => ui.sw2(mainPane, userPane), title);
-            tk.cb('b1 b2', 'General', () => ui.sw2(mainPane, generalPane), mainPane);
+            tk.cb('b1 b2 lt', 'General', () => ui.sw2(mainPane, generalPane), mainPane);
         } else {
             tk.p(`Some options are disabled, because you're in Guest mode.`, undefined, mainPane);
         }
-        tk.cb('b1 b2', 'Accessibility', () => ui.sw2(mainPane, accPane), mainPane);
-        tk.cb('b1 b2', 'Manage apps', async function () {
+        tk.cb('b1 b2 lt', 'Accessibility', () => ui.sw2(mainPane, accPane), mainPane);
+        tk.cb('b1 b2 lt', 'Manage apps', async function () {
             ui.sw2(mainPane, appPane);
             shitStain.innerHTML = "";
             const contents = await fs.ls('/apps/');
@@ -39,7 +40,9 @@ app['settings'] = {
                             if (item3.name === "manifest.json") {
                                 const thing = await fs.read(item3.path);
                                 const entry = JSON.parse(thing);
-                                console.log(entry);
+                                if (sys.dev === true) {
+                                    console.log(entry);
+                                }
                                 const notif = tk.c('div', shitStain, 'notif2');
                                 tk.p(entry.name, 'bold', notif);
                                 tk.ps(`${entry.dev} - Ver ${entry.ver}`, undefined, notif);
@@ -72,7 +75,7 @@ app['settings'] = {
                                     await fs.delfold(entry.lastpath);
                                     ui.slidehide(notif);
                                     delete app[entry.appid];
-                                    wm.notif(`${entry.name} removed`, `Reboot to finish removal`, () => wd.reboot(), 'Reboot', true);
+                                    wm.notif(`${entry.name} removed`, `Reboot to finish removal, it might be in RAM`, () => wd.reboot(), 'Reboot', true);
                                 }, notif);
                             }
                         }
@@ -80,14 +83,14 @@ app['settings'] = {
                 }
             }
         }, mainPane);
-        tk.cb('b1 b2', 'Personalize', () => ui.sw2(mainPane, appearPane), mainPane);
+        tk.cb('b1 b2 lt', 'Personalize', () => ui.sw2(mainPane, appearPane), mainPane);
         // General pane
         tk.p('General', undefined, generalPane);
-        tk.cb('b1 b2 red', 'Reinstall WebDesk (keep data)', async function () {
+        tk.cb('b1 b2 red lt', 'Reinstall WebDesk (keep data)', async function () {
             await fs.del('/system/webdesk');
             wd.reboot();
         }, generalPane);
-        tk.cb('b1 b2 red', 'Deep Clean (keep data)', async function () {
+        tk.cb('b1 b2 lt', 'Deep Clean (keep data)', async function () {
             const dark = ui.darken();
             const menu = tk.c('div', dark, 'cm');
             tk.img('/system/lib/img/icons/warn.svg', 'setupi', menu);
@@ -110,9 +113,9 @@ app['settings'] = {
             }
         }, generalPane); */
         if (sys.mob === true) {
-            tk.cb('b1 b2 red', 'Toggle mobile UI', async function () {
+            tk.cb('b1 b2 lt', 'Toggle mobile UI', async function () {
                 if (sys.mobui === true) {
-                    await fs.write('/user/info/mobile', 'false');
+                    await set.set('mobile', 'false');
                 } else {
                     await fs.del('/user/info/mobile');
                 }
@@ -120,15 +123,15 @@ app['settings'] = {
             }, generalPane);
         }
         if (window.navigator.standalone === true) {
-            tk.cb('b1 b2 red', 'Recalibrate App Bar', function () {
+            tk.cb('b1 b2 lt', 'Recalibrate App Bar', function () {
                 wd.tbcal();
             }, generalPane);
         }
-        tk.cb('b1 b2 red', 'Enter Recovery Mode', function () {
+        tk.cb('b1 b2 lt', 'Enter Recovery Mode', function () {
             fs.write('/system/migval', 'rec');
             wd.reboot();
         }, generalPane);
-        tk.cb('b1 b2 red', 'Developer Mode', async function () {
+        tk.cb('b1 b2 nodontdoit lt', 'Developer Mode', async function () {
             const win = tk.c('div', document.body, 'cm');
             const opt = await fs.read('/system/info/devmode');
             const pane = tk.c('div', win);
@@ -155,45 +158,48 @@ app['settings'] = {
                 }, pane);
             }
         }, generalPane);
-        tk.cb('b1 b2 red', 'Erase...', () => app.settings.eraseassist.init(), generalPane);
-        const pgfx = tk.c('div', generalPane, 'list');
-        const okgfx = tk.c('span', pgfx);
-        okgfx.innerText = "Graphics ";
+        tk.cb('b1 b2 red lt', 'Erase...', () => app.settings.eraseassist.init(), generalPane);
+        const pgfx = tk.c('div', generalPane, 'list flexthing');
+        const tnavgfx = tk.c('div', pgfx, 'tnav');
+        const titlegfx = tk.c('div', pgfx, 'title');
+        tnavgfx.innerText = "Graphics ";
         tk.cb('b7', 'Low', async function () {
             wm.notif('Graphics set to low', `Reboot to apply`, function () {
                 wd.reboot();
             }, 'Reboot', true);
             await fs.write('/system/info/lowgfx', 'true');
-        }, pgfx);
+        }, titlegfx);
         tk.cb('b7', 'Med', async function () {
             wm.notif('Graphics set to medium', `Reboot to apply`, function () {
                 wd.reboot();
             }, 'Reboot', true);
             await fs.write('/system/info/lowgfx', 'half');
-        }, pgfx);
+        }, titlegfx);
         tk.cb('b7', 'High', async function () {
             wm.notif('Graphics set to high (default)', `Reboot to apply`, function () {
                 wd.reboot();
             }, 'Reboot', true);
             await fs.del('/system/info/lowgfx');
-        }, pgfx);
+        }, titlegfx);
         tk.cb('b7', 'Epic', async function () {
             wm.notif('Graphics set to epic', `Reboot to apply`, function () {
                 wd.reboot();
             }, 'Reboot', true);
             await fs.write('/system/info/lowgfx', 'epic');
-        }, pgfx);
-        const p = tk.c('div', generalPane, 'list');
-        const ok = tk.c('span', p);
-        ok.innerText = "Clock seconds ";
+        }, titlegfx);
+
+        const p = tk.c('div', generalPane, 'list flexthing');
+        const tnav = tk.c('div', p, 'tnav');
+        const title = tk.c('div', p, 'title');
+        tnav.innerText = "Clock seconds ";
         tk.cb('b7', 'On', async function () {
             sys.seconds = true;
             await fs.write('/user/info/clocksec', 'true');
-        }, p);
+        }, title);
         tk.cb('b7', 'Off', async function () {
             sys.seconds = false;
             await fs.write('/user/info/clocksec', 'false');
-        }, p);
+        }, title);
         tk.cb('b1', 'Back', () => ui.sw2(generalPane, mainPane), generalPane);
         // Appearance pane
         tk.p('Personalize', undefined, appearPane);
@@ -202,22 +208,22 @@ app['settings'] = {
         bg1.addEventListener('input', function (e) {
             ui.crtheme(e.target.value);
         });
-        bg1.value = await fs.read('/user/info/color');
+        bg1.value = await set.read('color');
         new JSColor(bg1, undefined);
         const modething = tk.p('', undefined, appearPane);
         tk.cb('b1', 'Light', function () {
-            fs.del('/user/info/lightdarkpref');
+            set.del('lightdarkpref');
             sys.autodarkacc = false;
             wd.light();
         }, modething);
         tk.cb('b1', 'Dark', function () {
-            fs.del('/user/info/lightdarkpref');
+            set.del('lightdarkpref');
             sys.autodarkacc = false;
             wd.dark();
         }, modething);
         tk.cb('b1', 'Auto', async function () {
             fs.write('/user/info/lightdarkpref', 'auto');
-            const killyourselfapplesheep = await fs.read('/user/info/color');
+            const killyourselfapplesheep = await set.read('color');
             ui.crtheme(killyourselfapplesheep);
             sys.autodarkacc = true;
         }, modething);
@@ -270,9 +276,9 @@ app['settings'] = {
             tk.p('Custom notification sound', 'bold', menu);
             const the = tk.c('input', menu, 'i1');
             the.placeholder = "URL of sound here";
-            const ok = await fs.read('/user/info/cnotifurl');
+            const ok = await set.read('cnotifurl');
             if (ok === "true") {
-                const ok2 = await fs.read('/user/info/notifsrc');
+                const ok2 = await set.read('notifsrc');
                 the.value = ok2;
             }
             tk.cb('b1', 'Close', () => ui.dest(menu), menu); tk.cb('b1', 'Save', async function () {
@@ -314,7 +320,7 @@ app['settings'] = {
                 }
             });
         }, userPane); */
-        tk.cb('b1 b2', 'Change Username', function () {
+        tk.cb('b1 b2 lt', 'Change Username', function () {
             const ok = tk.mbw('Change Username', '300px', 'auto', true, undefined, undefined);
             const inp = tk.c('input', ok.main, 'i1');
             inp.placeholder = "New name here";
@@ -333,10 +339,33 @@ app['settings'] = {
                 wm.close(ok.win);
             });
         }, userPane);
-        tk.cb('b1 b2', 'Location', function () {
+        tk.cb('b1 b2 lt', 'Change Password', function () {
+            const ok = tk.mbw('Change Username', '300px', 'auto', true, undefined, undefined);
+            tk.p(`Changing your password will log you out of all WebDesks, except for this one.`, undefined, ok.main);
+            tk.p(`This WebDesk will reboot after password change.`, undefined, ok.main);
+            const inp = tk.c('input', ok.main, 'i1');
+            inp.placeholder = "Old password";
+            inp.type = "password";
+            const inp2 = tk.c('input', ok.main, 'i1');
+            inp2.placeholder = "New password";
+            inp2.type = "password";
+            tk.cb('b1', 'Change name', async function () {
+                if (inp.value.length > 16) {
+                    wm.snack(`Set a name under 16 characters`, 3200);
+                    return;
+                }
+
+                sys.socket.emit("changepassword", { token: webid.token, password: inp.value, newpass: inp2.value });
+            }, ok.main);
+            sys.socket.on("changepassdone", async (token) => {
+                await fs.write('/user/info/token', token);
+                await wd.reboot();
+            });
+        }, userPane);
+        tk.cb('b1 b2 lt', 'Location', function () {
             app.settings.locset.init();
         }, userPane);
-        tk.cb('b1 b2', 'Log out', function () {
+        tk.cb('b1 b2 lt', 'Log out', function () {
             const dark = ui.darken();
             const menu = tk.c('div', dark, 'cm');
             tk.img('/system/lib/img/icons/warn.svg', 'setupi', menu);
@@ -416,15 +445,34 @@ app['settings'] = {
     },
     eraseassist: {
         runs: false,
-        init: function () {
+        init: async function () {
+            const yeah = await fs.read('/user/info/token');
             ui.play('/system/lib/other/error.wav');
             const dark = ui.darken();
             const menu = tk.c('div', dark, 'cm');
+            const m1 = tk.c('div', menu);
+            const m2 = tk.c('div', menu, 'hide');
             tk.img('/system/lib/img/icons/warn.svg', 'setupi', menu);
             tk.p(`Are you sure?`, 'bold', menu);
-            tk.p(`You're about to erase this WebDesk. This can't be undone, everything will be deleted forever.`, undefined, menu);
-            tk.cb('b1 nodont', 'Erase', () => fs.erase('reboot'), menu);
-            tk.cb('b1', `Close`, () => ui.dest(dark), menu);
+            tk.p(`You're about to erase this WebDesk. This can't be undone, everything will be deleted forever.`, undefined, m1);
+            if (yeah) {
+                tk.cb('b1 nodont', 'Erase', () => ui.sw2(m1, m2), m1);
+            } else {
+                tk.cb('b1 nodont', 'Erase', () => fs.erase('reboot'), m1);
+            }
+            tk.cb('b1', `Close`, () => ui.dest(dark), m1);
+            tk.p(`Enter account password to confirm erase`, 'bold', menu);
+            tk.p(`You're about to erase this WebDesk. This can't be undone, everything will be deleted forever.`, undefined, m1);
+            const inp = tk.c('input', m2, 'i1');
+            inp.placeholder = "Password here";
+            inp.type = "password";
+            tk.cb('b1', 'Erase', async function () {
+                sys.socket.emit("erase", { token: webid.token, password: inp.value });
+            });
+            sys.socket.on("greenlight", async () => {
+                await fs.erase();
+                await wd.reboot();
+            });
         }
     },
     locset: {

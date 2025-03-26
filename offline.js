@@ -1,4 +1,4 @@
-// if you want to make a contribution,
+/* // if you want to make a contribution,
 // make the offline mode work please
 
 const CACHE_NAME = 'v2';
@@ -106,4 +106,4 @@ self.addEventListener('fetch', (event) => {
             })
         );
     }
-});
+}); */
