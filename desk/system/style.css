@@ -111,12 +111,13 @@ button {
 }
 
 .weatheri {
-    height: 40px;
-    width: 40px;
+    vertical-align: middle;
+    height: 32px;
+    width: 32px;
     border-radius: 10px;
     padding: 0px;
     margin: 0px;
-    background-color: rgba(var(--acc), 0.18);
+    border: 1px solid rgba(var(--acc), 0.22);
 }
 
 p {
@@ -245,7 +246,7 @@ p {
     align-items: center;
     justify-content: space-between;
     padding: 9px;
-    padding-left: 8px;
+    padding-left: 11px;
     padding-right: 11px;
     background-color: var(--ui2);
     width: 100%;
@@ -293,8 +294,7 @@ p {
 }
 
 .winbnest {
-    padding-right: 4px;
-    padding-left: 3px;
+    padding-right: 7px;
     padding-top: 2px;
     padding-bottom: 2px;
     border: none;
@@ -988,18 +988,25 @@ p {
     max-height: 85% !important;
 }
 
+.tbbutton {
+    padding: 2px !important;
+}
+
+.dockalt {
+    margin-left: 1px !important;
+}
+
 .tasknest button {
     padding: 0px;
     margin: 0px;
     box-shadow: none !important;
-    margin: 2px;
     border: none;
     background-color: rgb(0, 0, 0, 0) !important;
 }
 
 .tooltipd {
     position: fixed;
-    bottom: var(--hawktuah);
+    bottom: calc(var(--hawktuah) + 3px);
     padding: 5px 10px;
     font-size: 14px;
     background: var(--ui1);
@@ -1007,8 +1014,22 @@ p {
     color: var(--font);
     white-space: nowrap;
     opacity: 0;
-    transition: opacity 0.2s, transform 0.2s;
     pointer-events: none;
+    backdrop-filter: blur(var(--bl2));
+    -webkit-backdrop-filter: blur(var(--bl2));
+}
+
+.tooltipd::after {
+    content: '';
+    position: absolute;
+    bottom: -5px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 0;
+    height: 0;
+    border-left: 5px solid transparent;
+    border-right: 5px solid transparent;
+    border-top: 5px solid var(--ui1);
 }
 
 .tooltipd.visible {
@@ -1023,12 +1044,7 @@ p {
     margin: 0px !important;
     padding: 0px !important;
     vertical-align: middle;
-    transition: 0.04s;
     box-shadow: var(--optbox);
-}
-
-.dockicon:hover {
-    transform: scale(1.08);
 }
 
 .dockicon:active {

@@ -466,8 +466,28 @@ var wd = {
             el.contb = tk.cb('time', '--:--', () => controlcenter(), right);
             const tasknest = tk.c('div', el.taskbar, 'tasknest');
             const lefttb = tk.c('div', tasknest, 'tnav auto');
-            el.startbutton = tk.cb('', '', () => startmenu(), lefttb);
-            tk.img('/system/lib/img/icons/apps.svg', 'dockicon', el.startbutton, false, 'noretry');
+            el.startbutton = tk.cb('tbbutton', '', () => startmenu(), lefttb);
+            tk.img('/system/lib/img/icons/apps.svg', 'dockicon dockalt', el.startbutton, false, 'noretry');
+            const tooltip = tk.c('div', document.body, 'tooltipd');
+            tooltip.textContent = 'App Menu';
+    
+            function updateTooltipPosition() {
+                const { x, width } = el.startbutton.getBoundingClientRect();
+                tooltip.style.left = `${x + width / 2 - tooltip.offsetWidth / 2}px`;
+                setTimeout(updateTooltipPosition, 200);
+            }
+    
+            window.addEventListener("resize", updateTooltipPosition);
+    
+            if (el.taskbar) {
+                new ResizeObserver(updateTooltipPosition).observe(el.taskbar);
+            }
+    
+            updateTooltipPosition();
+            const showTooltip = () => {tooltip.classList.add('visible');};
+            const hideTooltip = () => {tooltip.classList.remove('visible');};
+            el.startbutton.addEventListener('mouseenter', showTooltip);
+            el.startbutton.addEventListener('mouseleave', hideTooltip);
             el.tr = tk.c('div', lefttb);
             if (sys.nvol === 0) el.contb.classList.toggle('silentbtn');
             if (sys.mobui === true) {

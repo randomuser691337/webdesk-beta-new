@@ -11,7 +11,7 @@ async function startsockets() {
             }
 
             sys.socket.on('connect_error', (error) => {
-                console.log('Connection error:', error);
+                console.log('<!> Connection error: ', error);
                 sys.socket = undefined;
                 resolve(false);
                 webid.priv = -1;
@@ -30,12 +30,33 @@ async function startsockets() {
             });
 
             sys.socket.on("connect", async () => {
-                if (fire === false) {
-                    fire = true;
+                const token = await fs.read('/user/info/token');
+                sys.socket.emit("login", token);
+                console.log('<i> Connected to WebDesk server');
+                resolve(true);
+            });
+
+            sys.socket.on("checkback", async (thing) => {
+                if (thing.error === true) {
+                    await fs.del('/user/info/token');
+                    window.location.reload();
                 } else {
-                    const token = await set.read('/token');
-                    sys.socket.emit("login", token);
+                    sys.name = thing.username;
+                    sd = thing.username;
+                    await fs.write('/user/info/name', thing.username);
+                    webid.token = await fs.read('/system/info/token');
+                    webid.priv = thing.priv;
+                    webid.userid = thing.userid;
+                    if (thing.priv === 0) {
+                        wm.notif('Your account has been limited.', `You can still use WebDesk normally, but you can't use online services.`);
+                    }
+                    console.log(`<i> Logged in!
+- Username: ${thing.username}
+- Account permission level: ${thing.priv}
+- UserID: ${thing.userid}
+- Token: ${ui.truncater(await fs.read('/user/info/token'), 8)}`);
                 }
+                resolve();
             });
 
             sys.socket.on("webcall", async (call) => {
@@ -58,390 +79,394 @@ async function startsockets() {
 
 async function bootstage2(uid2, eepysleepy, migcheck, sd, installed, lebronjames) {
     try {
-        await initscript('/system/apps.js');
-        await initcss('/system/lib/layout1.css');
-        await initcss('/system/lib/crop/cropper.css');
-        await initscript('/system/lib/jq.js');
-        await initscript('/system/lib/socket.io.js');
-        await initscript('/system/lib/peer.js');
-        await initscript('/system/lib/qrcode.js');
-        await initscript('/system/lib/ace/ace.js');
-        await initscript('/system/lib/ace/ext-searchbox.js');
-        await initscript('/system/lib/ace/theme-monokai.js');
-        await initscript('/system/lib/picker.js');
-        await initscript('/system/core.js');
-        await initscript('/system/wm.js');
-        await initscript('/system/services.js');
-        await initscript('/system/ui.js');
-        await initscript('/system/lib/crop/cropper.js');
-        sd = await set.read('name');
-        abt.ver = await fs.read('/system/info/currentver');
-        abt.lastmod = await fs.read('/system/info/currentveredit');
-        await initcss('/system/style.css');
-        await wd.fontsw('/system/lib/fonts/Poppins-Regular.woff2', '/system/lib/fonts/Poppins-Medium.woff2', '/system/lib/fonts/Poppins-Bold.woff2', '/system/lib/fonts/mono.woff2');
+        try {
+            await initscript('/system/apps.js');
+            await initcss('/system/lib/layout1.css');
+            await initcss('/system/lib/crop/cropper.css');
+            await initscript('/system/lib/jq.js');
+            await initscript('/system/lib/socket.io.js');
+            await initscript('/system/lib/peer.js');
+            await initscript('/system/lib/qrcode.js');
+            await initscript('/system/lib/ace/ace.js');
+            await initscript('/system/lib/ace/ext-searchbox.js');
+            await initscript('/system/lib/ace/theme-monokai.js');
+            await initscript('/system/lib/picker.js');
+            await initscript('/system/core.js');
+            await initscript('/system/wm.js');
+            await initscript('/system/services.js');
+            await initscript('/system/ui.js');
+            await initscript('/system/lib/crop/cropper.js');
+            sd = await set.read('name');
+            abt.ver = await fs.read('/system/info/currentver');
+            abt.lastmod = await fs.read('/system/info/currentveredit');
+            await initcss('/system/style.css');
+            await wd.fontsw('/system/lib/fonts/Poppins-Regular.woff2', '/system/lib/fonts/Poppins-Medium.woff2', '/system/lib/fonts/Poppins-Bold.woff2', '/system/lib/fonts/mono.woff2');
 
-        const socketworks = await startsockets();
-        if (!socketworks) {
-            console.log(socketworks);
-            console.log('<!> Socket connection failed, proceeding without socket');
+            const socketworks = await startsockets();
+            if (!socketworks) {
+                console.log(socketworks);
+                console.log('<!> Socket connection failed, proceeding without socket');
+            }
+
+        } catch (error) {
+            console.error(error);
         }
 
-    } catch (error) {
-        console.error(error);
-    }
+        console.log('<i> Boot stage 2: Load variables, make decisions');
+        if (sd && !migcheck) {
+            const uid = params.get('deskid');
+            if (uid) {
+                sys.migrid = uid;
+                const id = gen(7);
+                await ptp.go(id);
+                ui.crtheme('#010101', true);
+                wd.dark('nosave');
+                app.system.migrate.init('skibidi');
+                ui.hide(tk.g('death'), 140);
+                wegood();
+                return;
+            }
+            const deskid = await fs.read('/system/deskid');
+            if (deskid) {
+                if (deskid.length === 8) {
+                    await wd.newid();
+                    window.location.reload();
+                }
+            } else {
+                await wd.newid();
+                window.location.reload();
+            }
+            const [
+                darkpref, lightdark, color, font, dev, mob, city, clocksec, apprepo, filtering, notifsound, silent, perf
+            ] = await Promise.all([
+                set.read('lightdarkpref'),
+                set.read('lightdark'),
+                set.read('color'),
+                set.read('font'),
+                fs.read('/system/info/devmode'),
+                set.read('mobile'),
+                fs.read('/user/info/location.json'),
+                set.read('clocksec'),
+                fs.read('/system/appurl'),
+                set.read('filter'),
+                set.read('notifsrc'),
+                set.read('silent'),
+                set.read('lowgfx'),
+            ]);
 
-    console.log('<i> Boot stage 2: Load variables, make decisions');
-    if (sd && !migcheck) {
-        const uid = params.get('deskid');
-        if (uid) {
-            sys.migrid = uid;
+            await wd.blurcheck(perf);
+
+            if (clocksec === "true") {
+                sys.seconds = true;
+            } else {
+                sys.seconds = false;
+            }
+
+            if (city) {
+                const ok = JSON.parse(city)[0];
+                sys.city = ok.city;
+                sys.unit = ok.unit;
+                if (ok.unit === "Metric") {
+                    sys.unitsym = "°C";
+                } else {
+                    sys.unitsym = "°F";
+                }
+                if (ok.default === true) {
+                    sys.defaultloc = true;
+                } else {
+                    sys.defaultloc = false;
+                }
+                sys.loclast = ok.lastupdate;
+            } else {
+                wd.wetter();
+            }
+
+            await ptp.go(deskid);
+
+            if (!lebronjames) {
+                const [
+                    darkpref, lightdark, color, font, mob, clocksec, filtering, notifsound, silent
+                ] = await Promise.all([
+                    fs.read('/user/info/lightdarkpref'),
+                    fs.read('/user/info/lightdark'),
+                    fs.read('/user/info/color'),
+                    fs.read('/user/info/font'),
+                    fs.read('/user/info/mobile'),
+                    fs.read('/user/info/clocksec'),
+                    fs.read('/user/info/filter'),
+                    fs.read('/user/info/notifsrc'),
+                    fs.read('/user/info/silent'),
+                ]);
+                await set.set('lightdarkpref', darkpref);
+                await set.set('lightdark', lightdark);
+                await set.set('color', color);
+                await set.set('font', font);
+                await set.set('devmode', dev);
+                await set.set('mobile', mob);
+                await set.set('clocksec', clocksec);
+                await set.set('filter', filtering);
+                await set.set('notifsrc', notifsound);
+                await set.set('silent', silent);
+                await fs.del('/user/info/lightdarkpref');
+                await fs.del('/user/info/lightdark');
+                await fs.del('/user/info/color');
+                await fs.del('/user/info/font');
+                await fs.del('/user/info/mobile');
+                await fs.del('/user/info/clocksec');
+                await fs.del('/user/info/filter');
+                await fs.del('/user/info/notifsrc');
+                await fs.del('/user/info/silent');
+                await wd.reboot();
+            }
+
+            if (eepysleepy === "true") {
+                ui.hide(tk.g('contain'), 0);
+                await initscript('/apps/Lock Screen.app/install.js');
+                sys.setupd = "eepy";
+                wegood();
+                wd.dark('nosave');
+                ui.crtheme('#999999', true);
+                app.lockscreen.init();
+                await wd.chokehold();
+                wakelockgo();
+            }
+
+            if (apprepo) sys.appurl = apprepo;
+            if (notifsound) sys.notifsrc = notifsound;
+            if (silent === "true") sys.nvol = 0;
+
+            if (/Mobi|Android/i.test(navigator.userAgent)) {
+                sys.mob = true;
+                if (mob !== "false") {
+                    sys.mobui = true;
+                }
+            }
+
+            if (filtering === "true") {
+                sys.filter = true;
+            } else if (filtering === "nc") {
+                sys.filter = true;
+                sys.nc = true;
+            }
+
+            if (dev === "true") {
+                sys.dev = true;
+                wm.notif(`Developer Mode is enabled.`);
+            }
+
+            if (font === "big") {
+                wd.bgft();
+            } else if (font === "small") {
+                wd.smft();
+            } else {
+                wd.meft();
+            }
+
+            fs.write('/user/files/Welcome to WebDesk!.txt', `Welcome to WebDesk! This is your Files folder, where things you upload are stored. Use the buttons at the top to navigate between folders, right-click/tap and hold a file to see it's info, and normal tap/click it to open it.`);
+            sys.setupd = true;
+            try {
+                const skibidi = await fetch('/target.json');
+                const fucker = await skibidi.text();
+                const json = await JSON.parse(fucker);
+                if (json['0'].target !== abt.ver) {
+                    const dark = ui.darken();
+                    const menu = tk.c('div', dark, 'cm');
+                    tk.img('/system/lib/img/icons/update.svg', 'setupi', menu);
+                    tk.p('Update WebDesk', 'bold', menu);
+                    tk.p('This will only take a few seconds.', undefined, menu);
+                    tk.p(abt.ver + " to " + json['0'].target, undefined, menu);
+                    tk.cb('b1', 'Later', () => ui.dest(dark), menu); tk.cb('b1', 'Update', async function () {
+                        await fs.del('/system/webdesk');
+                        reboot();
+                    }, menu);
+                }
+                const token = await fs.read('/user/info/token');
+                if (sys.socket === undefined) {
+                    wm.notif(`Can't connect to server`, `You can still use WebDesk normally, but you can't use online services.`);
+                    webid.priv = -1;
+                } else {
+                    if (!token) {
+                        const dark = ui.darken();
+                        const menu = tk.c('div', dark, 'cm');
+                        tk.img('/system/lib/img/icons/update.svg', 'setupi', menu);
+                        tk.p('Log into/make WebDesk account', 'bold', menu);
+                        tk.p(`Misuse targeting others may result in account limitations. The developer is not liable for your actions.`, undefined, menu);
+                        const useri = tk.c('input', menu, 'i1');
+                        const passi = tk.c('input', menu, 'i1');
+                        useri.placeholder = 'Username';
+                        passi.placeholder = 'Password';
+                        passi.type = 'password';
+                        tk.cb('b1', 'Create/log in', async function () {
+                            if (useri.value.length > 16) {
+                                wm.snack(`Set a name under 16 characters`, 3200);
+                                return;
+                            }
+
+                            if (passi.value.length < 8) {
+                                wm.snack(`Set a password over 8 characters.`, 3200);
+                                return;
+                            }
+
+                            sys.socket.emit("newacc", { user: useri.value, pass: passi.value });
+                        }, menu);
+                        sys.socket.on("token", ({ token }) => {
+                            fs.write('/user/info/token', token);
+                            wd.reboot();
+                        });
+                    } else {
+                        await new Promise((resolve) => {
+                            sys.socket.emit("login", token);
+                            sys.socket.on("checkback", async (thing) => {
+                                if (thing.error === true) {
+                                    await fs.del('/user/info/token');
+                                    window.location.reload();
+                                } else {
+                                    sys.name = thing.username;
+                                    sd = thing.username;
+                                    await fs.write('/user/info/name', thing.username);
+                                    webid.token = token;
+                                    webid.priv = thing.priv;
+                                    webid.userid = thing.userid;
+                                    if (thing.priv === 0) {
+                                        wm.notif('Your account has been limited.', `You can still use WebDesk normally, but you can't use online services.`);
+                                    }
+                                }
+                                resolve();
+                            });
+                        });
+                    }
+                }
+            } catch (error) {
+                console.log(error);
+                webid.priv = -1;
+            }
+            if (sys.name === "Default User") {
+                sys.name = sd;
+            }
+            if (darkpref === "auto") {
+                sys.autodarkacc = true;
+            } else {
+                sys.autodarkacc = false;
+            }
+            if (lightdark === "dark") {
+                wd.dark('nosave');
+            } else {
+                wd.light('nosave');
+            }
+            if (color) {
+                ui.crtheme(color);
+            } else {
+                wd.seasonal();
+            }
+            console.log('<i> Boot stage 3: Load apps');
+            await initapps();
+            console.log('<i> Boot stage 4: Load desktop, check for updates');
+            await wd.desktop(sys.name, deskid, 'wait');
+            await wd.setbg(false);
+            ui.dest(tk.g('loading', 220));
+        } else if (migcheck === "down") {
+            await wd.setbg(undefined, '/system/lib/img/wallpapers/restore/recovery.png');
+            await initapps();
             const id = gen(7);
             await ptp.go(id);
             ui.crtheme('#010101', true);
             wd.dark('nosave');
-            app.system.migrate.init('skibidi');
-            ui.hide(tk.g('death'), 140);
+            await fs.del('/system/migval');
+            app.system.migrate.init('down');
+            ui.dest(tk.g('loading', 220));
             wegood();
-            return;
-        }
-        const deskid = await fs.read('/system/deskid');
-        if (deskid) {
-            if (deskid.length === 8) {
-                await wd.newid();
-                window.location.reload();
-            }
-        } else {
-            await wd.newid();
-            window.location.reload();
-        }
-        const [
-            darkpref, lightdark, color, font, dev, mob, city, clocksec, apprepo, filtering, notifsound, silent, perf
-        ] = await Promise.all([
-            set.read('lightdarkpref'),
-            set.read('lightdark'),
-            set.read('color'),
-            set.read('font'),
-            fs.read('/system/info/devmode'),
-            set.read('mobile'),
-            fs.read('/user/info/location.json'),
-            set.read('clocksec'),
-            fs.read('/system/appurl'),
-            set.read('filter'),
-            set.read('notifsrc'),
-            set.read('silent'),
-            set.read('lowgfx'),
-        ]);
-
-        await wd.blurcheck(perf);
-
-        if (clocksec === "true") {
-            sys.seconds = true;
-        } else {
-            sys.seconds = false;
-        }
-
-        if (city) {
-            const ok = JSON.parse(city)[0];
-            sys.city = ok.city;
-            sys.unit = ok.unit;
-            if (ok.unit === "Metric") {
-                sys.unitsym = "°C";
-            } else {
-                sys.unitsym = "°F";
-            }
-            if (ok.default === true) {
-                sys.defaultloc = true;
-            } else {
-                sys.defaultloc = false;
-            }
-            sys.loclast = ok.lastupdate;
-        } else {
-            wd.wetter();
-        }
-
-        await ptp.go(deskid);
-
-        if (!lebronjames) {
-            const [
-                darkpref, lightdark, color, font, mob, clocksec, filtering, notifsound, silent
-            ] = await Promise.all([
-                fs.read('/user/info/lightdarkpref'),
-                fs.read('/user/info/lightdark'),
-                fs.read('/user/info/color'),
-                fs.read('/user/info/font'),
-                fs.read('/user/info/mobile'),
-                fs.read('/user/info/clocksec'),
-                fs.read('/user/info/filter'),
-                fs.read('/user/info/notifsrc'),
-                fs.read('/user/info/silent'),
-            ]);
-            await set.set('lightdarkpref', darkpref);
-            await set.set('lightdark', lightdark);
-            await set.set('color', color);
-            await set.set('font', font);
-            await set.set('devmode', dev);
-            await set.set('mobile', mob);
-            await set.set('clocksec', clocksec);
-            await set.set('filter', filtering);
-            await set.set('notifsrc', notifsound);
-            await set.set('silent', silent);
-            await fs.del('/user/info/lightdarkpref');
-            await fs.del('/user/info/lightdark');
-            await fs.del('/user/info/color');
-            await fs.del('/user/info/font');
-            await fs.del('/user/info/mobile');
-            await fs.del('/user/info/clocksec');
-            await fs.del('/user/info/filter');
-            await fs.del('/user/info/notifsrc');
-            await fs.del('/user/info/silent');
-            await wd.reboot();
-        }
-
-        if (eepysleepy === "true") {
-            ui.hide(tk.g('contain'), 0);
-            await initscript('/apps/Lock Screen.app/install.js');
-            sys.setupd = "eepy";
-            wegood();
+        } else if (migcheck === "echo") {
+            await wd.setbg(undefined, '/system/lib/img/wallpapers/restore/recovery.png');
+            await initapps();
+            await wd.setbg(true, false);
+            const id = gen(7);
+            await ptp.go(id);
+            ui.crtheme('#010101', true);
             wd.dark('nosave');
-            ui.crtheme('#999999', true);
-            app.lockscreen.init();
-            await wd.chokehold();
-            wakelockgo();
-        }
-
-        if (apprepo) sys.appurl = apprepo;
-        if (notifsound) sys.notifsrc = notifsound;
-        if (silent === "true") sys.nvol = 0;
-
-        if (/Mobi|Android/i.test(navigator.userAgent)) {
-            sys.mob = true;
-            if (mob !== "false") {
-                sys.mobui = true;
-            }
-        }
-
-        if (filtering === "true") {
-            sys.filter = true;
-        } else if (filtering === "nc") {
-            sys.filter = true;
-            sys.nc = true;
-        }
-
-        if (dev === "true") {
-            sys.dev = true;
-            wm.notif(`Developer Mode is enabled.`);
-        }
-
-        if (font === "big") {
-            wd.bgft();
-        } else if (font === "small") {
-            wd.smft();
+            await fs.del('/system/migval');
+            app.system.echodesk.init();
+            ui.dest(tk.g('loading', 220));
+            wegood();
+        } else if (migcheck === "rec") {
+            await wd.setbg(undefined, '/system/lib/img/wallpapers/restore/recovery.png');
+            await initapps();
+            await app.system.recovery.init();
+            ui.dest(tk.g('loading', 220));
         } else {
-            wd.meft();
+            await initapps();
+            await wd.seasonal();
+            await wd.setbg();
+            const id = await wd.newid();
+            await ptp.go(id);
+            if (uid2) {
+                app.system.setup.init(true, uid2);
+            } else {
+                app.system.setup.init();
+            }
+            sys.setupd = false;
+            ui.dest(tk.g('loading', 220));
+            wegood();
         }
 
-        fs.write('/user/files/Welcome to WebDesk!.txt', `Welcome to WebDesk! This is your Files folder, where things you upload are stored. Use the buttons at the top to navigate between folders, right-click/tap and hold a file to see it's info, and normal tap/click it to open it.`);
-        sys.setupd = true;
+        wd.perfmon();
+        ui.hide(tk.g('death'), 140);
+
         try {
-            const skibidi = await fetch('/target.json');
-            const fucker = await skibidi.text();
-            const json = await JSON.parse(fucker);
-            if (json['0'].target !== abt.ver) {
-                const dark = ui.darken();
-                const menu = tk.c('div', dark, 'cm');
-                tk.img('/system/lib/img/icons/update.svg', 'setupi', menu);
-                tk.p('Update WebDesk', 'bold', menu);
-                tk.p('This will only take a few seconds.', undefined, menu);
-                tk.p(abt.ver + " to " + json['0'].target, undefined, menu);
-                tk.cb('b1', 'Later', () => ui.dest(dark), menu); tk.cb('b1', 'Update', async function () {
-                    await fs.del('/system/webdesk');
-                    reboot();
-                }, menu);
-            }
-            const token = await fs.read('/user/info/token');
-            if (sys.socket === undefined) {
-                wm.notif(`Can't connect to server`, `You can still use WebDesk normally, but you can't use online services.`);
-                webid.priv = -1;
-            } else {
-                if (!token) {
-                    const dark = ui.darken();
-                    const menu = tk.c('div', dark, 'cm');
-                    tk.img('/system/lib/img/icons/update.svg', 'setupi', menu);
-                    tk.p('Log into/make WebDesk account', 'bold', menu);
-                    tk.p(`Misuse targeting others may result in account limitations. The developer is not liable for your actions.`, undefined, menu);
-                    const useri = tk.c('input', menu, 'i1');
-                    const passi = tk.c('input', menu, 'i1');
-                    useri.placeholder = 'Username';
-                    passi.placeholder = 'Password';
-                    passi.type = 'password';
-                    tk.cb('b1', 'Create/log in', async function () {
-                        if (useri.value.length > 16) {
-                            wm.snack(`Set a name under 16 characters`, 3200);
-                            return;
+            if (sys.socket !== undefined) {
+                setInterval(async function () {
+                    if (sys.socket === undefined) {
+                        console.log('<!> Trying to reconnect');
+                        const sock = await startsockets();
+                        if (sock === true) {
+                            console.log('<i> Reconnected successfully');
                         }
-
-                        if (passi.value.length < 8) {
-                            wm.snack(`Set a password over 8 characters.`, 3200);
-                            return;
-                        }
-
-                        sys.socket.emit("newacc", { user: useri.value, pass: passi.value });
-                    }, menu);
-                    sys.socket.on("token", ({ token }) => {
-                        fs.write('/user/info/token', token);
-                        wd.reboot();
-                    });
-                } else {
-                    await new Promise((resolve) => {
-                        sys.socket.emit("login", token);
-                        sys.socket.on("checkback", async (thing) => {
-                            if (thing.error === true) {
-                                await fs.del('/user/info/token');
-                                window.location.reload();
-                            } else {
-                                sys.name = thing.username;
-                                sd = thing.username;
-                                await fs.write('/user/info/name', thing.username);
-                                webid.token = token;
-                                webid.priv = thing.priv;
-                                webid.userid = thing.userid;
-                                if (thing.priv === 0) {
-                                    wm.notif('Your account has been limited.', `You can still use WebDesk normally, but you can't use online services.`);
-                                }
-                            }
-                            resolve();
-                        });
-                    });
-                }
+                    }
+                }, 5000);
             }
         } catch (error) {
             console.log(error);
-            webid.priv = -1;
+            wm.notif('Error starting WebDesk Online Services.', 'You might need to update.');
         }
-        if (sys.name === "Default User") {
-            sys.name = sd;
-        }
-        if (darkpref === "auto") {
-            sys.autodarkacc = true;
-        } else {
-            sys.autodarkacc = false;
-        }
-        if (lightdark === "dark") {
-            wd.dark('nosave');
-        } else {
-            wd.light('nosave');
-        }
-        if (color) {
-            ui.crtheme(color);
-        } else {
-            wd.seasonal();
-        }
-        console.log('<i> Boot stage 3: Load apps');
-        await initapps();
-        console.log('<i> Boot stage 4: Load desktop, check for updates');
-        await wd.desktop(sys.name, deskid, 'wait');
-        await wd.setbg(false);
-        ui.dest(tk.g('loading', 220));
-    } else if (migcheck === "down") {
-        await wd.setbg(undefined, '/system/lib/img/wallpapers/restore/recovery.png');
-        await initapps();
-        const id = gen(7);
-        await ptp.go(id);
-        ui.crtheme('#010101', true);
-        wd.dark('nosave');
-        await fs.del('/system/migval');
-        app.system.migrate.init('down');
-        ui.dest(tk.g('loading', 220));
-        wegood();
-    } else if (migcheck === "echo") {
-        await wd.setbg(undefined, '/system/lib/img/wallpapers/restore/recovery.png');
-        await initapps();
-        await wd.setbg(true, false);
-        const id = gen(7);
-        await ptp.go(id);
-        ui.crtheme('#010101', true);
-        wd.dark('nosave');
-        await fs.del('/system/migval');
-        app.system.echodesk.init();
-        ui.dest(tk.g('loading', 220));
-        wegood();
-    } else if (migcheck === "rec") {
-        await wd.setbg(undefined, '/system/lib/img/wallpapers/restore/recovery.png');
-        await initapps();
-        await app.system.recovery.init();
-        ui.dest(tk.g('loading', 220));
-    } else {
-        await initapps();
-        await wd.seasonal();
-        await wd.setbg();
-        const id = await wd.newid();
-        await ptp.go(id);
-        if (uid2) {
-            app.system.setup.init(true, uid2);
-        } else {
-            app.system.setup.init();
-        }
-        sys.setupd = false;
-        ui.dest(tk.g('loading', 220));
-        wegood();
-    }
 
-    wd.perfmon();
-    ui.hide(tk.g('death'), 140);
+        const dropZone = document.body;
+        ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+            dropZone.addEventListener(eventName, preventDefaults, false);
+            document.body.addEventListener(eventName, preventDefaults, false);
+        });
 
-    try {
-        if (sys.socket !== undefined) {
-            setInterval(async function () {
-                if (sys.socket === undefined) {
-                    console.log('<!> Trying to reconnect');
-                    const sock = await startsockets();
-                    if (sock === true) {
-                        console.log('<i> Reconnected successfully');
-                    }
-                }
-            }, 3000);
+        dropZone.addEventListener('drop', handleDrop, false);
+
+        function preventDefaults(e) {
+            e.preventDefault();
+            e.stopPropagation();
+        }
+
+        function handleDrop(e) {
+            let dt = e.dataTransfer;
+            let files = dt.files;
+
+            handleFiles(files);
+        }
+
+        async function handleFiles(files) {
+            let filesArray = [...files];
+            filesArray.forEach(file => {
+                const reader = new FileReader();
+                reader.onload = async function (e) {
+                    const contents = e.target.result;
+                    await fs.write(`/user/files/${file.name}`, contents);
+                    app.files.init('/user/files/');
+                };
+
+                reader.readAsDataURL(file);
+            });
+        }
+        wegood();
+        await app.appmark.checkforup();
+        if (navigator.onLine === false) {
+            wm.notif("Offline", "You are offline, some features may not work.");
         }
     } catch (error) {
         console.log(error);
-        wm.notif('Error starting WebDesk Online Services.', 'You might need to update.');
-    }
-
-    const dropZone = document.body;
-    ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
-        dropZone.addEventListener(eventName, preventDefaults, false);
-        document.body.addEventListener(eventName, preventDefaults, false);
-    });
-
-    dropZone.addEventListener('drop', handleDrop, false);
-
-    function preventDefaults(e) {
-        e.preventDefault();
-        e.stopPropagation();
-    }
-
-    function handleDrop(e) {
-        let dt = e.dataTransfer;
-        let files = dt.files;
-
-        handleFiles(files);
-    }
-
-    async function handleFiles(files) {
-        let filesArray = [...files];
-        filesArray.forEach(file => {
-            const reader = new FileReader();
-            reader.onload = async function (e) {
-                const contents = e.target.result;
-                await fs.write(`/user/files/${file.name}`, contents);
-                app.files.init('/user/files/');
-            };
-
-            reader.readAsDataURL(file);
-        });
-    }
-    wegood();
-    await app.appmark.checkforup();
-    if (navigator.onLine === false) {
-        wm.notif("Offline", "You are offline, some features may not work.");
     }
 }

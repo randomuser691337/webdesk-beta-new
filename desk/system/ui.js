@@ -619,11 +619,11 @@ var tk = {
         closeButtonNest.appendChild(closeButton);
         let shortened;
         if (sys.mob === true) {
-            shortened = ui.truncater(title, 7);
+            shortened = ui.truncater(title, 12);
         } else {
-            shortened = ui.truncater(title, 10);
+            shortened = ui.truncater(title, 60);
         }
-        const tbn = tk.cb('', '', function () {
+        const tbn = tk.cb('tbbutton', '', function () {
             wm.show(windowDiv, tbn);
         }, el.tr);
         if (icon) {
@@ -641,7 +641,6 @@ var tk = {
             setTimeout(updateTooltipPosition, 200);
         }
 
-
         window.addEventListener("resize", updateTooltipPosition);
 
         if (el.taskbar) {
@@ -649,16 +648,8 @@ var tk = {
         }
 
         updateTooltipPosition();
-
-
-        const showTooltip = () => {
-            tooltip.classList.add('visible');
-        };
-
-        const hideTooltip = () => {
-            tooltip.classList.remove('visible');
-        };
-
+        const showTooltip = () => {tooltip.classList.add('visible');};
+        const hideTooltip = () => {tooltip.classList.remove('visible');};
         tbn.addEventListener('mouseenter', showTooltip);
         tbn.addEventListener('mouseleave', hideTooltip);
 

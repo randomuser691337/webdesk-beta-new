@@ -507,7 +507,21 @@ app['settings'] = {
         runs: false,
         init: async function () {
             const ok = tk.mbw('Wallpapers (beta)', '480px', 'auto', true, undefined, undefined);
-            const wallpapers = await fs.ls('/system/lib/img/wallpapers/current/');
+            let wallpapers = await fs.ls('/system/lib/img/wallpapers/current/');
+            tk.p('Scanning for duplicates...', undefined, ok.main);
+            for (const wallpaper of wallpapers.items) {
+                if (wallpaper.type === "file") {
+                    const defaultWallpaper = await fs.read('/system/lib/img/wallpapers/restore/default');
+                    const currentWallpaper = await fs.read(wallpaper.path);
+                    const speedy = Math.floor(defaultWallpaper.length * 0.2);
+
+                    if (defaultWallpaper.slice(0, speedy) === currentWallpaper.slice(0, speedy)) {
+                        await fs.del(wallpaper.path);
+                        wallpapers = await fs.ls('/system/lib/img/wallpapers/current/');
+                    }
+                }
+            }
+
             const grid = tk.c('div', ok.main, 'brick-layout-list');
             let currentPage = 0;
             const itemsPerPage = 2;
