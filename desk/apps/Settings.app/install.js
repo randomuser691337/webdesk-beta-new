@@ -152,13 +152,43 @@ app['settings'] = {
                 tk.cb(`b1`, 'Disable (reboot)', async function () {
                     await fs.delfold('/system/');
                     await fs.delfold('/user/info/');
-                    await fs.write('/user/info/name', sys.name);
+                    await set.set('name', sys.name);
                     await fs.write('/system/deskid', sys.deskid);
                     await wd.reboot();
                 }, pane);
             }
         }, generalPane);
         tk.cb('b1 b2 red lt', 'Erase...', () => app.settings.eraseassist.init(), generalPane);
+        const pgfx2 = tk.c('div', generalPane, 'list flexthing');
+        const tnavgfx2 = tk.c('div', pgfx2, 'tnav');
+        const titlegfx2 = tk.c('div', pgfx2, 'title');
+        tnavgfx2.innerText = "Graphics ";
+        tk.cb('b7', 'Low', async function () {
+            wm.notif('Graphics set to low', `Reboot to apply`, function () {
+                wd.reboot();
+            }, 'Reboot', true);
+            await fs.write('/system/info/lowgfx', 'true');
+        }, titlegfx2);
+        tk.cb('b7', 'Med', async function () {
+            wm.notif('Graphics set to medium', `Reboot to apply`, function () {
+                wd.reboot();
+            }, 'Reboot', true);
+            await fs.write('/system/info/lowgfx', 'half');
+        }, titlegfx2);
+        tk.cb('b7', 'High', async function () {
+            wm.notif('Graphics set to high (default)', `Reboot to apply`, function () {
+                wd.reboot();
+            }, 'Reboot', true);
+            await fs.del('/system/info/lowgfx');
+        }, titlegfx2);
+        tk.cb('b7', 'Epic', async function () {
+            wm.notif('Graphics set to epic', `Reboot to apply`, function () {
+                wd.reboot();
+            }, 'Reboot', true);
+            await fs.write('/system/info/lowgfx', 'epic');
+        }, titlegfx2);
+
+
         const pgfx = tk.c('div', generalPane, 'list flexthing');
         const tnavgfx = tk.c('div', pgfx, 'tnav');
         const titlegfx = tk.c('div', pgfx, 'title');
@@ -167,25 +197,25 @@ app['settings'] = {
             wm.notif('Graphics set to low', `Reboot to apply`, function () {
                 wd.reboot();
             }, 'Reboot', true);
-            await fs.write('/system/info/lowgfx', 'true');
+            await set.set('lowgfx', 'true');
         }, titlegfx);
         tk.cb('b7', 'Med', async function () {
             wm.notif('Graphics set to medium', `Reboot to apply`, function () {
                 wd.reboot();
             }, 'Reboot', true);
-            await fs.write('/system/info/lowgfx', 'half');
+            await set.set('lowgfx', 'half');
         }, titlegfx);
         tk.cb('b7', 'High', async function () {
             wm.notif('Graphics set to high (default)', `Reboot to apply`, function () {
                 wd.reboot();
             }, 'Reboot', true);
-            await fs.del('/system/info/lowgfx');
+            await set.set('lowgfx');
         }, titlegfx);
         tk.cb('b7', 'Epic', async function () {
             wm.notif('Graphics set to epic', `Reboot to apply`, function () {
                 wd.reboot();
             }, 'Reboot', true);
-            await fs.write('/system/info/lowgfx', 'epic');
+            await set.set('lowgfx', 'epic');
         }, titlegfx);
 
         const p = tk.c('div', generalPane, 'list flexthing');
@@ -194,11 +224,11 @@ app['settings'] = {
         tnav.innerText = "Clock seconds ";
         tk.cb('b7', 'On', async function () {
             sys.seconds = true;
-            await fs.write('/user/info/clocksec', 'true');
+            await set.set('clocksec', 'true');
         }, title);
         tk.cb('b7', 'Off', async function () {
             sys.seconds = false;
-            await fs.write('/user/info/clocksec', 'false');
+            await set.set('clocksec', 'false');
         }, title);
         tk.cb('b1', 'Back', () => ui.sw2(generalPane, mainPane), generalPane);
         // Appearance pane
@@ -386,15 +416,15 @@ app['settings'] = {
         ok2.innerText = "Font size ";
         tk.cb('b7', 'Big', async function () {
             wd.bgft();
-            fs.write('/user/info/font', 'big');
+            set.set('font', 'big');
         }, p2);
         tk.cb('b7', 'Normal', function () {
             wd.meft();
-            fs.write('/user/info/font', 'normal');
+            set.set('font', 'normal');
         }, p2);
         tk.cb('b7', 'Small', function () {
             wd.smft();
-            fs.write('/user/info/font', 'small');
+            set.set('font', 'small');
         }, p2);
 
         const p3 = tk.c('div', accPane, 'list');
@@ -452,8 +482,9 @@ app['settings'] = {
             const menu = tk.c('div', dark, 'cm');
             const m1 = tk.c('div', menu);
             const m2 = tk.c('div', menu, 'hide');
-            tk.img('/system/lib/img/icons/warn.svg', 'setupi', menu);
-            tk.p(`Are you sure?`, 'bold', menu);
+            tk.img('/system/lib/img/icons/warn.svg', 'setupi', m1);
+            tk.img('/system/lib/img/icons/pass.svg', 'setupi', m2);
+            tk.p(`Are you sure?`, 'bold', m1);
             tk.p(`You're about to erase this WebDesk. This can't be undone, everything will be deleted forever.`, undefined, m1);
             if (yeah) {
                 tk.cb('b1 nodont', 'Erase', () => ui.sw2(m1, m2), m1);
@@ -461,17 +492,18 @@ app['settings'] = {
                 tk.cb('b1 nodont', 'Erase', () => fs.erase('reboot'), m1);
             }
             tk.cb('b1', `Close`, () => ui.dest(dark), m1);
-            tk.p(`Enter account password to confirm erase`, 'bold', menu);
-            tk.p(`You're about to erase this WebDesk. This can't be undone, everything will be deleted forever.`, undefined, m1);
+            tk.p(`Enter account password to confirm erase`, 'bold', m2);
+            tk.p(`You're about to erase this WebDesk. This can't be undone, everything will be deleted forever.`, undefined, m2);
             const inp = tk.c('input', m2, 'i1');
             inp.placeholder = "Password here";
             inp.type = "password";
             tk.cb('b1', 'Erase', async function () {
-                sys.socket.emit("erase", { token: webid.token, password: inp.value });
-            });
+                sys.socket.emit("erase", { token: webid.token, pass: inp.value });
+            }, m2);
+            tk.cb('b1', `Close`, () => ui.dest(dark), m2);
             sys.socket.on("greenlight", async () => {
                 await fs.erase();
-                await wd.reboot();
+                ui.dest(menu);
             });
         }
     },

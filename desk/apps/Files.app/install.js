@@ -1,6 +1,13 @@
 app['files'] = {
     runs: true,
     name: 'Files',
+    prohib: function (path) {
+        if ((path.startsWith('/system/') || path.startsWith('/apps/') || path.startsWith('/user/info/')) && !path.startsWith('/system/lib/img/wallpapers/') && sys.dev === false) {
+            return true;
+        } else {
+            return false;
+        }
+    },
     init: async function () {
         const win = tk.mbw(`Files`, '340px', '480px', true, undefined, undefined, '/apps/Files.app/Contents/icon.svg', true);
         const search = tk.c('input', win.main, 'i1');
@@ -30,13 +37,6 @@ app['files'] = {
                 }
             });
         });
-        function prohibited(path) {
-            if ((path.startsWith('/system/') || path.startsWith('/apps/') || path.startsWith('/user/info/')) && !path.startsWith('/system/lib/img/wallpapers/') && sys.dev === false) {
-                return true;
-            } else {
-                return false;
-            }
-        }
         function clr() {
             items2.forEach(item => {
                 item.style.display = 'block';
@@ -112,7 +112,7 @@ app['files'] = {
                 e.preventDefault();
                 el.dropped = true;
                 const text = e.dataTransfer.getData('text/plain');
-                if (prohibited(text) === true) {
+                if (app.files.prohib(text) === true) {
                     wm.snack('Enable Developer Mode to move system files.');
                     return;
                 }
@@ -180,7 +180,7 @@ app['files'] = {
                     let timer;
 
                     function openmenu() {
-                        if (prohibited(item.path) === true) {
+                        if (app.files.prohib(item.path) === true) {
                             wm.snack('Enable Developer Mode to modify this folder.', 6000);
                             return;
                         }
@@ -227,7 +227,7 @@ app['files'] = {
 
                     const fileItem = tk.cb('flist width', "File: " + item.name, async function () {
                         try {
-                            if (prohibited(item.path) === true) {
+                            if (app.files.prohib(item.path) === true) {
                                 wm.snack('Enable Developer Mode to modify system files.', 6000);
                                 return;
                             }
@@ -564,7 +564,7 @@ app['files'] = {
                                 }, menu);
                                 tk.cb('b1', 'Choose', function () {
                                     ui.dest(menu); ui.dest(win.win);
-                                    if (prohibited(thing.path) === true) {
+                                    if (app.files.prohib(thing.path) === true) {
                                         if (sys.dev === false) {
                                             wm.snack(`Enable Developer Mode to make or edit files here.`);
                                             return;
@@ -596,7 +596,7 @@ app['files'] = {
                     if (inp.value === "") {
                         wm.snack('Enter a filename.');
                     } else {
-                        if (prohibited(selectedPath) === true) {
+                        if (app.files.prohib(selectedPath) === true) {
                             if (sys.dev === false) {
                                 wm.snack(`Enable Developer Mode to make or edit files here.`);
                                 return;

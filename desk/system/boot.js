@@ -3,6 +3,11 @@ async function startsockets() {
     const devsocket = await fs.read('/system/info/devsocket');
     return new Promise((resolve) => {
         try {
+            if (sys.socket) {
+                sys.socket.disconnect();
+                sys.socket = undefined;
+            }
+
             if (devsocket === "true") {
                 sys.socket = io('wss://webdeskbeta.meower.xyz/');
                 wm.notif('Using beta socket server', 'This is for testing purposes only.');
@@ -10,8 +15,17 @@ async function startsockets() {
                 sys.socket = io("wss://webdesk.meower.xyz/");
             }
 
+            const timeout = setTimeout(() => {
+                console.log('<!> Connection timeout: No response in 6 seconds');
+                sys.socket.disconnect();
+                sys.socket = undefined;
+                resolve(false);
+            }, 6000);
+
             sys.socket.on('connect_error', (error) => {
+                clearTimeout(timeout);
                 console.log('<!> Connection error: ', error);
+                sys.socket.disconnect();
                 sys.socket = undefined;
                 resolve(false);
                 webid.priv = -1;
@@ -22,7 +36,11 @@ async function startsockets() {
             });
 
             sys.socket.on("error", (data) => {
-                wm.snack(data);
+                if (data == "No token provided" && sys.setupd === false) {
+                    console.log(`<!> Quiet error: ` + data);
+                } else {
+                    wm.snack(data);
+                }
             });
 
             sys.socket.on("force_update", (data) => {
@@ -30,6 +48,7 @@ async function startsockets() {
             });
 
             sys.socket.on("connect", async () => {
+                clearTimeout(timeout);
                 const token = await fs.read('/user/info/token');
                 sys.socket.emit("login", token);
                 console.log('<i> Connected to WebDesk server');
@@ -44,7 +63,7 @@ async function startsockets() {
                     sys.name = thing.username;
                     sd = thing.username;
                     await fs.write('/user/info/name', thing.username);
-                    webid.token = await fs.read('/system/info/token');
+                    webid.token = await fs.read('/user/info/token');
                     webid.priv = thing.priv;
                     webid.userid = thing.userid;
                     if (thing.priv === 0) {
@@ -60,18 +79,13 @@ async function startsockets() {
             });
 
             sys.socket.on("webcall", async (call) => {
-                wm.notif(call.username, 'is calling you', function () {
-                    sys.callid = `${call.id}`;
-                    app.webcomm.webcall.init(call.username, call.deskid, true);
-                }, 'Pick up');
-            });
-
-            sys.socket.on("umsg", async (msg) => {
-                app.webcomm.webchat.init(msg.username, msg.contents);
             });
         } catch (error) {
             console.log(error);
-            sys.socket = undefined;
+            if (sys.socket) {
+                sys.socket.disconnect();
+                sys.socket = undefined;
+            }
             resolve(false);
         }
     });
@@ -268,7 +282,7 @@ async function bootstage2(uid2, eepysleepy, migcheck, sd, installed, lebronjames
                 const skibidi = await fetch('/target.json');
                 const fucker = await skibidi.text();
                 const json = await JSON.parse(fucker);
-                if (json['0'].target !== abt.ver) {
+                if (json['0'].target !== abt.ver || json['0'].lastmod !== abt.lastmod) {
                     const dark = ui.darken();
                     const menu = tk.c('div', dark, 'cm');
                     tk.img('/system/lib/img/icons/update.svg', 'setupi', menu);
@@ -413,15 +427,18 @@ async function bootstage2(uid2, eepysleepy, migcheck, sd, installed, lebronjames
 
         try {
             if (sys.socket !== undefined) {
+                let reconnecting = false;
                 setInterval(async function () {
-                    if (sys.socket === undefined) {
+                    if (sys.socket === undefined && !reconnecting) {
+                        reconnecting = true;
                         console.log('<!> Trying to reconnect');
                         const sock = await startsockets();
                         if (sock === true) {
                             console.log('<i> Reconnected successfully');
                         }
+                        reconnecting = false;
                     }
-                }, 5000);
+                }, 6000);
             }
         } catch (error) {
             console.log(error);

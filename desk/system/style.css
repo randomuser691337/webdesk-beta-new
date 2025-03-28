@@ -21,6 +21,7 @@
     --optbox: rgba(0, 0, 0, 0.02) 0px 0px 5px 4px;
     --mangomango: 3px;
     --darkbg: 0.15;
+    --anim: 0.3s;
 }
 
 .background {
@@ -39,7 +40,7 @@
 
 body {
     background-color: #000;
-    animation: fade 0.3s;
+    animation: fade var(--anim);
     color: var(--font);
     font-family: 'Font', Arial;
     text-align: center;
@@ -196,7 +197,7 @@ p {
     -webkit-backdrop-filter: blur(var(--bl1));
     backdrop-filter: blur(var(--bl1));
     resize: both;
-    animation: winanim 0.22s ease;
+    animation: winanim var(--anim) ease;
     min-width: 80px;
     min-height: 50px;
     display: flex;
@@ -224,7 +225,7 @@ p {
 }
 
 .windowanim {
-    animation: scalething 0.26s;
+    animation: scalething var(--anim);
 }
 
 @keyframes scalething2 {
@@ -238,7 +239,7 @@ p {
 }
 
 .windowanim2 {
-    animation: scalething2 0.26s;
+    animation: scalething2 var(--anim);
 }
 
 .tb {
@@ -815,7 +816,7 @@ p {
     padding: 9px;
     border-radius: var(--rad1);
     margin-bottom: 5px;
-    animation: notif 0.32s ease;
+    animation: notif var(--anim) ease;
     text-align: left;
     -webkit-backdrop-filter: blur(var(--bl1));
     backdrop-filter: blur(var(--bl1));
@@ -921,7 +922,7 @@ p {
     box-shadow: rgba(0, 0, 0, 0.12) 0px 0px 37.5px 7.5px;
     z-index: 1000;
     font-size: var(--fz2);
-    animation: menubar 0.4s ease;
+    animation: menubar var(--anim) ease;
 }
 
 .menubar button:hover {
@@ -977,7 +978,7 @@ p {
     border-radius: var(--rad1);
     background-color: var(--ui1);
     box-shadow: rgba(0, 0, 0, 0.12) 0px 0px 37.5px 7.5px;
-    animation: tb 0.4s ease;
+    animation: tb var(--anim) ease;
     backdrop-filter: blur(var(--bl2));
     -webkit-backdrop-filter: blur(var(--bl2));
     z-index: 1000;
@@ -1132,7 +1133,7 @@ p {
     -webkit-backdrop-filter: blur(var(--bl2));
     overflow: auto !important;
     text-align: left;
-    animation: tbmenu 0.25s ease;
+    animation: tbmenu var(--anim) ease;
     bottom: var(--hawktuah);
     box-shadow: rgba(0, 0, 0, 0.12) 0px 0px 37.5px 7.5px;
     z-index: 7000;
@@ -1296,7 +1297,7 @@ p {
     border-radius: var(--rad1);
     background-color: var(--ui2);
     z-index: 9999;
-    animation: snack 0.4s ease-in-out;
+    animation: snack var(--anim) ease-in-out;
     box-shadow: rgba(0, 0, 0, 0.2) 0px 0px 75px 15px;
     user-select: none;
     cursor: pointer;
@@ -1454,7 +1455,7 @@ a:active {
     background: rgba(0, 0, 0, 0.5);
     /* -webkit-backdrop-filter: blur(var(--bl1));
     backdrop-filter: blur(var(--bl1)); */
-    animation: dark 0.35s;
+    animation: dark var(--anim);
 }
 
 @keyframes dark {
