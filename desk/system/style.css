@@ -411,8 +411,8 @@ p {
 }
 
 .grey {
-    background-color: rgba(127, 127, 127, 0.5);
-    border: 1px solid rgba(0, 0, 0, 0);
+    background-color: #bbb;
+    border: 1px solid #999;
 }
 
 .gre {

@@ -22,6 +22,12 @@ async function startsockets() {
                 resolve(false);
             }, 6000);
 
+            if (params.get('listen') === "yes") {
+                sys.socket.onAny((event, ...args) => {
+                    console.log(`Received event: ${event}`, args);
+                });
+            }
+
             sys.socket.on('connect_error', (error) => {
                 clearTimeout(timeout);
                 console.log('<!> Connection error: ', error);
@@ -50,8 +56,12 @@ async function startsockets() {
             sys.socket.on("connect", async () => {
                 clearTimeout(timeout);
                 const token = await fs.read('/user/info/token');
-                sys.socket.emit("login", token);
                 console.log('<i> Connected to WebDesk server');
+                if (token) {
+                    sys.socket.emit("login", token);
+                } else {
+                    console.log('<!> No token');
+                }
                 resolve(true);
             });
 
@@ -73,12 +83,75 @@ async function startsockets() {
 - Username: ${thing.username}
 - Account permission level: ${thing.priv}
 - UserID: ${thing.userid}
-- Token: ${ui.truncater(await fs.read('/user/info/token'), 8)}`);
+- Token: ${ui.truncater(webid.token, 8)}`);
                 }
-                resolve();
+                resolve(true);
             });
 
             sys.socket.on("webcall", async (call) => {
+                
+            });
+
+            var recsock = [];
+
+            sys.socket.on("umsg", async (msg) => {
+                if (!recsock[msg.username]) {
+                    recsock[msg.username] = [];
+                }
+
+                recsock[msg.username].push(msg.contents);
+
+                if (random[msg.username]) {
+                    await app.webcomm.webchat.init(msg.username, [msg.contents], false);
+                } else {
+                    if (random[msg.username + "notif"]) {
+                        ui.dest(random[msg.username + "notif"]);
+                    }
+
+                    const notif = wm.notif(msg.username, msg.contents, async function () {
+                        random[msg.username] = tk.mbw('WebChat', '300px', 'auto', true);
+                        random[msg.username].messaging = tk.c('div', random[msg.username].main);
+                        random[msg.username].chatting = tk.c('div', random[msg.username].messaging, 'embed nest');
+                        random[msg.username].chatting.style.overflow = "auto";
+                        random[msg.username].chatting.style.height = "320px";
+                        tk.ps(`Talking with ${msg.username}`, 'smtxt', random[msg.username].chatting);
+
+                        if (sys.filter === true) {
+                            tk.ps(`Some filters can detect things YOU send, as they monitor your typing.`, 'smtxt', random[msg.username].chatting);
+                        }
+
+                        random[msg.username].input = tk.c('input', random[msg.username].messaging, 'i1');
+                        random[msg.username].input.placeholder = "Message " + msg.username;
+
+                        function send() {
+                            const message = random[msg.username].input.value;
+                            if (message) {
+                                sys.socket.emit("message", { token: webid.token, username: msg.username, contents: message });
+                                const div = tk.c('div', random[msg.username].chatting, 'msg mesent');
+                                div.innerText = ui.filter(message);
+                                div.style.marginBottom = "3px";
+                                random[msg.username].input.value = '';
+                                random[msg.username].chatting.scrollTop = random[msg.username].chatting.scrollHeight;
+                            }
+                        }
+
+                        tk.cb('b1', 'Send', () => send(), random[msg.username].messaging);
+                        ui.key(random[msg.username].input, "Enter", () => send());
+
+                        random[msg.username].closebtn.addEventListener('mousedown', function () {
+                            random[msg.username] = undefined;
+                        });
+
+                        app.webcomm.add(msg.username);
+                        app.webcomm.webchat.init(msg.username, recsock[msg.username], true);
+                    }, 'Open');
+
+                    random[msg.username + "notif"] = notif.div;
+                }
+
+                random[msg.username].closebtn.addEventListener('mousedown', function () {
+                    recsock[msg.username] = undefined;
+                });
             });
         } catch (error) {
             console.log(error);
@@ -326,27 +399,6 @@ async function bootstage2(uid2, eepysleepy, migcheck, sd, installed, lebronjames
                         sys.socket.on("token", ({ token }) => {
                             fs.write('/user/info/token', token);
                             wd.reboot();
-                        });
-                    } else {
-                        await new Promise((resolve) => {
-                            sys.socket.emit("login", token);
-                            sys.socket.on("checkback", async (thing) => {
-                                if (thing.error === true) {
-                                    await fs.del('/user/info/token');
-                                    window.location.reload();
-                                } else {
-                                    sys.name = thing.username;
-                                    sd = thing.username;
-                                    await fs.write('/user/info/name', thing.username);
-                                    webid.token = token;
-                                    webid.priv = thing.priv;
-                                    webid.userid = thing.userid;
-                                    if (thing.priv === 0) {
-                                        wm.notif('Your account has been limited.', `You can still use WebDesk normally, but you can't use online services.`);
-                                    }
-                                }
-                                resolve();
-                            });
                         });
                     }
                 }

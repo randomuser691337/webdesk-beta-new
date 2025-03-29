@@ -221,13 +221,21 @@ app['webcomm'] = {
     },
     webchat: {
         runs: false,
-        init: async function (name, message) {
+        init: async function (name, message, multi) {
             if (random[name]) {
-                wd.win(random[name].win);
-                const msg = tk.c('div', random[name].chatting, 'flist othersent');
-                msg.style.marginBottom = "3px";
-                msg.innerText = ui.filter(`${name}: ` + message);
+                if (multi === true) {
+                    message.forEach((message) => {
+                        const msg = tk.c('div', random[name].chatting, 'flist othersent');
+                        msg.style.marginBottom = "3px";
+                        msg.innerText = ui.filter(message);
+                    });
+                } else {
+                    const msg = tk.c('div', random[name].chatting, 'flist othersent');
+                    msg.style.marginBottom = "3px";
+                    msg.innerText = ui.filter(message);
+                }
                 random[name].chatting.scrollTop = random[name].chatting.scrollHeight;
+                wd.win(random[name].win);
             } else {
                 if (wd.checkperms() === false) {
                     wm.notif(name, `sent you a message, but your account is limited. View anyways?`, async function () {
@@ -235,7 +243,10 @@ app['webcomm'] = {
                     }, 'Show message');
                     return;
                 };
-                wm.notif(name, message, async function () {
+                if (random[name + "notif"]) {
+                    ui.dest(random[name + "notif"]);
+                }
+                const notif = wm.notif(name, message, async function () {
                     random[name] = tk.mbw('WebChat', '300px', 'auto', true);
                     random[name].messaging = tk.c('div', random[name].main);
                     random[name].chatting = tk.c('div', random[name].messaging, 'embed nest');
@@ -254,7 +265,7 @@ app['webcomm'] = {
                         if (msg) {
                             sys.socket.emit("message", { token: webid.token, username: name, contents: msg });
                             const div = tk.c('div', random[name].chatting, 'msg mesent');
-                            div.innerText = ui.filter(`${sys.name}: ` + msg);
+                            div.innerText = ui.filter(msg);
                             div.style.marginBottom = "3px";
                             random[name].input.value = '';
                             random[name].chatting.scrollTop = random[name].chatting.scrollHeight;
@@ -270,8 +281,9 @@ app['webcomm'] = {
                     });
 
                     app.webcomm.add(name);
-                    app.webcomm.webchat.init(name, message);
+                    app.webcomm.webchat.init(name, message, multi);
                 }, 'Open');
+                random[name + "notif"] = notif.div;
             }
         }
     },
