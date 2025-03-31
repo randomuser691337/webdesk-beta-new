@@ -310,8 +310,8 @@ p {
 }
 
 .winb {
-    width: 13px !important;
-    height: 13px !important;
+    width: 13px;
+    height: 13px;
     min-width: 13px !important;
     max-width: 13px !important;
     min-height: 13px !important;
@@ -411,8 +411,10 @@ p {
 }
 
 .grey {
-    background-color: #bbb;
-    border: 1px solid #999;
+    background-color: rgba(127, 127, 127, 0.5);
+    width: 15px !important;
+    height: 15px !important;
+    border: none !important;
 }
 
 .gre {
