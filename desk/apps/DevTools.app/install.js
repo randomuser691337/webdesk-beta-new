@@ -21,6 +21,37 @@ if (sys.dev === true) {
                 fs.write('/system/info/devsocket', 'true');
             }, blurp);
             blur2.style = "flex: 1 1; margin-left: 1px !important;";
+            tk.p('Change DeskID', undefined, win.main);
+            tk.p(`If you hate your current DeskID, change it below to any digit below 7 characters`, undefined, win.main);
+            const input = tk.c('input', win.main, 'i1');
+            input.placeholder = "Enter any DeskID";
+            tk.cb('b1 b2', 'Obtain new DeskID', async function () {     
+                if (input.value === sys.deskid) {
+                    wm.snack("New DeskID cannot be the same as your old DeskID");
+                    return false;
+                }
+                isValid = /^[0-9]{1,7}$/.test(input.value);
+                if (isValid) {
+                    fs.write('/system/deskid', input.value);
+                    ptp.go(input.value)
+                    wm.snack("Changed DeskID to " + input.value) 
+                } else {
+                    wm.snack("Not a valid number");
+                }
+            }, win.main);
+            tk.cb('b1 b2', 'Obtain new DeskID (until next restart)', async function () {
+                if (input.value === sys.deskid) {
+                    wm.snack("New DeskID cannot be the same as your old DeskID");
+                    return false;
+                }
+                isValid = /^[0-9]{1,7}$/.test(input.value);
+                if (isValid) {
+                    ptp.go(input.value)
+                    wm.snack("Temporarily changed DeskID until next reboot to " + input.value) 
+                } else {
+                    wm.snack("Not a valid number");
+                }
+            }, win.main);
         }
     }
 }
