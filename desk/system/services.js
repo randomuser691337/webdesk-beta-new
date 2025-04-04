@@ -112,7 +112,7 @@ var ptp = {
                         console.log(parsedData);
                         if (parsedData.response) {
                             if (sys.callid === parsedData.id) {
-                                ui.dest(random["call" + sys.callid].win);
+                                // ui.dest(random["call" + sys.callid].win);
                                 navigator.mediaDevices.getUserMedia({ audio: true })
                                     .then((stream) => {
                                         call.answer(stream);

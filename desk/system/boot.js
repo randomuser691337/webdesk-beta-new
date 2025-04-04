@@ -378,12 +378,15 @@ async function bootstage2(uid2, eepysleepy, migcheck, sd, installed, lebronjames
                 const skibidi = await fetch('/target.json');
                 const fucker = await skibidi.text();
                 const json = await JSON.parse(fucker);
-                if (json['0'].target !== abt.ver || json['0'].lastmod !== abt.lastmod) {
+                if (json['0'].target !== abt.ver || json['0'].lastmod !== abt.lastmod || params.get('update') === "yes") {
                     const dark = ui.darken();
                     const menu = tk.c('div', dark, 'cm');
                     tk.img('/system/lib/img/icons/update.svg', 'setupi', menu);
                     tk.p('Update WebDesk', 'bold', menu);
                     tk.p('This will only take a few seconds.', undefined, menu);
+                    if (params.get('update') === "yes") {
+                        tk.p('update=yes is in the URL, this is making this message show', 'warn', menu);
+                    }
                     tk.p(abt.ver + " to " + json['0'].target, undefined, menu);
                     tk.cb('b1', 'Later', () => ui.dest(dark), menu); tk.cb('b1', 'Update', async function () {
                         await fs.del('/system/webdesk');
