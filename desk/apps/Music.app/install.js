@@ -101,34 +101,86 @@ app['music'] = {
                 });
             });
         }
+        let playlist = [];
         async function shuffle() {
-            const div = tk.c('div', document.body, 'hide');
-            const ok = await fs.ls(currentpath);
-            for (const item of ok.items) {
-                tk.cb('b4 b2 left', item.name, async function () {
-                    stopmusic(); playmusic(item.path, item.name);
-                }, div);
+            if (playlist.length === 0) {
+                const ok = await fs.ls(currentpath);
+                playlist = ok.items
+                    .filter(item => !item.name.endsWith('.folder') || !item.type === "folder")
+                    .map(item => ({ path: item.path, name: item.name }));
             }
-            const elements = div.children;
-            if (elements.length === 0) return null;
-            let go = elements[Math.floor(Math.random() * elements.length)];
-            function go2() {
-                if (go.innerText !== "Back") {
-                    go.click();
-                } else {
-                    go = elements[Math.floor(Math.random() * elements.length)];
-                    go2();
-                }
+
+            if (playlist.length === 0) {
+                wm.snack('No songs available to shuffle');
+                return;
             }
-            go2();
-            div.remove();
+
+            const randomIndex = Math.floor(Math.random() * playlist.length);
+            const selectedSong = playlist.splice(randomIndex, 1)[0];
+            playmusic(selectedSong.path, selectedSong.name);
         }
+
+        function setupMediaSession(audio, metadata) {
+            if ('mediaSession' in navigator) {
+                let artworkSrc = '';
+                if (metadata.picture && metadata.picture.data && metadata.picture.format) {
+                    const byteArray = new Uint8Array(metadata.picture.data);
+                    const blob = new Blob([byteArray], { type: metadata.picture.format });
+                    artworkSrc = URL.createObjectURL(blob);
+                }
+
+                navigator.mediaSession.metadata = new MediaMetadata({
+                    title: metadata.title || 'Unknown',
+                    artist: metadata.artist || 'Unknown',
+                    album: metadata.album || 'Unknown',
+                    artwork: [
+                        { src: artworkSrc, sizes: '512x512', type: metadata.picture?.format || 'image/png' }
+                    ]
+                });
+
+                navigator.mediaSession.setActionHandler('play', () => {
+                    if (audio.paused) {
+                        audio.play();
+                    }
+                });
+
+                navigator.mediaSession.setActionHandler('pause', () => {
+                    if (!audio.paused) {
+                        audio.pause();
+                    }
+                });
+
+                navigator.mediaSession.setActionHandler('seekbackward', (details) => {
+                    audio.currentTime = Math.max(0, audio.currentTime - (details.seekOffset || 10));
+                });
+
+                navigator.mediaSession.setActionHandler('seekforward', (details) => {
+                    audio.currentTime = Math.min(audio.duration, audio.currentTime + (details.seekOffset || 10));
+                });
+
+                navigator.mediaSession.setActionHandler('stop', () => {
+                    audio.pause();
+                    // audio.currentTime = 0;
+                });
+
+                navigator.mediaSession.setActionHandler('seekto', (details) => {
+                    if (details.fastSeek && 'fastSeek' in audio) {
+                        audio.fastSeek(details.seekTime);
+                    } else {
+                        audio.currentTime = details.seekTime;
+                    }
+                });
+            }
+        }
+
         async function playmusic(path2, name2, ext) {
+            stopmusic();
             const sigma = await fs.read(path2);
             audio = await ui.play(path2, sigma);
             audio.addEventListener("ended", async function () {
                 shuffle();
             });
+
             const progressBar = tk.c('input', nowplay);
             progressBar.type = "range";
             progressBar.min = 0;
@@ -140,6 +192,8 @@ app['music'] = {
             console.log(go);
             nowplaytxt.innerText = ui.truncater(go.title, 18, true);
             lyrics(go.title, go.artist).then(lyr => { console.log(lyr); });
+
+            setupMediaSession(audio, go);
 
             const playPauseBtn = tk.cb('b4', 'Pause', function () {
                 if (audio.paused) {
@@ -168,26 +222,50 @@ app['music'] = {
 
             show(plaything);
         }
-        tk.cb('b4 b2 left', 'Music', async function () {
+
+        const mbtn = tk.cb('b4 b2 left', 'Music', async function () {
             showm(musicm);
             const div = tk.c('div', musicm);
             tk.cb('b4', 'Back', function () {
                 ui.dest(div);
                 showm(mainm);
+
             }, div);
             tk.cb('b4', 'New playlist', function () {
-                shuffle();
+                const div = tk.c('div', musicm, 'cm');
+                tk.p('Create a new playlist', undefined, div);
+                const input = tk.c('input', div, 'i1');
+                input.placeholder = 'Playlist name';
+                tk.cb('b4', 'Close', async function () {
+                    ui.dest(div);
+                }, div);
+                tk.cb('b4', 'Create', async function () {
+                    const playlistName = input.value.trim();
+                    if (!playlistName) {
+                        wm.snack('Playlist name cannot be empty');
+                        return;
+                    }
+                    const path = '/apps/Music.app/Contents/library/' + playlistName;
+                    currentpath = path;
+                    await fs.write(path + "/.folder", '.folder');
+                    wm.snack(`Playlist ${playlistName} created`);
+                    mbtn.click();
+                    ui.dest(div);
+                }, div);
             }, div);
             const ok = await fs.ls(currentpath);
             for (const item of ok.items) {
-                if (item.type === "folder") {
-                    tk.cb('b4 b2 left', item.name, async function () {
-                        stopmusic(); playmusic(item.path, item.name);
-                    }, div);
-                } else {
-                    tk.cb('b4 b2 left', item.name, async function () {
-                        stopmusic(); playmusic(item.path, item.name);
-                    }, div);
+                if (item.name !== ".folder") {
+                    if (item.type === "folder") {
+                        tk.cb('b4 b2 left bold', item.name, async function () {
+                            currentpath = item.path;
+                            mbtn.click();
+                        }, div);
+                    } else {
+                        tk.cb('b4 b2 left', item.name, async function () {
+                            stopmusic(); playmusic(item.path, item.name);
+                        }, div);
+                    }
                 }
             }
         }, mainm).addEventListener('mouseover', function () { show(musicthing); });
@@ -299,6 +377,16 @@ app['music'] = {
 
         win.closebtn.addEventListener('click', function () {
             stopmusic(); tagger.remove();
+            navigator.mediaSession.metadata = null;
+            navigator.mediaSession.setActionHandler("play", null);
+            navigator.mediaSession.setActionHandler("pause", null);
+            navigator.mediaSession.setActionHandler("stop", null);
+            navigator.mediaSession.setActionHandler("seekbackward", null);
+            navigator.mediaSession.setActionHandler("seekforward", null);
+            navigator.mediaSession.setActionHandler("seekto", null);
+            navigator.mediaSession.setActionHandler("previoustrack", null);
+            navigator.mediaSession.setActionHandler("nexttrack", null);
+
         });
 
         if (path && name) {

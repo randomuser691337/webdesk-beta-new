@@ -1456,8 +1456,8 @@ a:active {
     top: 0px;
     z-index: 9990;
     background: rgba(0, 0, 0, 0.5);
-    /* -webkit-backdrop-filter: blur(var(--bl1));
-    backdrop-filter: blur(var(--bl1)); */
+    -webkit-backdrop-filter: blur(var(--bl1));
+    backdrop-filter: blur(var(--bl1));
     animation: dark var(--anim);
 }
 

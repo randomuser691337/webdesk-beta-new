@@ -342,8 +342,8 @@ app['files'] = {
                                         const menu = tk.c('div', dark, 'cm');
                                         tk.img('/desk/system/lib/img/icons/warn.svg', 'icon', menu);
                                         tk.p('Install this WebDesk?', 'bold', menu);
-                                        tk.p(`This will overwrite WebDesk with it's own files, which could add viruses.`, undefined, menu);
-                                        tk.p(`Make sure you have a backup. Official WebDesk updates will overwrite this version.`, undefined, menu);
+                                        tk.p(`This will overwrite WebDesk with it's own files, which could install viruses.`, undefined, menu);
+                                        tk.p(`Make sure you have a backup. WebDesk updates will overwrite this version.`, undefined, menu);
                                         tk.cb('b1 nodontdoit', 'Install', async function () {
                                             await fs.write('/system/custom', 'true');
                                             const blob = await (await fetch(filecontent)).blob();

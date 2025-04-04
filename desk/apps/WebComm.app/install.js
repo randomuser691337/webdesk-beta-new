@@ -72,7 +72,18 @@ app['webcomm'] = {
             } else {
                 sys.callid = await gens(32);
                 sys.socket.emit("call", { token: webid.token, username: inp.value, deskid: sys.deskid, id: `${sys.callid}` });
-                // app.webcomm.webcall.init(inp.value);
+                random["call" + sys.callid] = tk.mbw('WebCall', '260px', 'auto', true, undefined, undefined);
+                random["call" + sys.callid].win.click();
+                const msg = tk.p(`Waiting for answer`, undefined, random["call" + sys.callid].main);
+                tk.cb('b1 nodontdoit', 'End', function () {
+                    sys.callid = undefined;
+                    random["call" + sys.callid].closebtn.click();
+                }, random["call" + sys.callid].main);
+                setTimeout(function () {
+                    if (msg) {
+                        msg.innerText = inp.value + " didn't pick up";
+                    }
+                }, 15000);
             }
         }, win.main);
         const chatbtn = tk.cb('b1', 'Message', async function () {
@@ -244,7 +255,7 @@ app['webcomm'] = {
                     }, 'Show message');
                     return;
                 };
-                
+
                 if (random[name + "notif"]) {
                     ui.dest(random[name + "notif"]);
                     if (random[name + "count"]) {

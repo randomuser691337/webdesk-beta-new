@@ -112,7 +112,6 @@ var ptp = {
                         console.log(parsedData);
                         if (parsedData.response) {
                             if (sys.callid === parsedData.id) {
-                                // ui.dest(random["call" + sys.callid].win);
                                 navigator.mediaDevices.getUserMedia({ audio: true })
                                     .then((stream) => {
                                         call.answer(stream);
@@ -124,6 +123,7 @@ var ptp = {
                                         wm.notif('WebCall Error', 'Microphone access is denied, calling/answering might fail.');
                                         console.log(`<!> ${err}`);
                                     });
+                                    random["call" + sys.callid].win.closebtn.click();
                             }
                         } else {
                             console.log(`<!> Call IDs don't match, giving up.`);
@@ -309,17 +309,17 @@ async function migrationgo(deskid, el) {
             conn.on('open', async function () {
                 try {
                     console.log('Part 2 complete');
-                    const fileContents = await Promise.all(files.map(file => fs.read(file)));
-                    fileContents.forEach((content, index) => {
+                    for (const file of files) {
                         if (el) {
-                            el.innerText = 'Sending ' + files[index];
+                            el.innerText = `Sending ${file}`;
                         }
+                        const fileContent = await fs.read(file);
                         conn.send({
                             name: 'MigrationFile',
-                            file: content,
-                            filename: files[index],
+                            file: fileContent,
+                            filename: file,
                         });
-                    });
+                    }
                     conn.send({ name: 'MigrationEnd' });
                     resolve(true);
                 } catch (fileReadError) {
