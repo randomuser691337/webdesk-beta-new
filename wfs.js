@@ -1,20 +1,29 @@
 let db;
 const request = indexedDB.open("WebDeskDB", 2);
 const pin = undefined;
+let lastAction = "Initializing";
+
+function logTimeout(action) {
+    lastAction = action;
+    setTimeout(() => {
+        console.warn(`<i> Operation "${lastAction}" is taking longer than expected.`);
+    }, 4000);
+}
 
 request.onerror = function (event) {
-    console.error('Error opening database:', event.target.error);
+    console.error('<!> Error opening database: ', event.target.error);
     self.postMessage({ type: 'error', data: event.target.error });
 };
 
 request.onsuccess = function (event) {
     db = event.target.result;
-    console.log('Database opened successfully');
+    console.log('<i> Database opened successfully');
     self.postMessage({ type: 'db_ready' });
 };
 
 request.onupgradeneeded = function (event) {
     db = event.target.result;
+    logTimeout("Upgrading database");
     if (!db.objectStoreNames.contains('main')) {
         const objectStore = db.createObjectStore('main', { keyPath: 'path' });
         console.log('Worker initialized DB for the first time');

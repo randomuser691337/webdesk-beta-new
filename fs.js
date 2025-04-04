@@ -1,5 +1,5 @@
 var wfs = new Worker('/wfs.js');
-
+var fsloaded = false;
 wfs.onmessage = function (event) {
     const { type, data, requestId } = event.data;
     if (pendingRequests[requestId]) {
@@ -10,6 +10,8 @@ wfs.onmessage = function (event) {
         }
         delete pendingRequests[requestId];
     } else if (type === 'db_ready') {
+        fsloaded = true;
+        console.log(`<i> Calling boot()`);
         boot();
     } else if (type === "reboot") {
         try {

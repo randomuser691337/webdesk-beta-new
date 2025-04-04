@@ -80,7 +80,7 @@ var wm = {
                 setTimeout(() => {
                     wid.classList.remove('unmax');
                     wid.style.bottom = "undefined";
-                }, 260);
+                }, sys.animspeed2);
             }
         }
     },
@@ -104,7 +104,7 @@ var wm = {
                     top: endOffset.bottom,
                     left: endOffset.x - (endOffset.width / 2),
                     opacity: 0
-                }, 260, function () {
+                }, sys.animspeed2, function () {
                     $animatedDiv.hide();
                     $animatedDiv.removeClass("windowanim");
                 });
@@ -122,7 +122,7 @@ var wm = {
                 top: original.top,
                 left: original.left,
                 opacity: 1
-            }, 260, function () {
+            }, sys.animspeed2, function () {
                 $animatedDiv.removeClass("minimized");
             });
 
@@ -164,9 +164,9 @@ var wm = {
             $(div).css({ opacity: 1 })
                 .animate(
                     { opacity: 0 },
-                    { duration: 220, queue: false }
+                    { duration: sys.animspeed2, queue: false }
                 )
-                .slideUp(220, function () {
+                .slideUp(sys.animspeed2, function () {
                     ui.dest(div, 0);
                 });
         }

@@ -89,7 +89,14 @@ async function startsockets() {
             });
 
             sys.socket.on("webcall", async (call) => {
-                
+                const notif = wm.notif('Call from ' + call.username, undefined, async function () {
+                    app.webcomm.webcall.init(call.username, call.deskid, call.id);
+                }, 'Answer');
+                setTimeout(function () {
+                    if (notif) {
+                        ui.dest(notif.div);
+                    }
+                }, 15000);
             });
 
             var recsock = [];
@@ -184,6 +191,7 @@ async function bootstage2(uid2, eepysleepy, migcheck, sd, installed, lebronjames
             await initscript('/system/ui.js');
             await initscript('/system/lib/crop/cropper.js');
             sd = await set.read('name');
+            sd2 = await fs.read('/user/info/name');
             abt.ver = await fs.read('/system/info/currentver');
             abt.lastmod = await fs.read('/system/info/currentveredit');
             await initcss('/system/style.css');
@@ -200,7 +208,7 @@ async function bootstage2(uid2, eepysleepy, migcheck, sd, installed, lebronjames
         }
 
         console.log('<i> Boot stage 2: Load variables, make decisions');
-        if (sd && !migcheck) {
+        if ((sd || sd2) && !migcheck) {
             const uid = params.get('deskid');
             if (uid) {
                 sys.migrid = uid;
@@ -272,7 +280,7 @@ async function bootstage2(uid2, eepysleepy, migcheck, sd, installed, lebronjames
 
             if (!lebronjames) {
                 const [
-                    darkpref, lightdark, color, font, mob, clocksec, filtering, notifsound, silent
+                    darkpref, lightdark, color, font, mob, clocksec, filtering, notifsound, silent, setupver, setuptime, blur, lowgfx, name
                 ] = await Promise.all([
                     fs.read('/user/info/lightdarkpref'),
                     fs.read('/user/info/lightdark'),
@@ -283,6 +291,11 @@ async function bootstage2(uid2, eepysleepy, migcheck, sd, installed, lebronjames
                     fs.read('/user/info/filter'),
                     fs.read('/user/info/notifsrc'),
                     fs.read('/user/info/silent'),
+                    fs.read('/system/info/setupver'),
+                    fs.read('/system/info/setuptime'),
+                    fs.read('/user/info/blur'),
+                    fs.read('/system/info/lowgfx'),
+                    fs.read('/user/info/name'),
                 ]);
                 await set.set('lightdarkpref', darkpref);
                 await set.set('lightdark', lightdark);
@@ -294,6 +307,11 @@ async function bootstage2(uid2, eepysleepy, migcheck, sd, installed, lebronjames
                 await set.set('filter', filtering);
                 await set.set('notifsrc', notifsound);
                 await set.set('silent', silent);
+                await set.set('setupver', setupver);
+                await set.set('setuptime', setuptime);
+                await set.set('blur', blur);
+                await set.set('lowgfx', lowgfx);
+                await set.set('name', name);
                 await fs.del('/user/info/lightdarkpref');
                 await fs.del('/user/info/lightdark');
                 await fs.del('/user/info/color');
@@ -303,6 +321,11 @@ async function bootstage2(uid2, eepysleepy, migcheck, sd, installed, lebronjames
                 await fs.del('/user/info/filter');
                 await fs.del('/user/info/notifsrc');
                 await fs.del('/user/info/silent');
+                await fs.del('/user/info/blur');
+                await fs.del('/system/info/lowgfx');
+                await fs.del('/user/info/name');
+                await initscript('/apps/Achievements.app/install.js');
+                await app.ach.unlock(`Everything Stays`, `Surivive the 0.3.2 update.`);
                 await wd.reboot();
             }
 

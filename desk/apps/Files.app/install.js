@@ -130,48 +130,54 @@ app['files'] = {
             for (const item of contents.items) {
                 if (item.type === "folder") {
                     let folder;
-                    let flipped = false;
                     if (item.path.includes('.app')) {
-                        const skibidi2 = await fs.ls(item.path);
-                        for (const item3 of skibidi2.items) {
-                            if (item3.name === "install.js") {
-                                if (flipped === false) {
-                                    flipped = true;
-                                    folder = tk.cb('flist width', "App: " + item.name, function () {
-                                        const menu = tk.c('div', document.body, 'cm');
-                                        if (sys.dev === true) {
-                                            if (item.path.startsWith('/apps/')) {
-                                                tk.p(item.name, 'bold', menu);
-                                                tk.cb('b1 b2', 'View contents', async function () {
-                                                    await navto(item.path);
-                                                    ui.dest(menu);
-                                                }, menu);
-                                                tk.cb('b1 b2', 'Delete app', async function () {
-                                                    await fs.delfold(item.path);
-                                                    ui.dest(menu);
-                                                    ui.slidehide(folder, 100);
-                                                }, menu);
-                                                tk.cb('b1', 'Close', () => ui.dest(menu), menu);
-                                            } else {
-                                                tk.p(`This is a WebDesk app, but it's not in the /Apps/ folder.`, 'bold', menu);
-                                                tk.cb('b1 b2', 'View contents', async function () {
-                                                    await navto(item.path);
-                                                    ui.dest(menu);
-                                                }, menu); tk.cb('b1', 'Close', () => ui.dest(menu), menu);
-                                            }
-                                        } else {
-                                            tk.p('Enable Developer Mode to manage this app.', 'bold', menu);
-                                            tk.cb('b1', 'Close', () => ui.dest(menu), menu);
-                                        }
-                                    }, items);
+                        folder = tk.cb('flist width', "App: " + item.name, function () {
+                            const menu = tk.c('div', document.body, 'cm');
+                            if (sys.dev === true) {
+                                if (item.path.startsWith('/apps/')) {
+                                    tk.p(item.name, 'bold', menu);
+                                    tk.cb('b1 b2', 'View contents', async function () {
+                                        await navto(item.path);
+                                        ui.dest(menu);
+                                    }, menu);
+                                    tk.cb('b1 b2', 'Delete app', async function () {
+                                        await fs.delfold(item.path);
+                                        ui.dest(menu);
+                                        ui.slidehide(folder, 100);
+                                    }, menu);
+                                    tk.cb('b1', 'Close', () => ui.dest(menu), menu);
+                                } else {
+                                    tk.p(`This is a WebDesk app, but it's not in the /Apps/ folder.`, 'bold', menu);
+                                    tk.cb('b1 b2', 'View contents', async function () {
+                                        await navto(item.path);
+                                        ui.dest(menu);
+                                    }, menu);
+                                    tk.cb('b1 b2', 'Delete app', async function () {
+                                        await fs.delfold(item.path);
+                                        ui.dest(menu);
+                                        ui.slidehide(folder, 100);
+                                    }, menu);
+                                    tk.cb('b1', 'Close', () => ui.dest(menu), menu);
                                 }
                             } else {
-                                if (flipped === false) {
-                                    folder = tk.cb('flist width', "Folder: " + item.name, () => navto(item.path), items);
-                                    flipped = true;
+                                if (!item.path.startsWith('/apps/')) {
+                                    tk.p(item.name, 'bold', menu);
+                                    tk.cb('b1 b2', 'View contents', async function () {
+                                        await navto(item.path);
+                                        ui.dest(menu);
+                                    }, menu);
+                                    tk.cb('b1 b2', 'Delete app', async function () {
+                                        await fs.delfold(item.path);
+                                        ui.dest(menu);
+                                        ui.slidehide(folder, 100);
+                                    }, menu);
+                                    tk.cb('b1', 'Close', () => ui.dest(menu), menu);
+                                } else {
+                                    tk.p(`Enable Developer Mode to manage this app, or go to Settings -> Manage apps`, 'bold', menu);
+                                    tk.cb('b1', 'Close', () => ui.dest(menu), menu);
                                 }
                             }
-                        }
+                        }, items);
                     } else {
                         folder = tk.cb('flist width', "Folder: " + item.name, () => navto(item.path), items);
                     }
@@ -258,6 +264,10 @@ app['files'] = {
                                         (await thing).img.style.marginBottom = "4px";
                                     } else if (item.name.endsWith('.zip')) {
                                     } else if (item.name.endsWith('.mp3')) {
+                                        thing = tk.c('audio', menu, 'embed');
+                                        thing.controls = true;
+                                        thing.src = filecontent;
+                                        thing.style.marginBottom = "4px";
                                     } else {
                                         thing = tk.c('div', menu, 'embed resizeoff');
                                         const genit = gen(8);
@@ -292,6 +302,8 @@ app['files'] = {
                             tk.cb('b3', 'Open', async function () {
                                 if (filecontent.startsWith('data:app') || filecontent.startsWith('data:image')) {
                                     app.imgview.init(filecontent);
+                                } else if (filecontent.startsWith('data:') && (item.path.endsWith('.mp3') || item.path.endsWith('.wav'))) {
+                                    app.imgview.init(filecontent, item.path, item.name);
                                 } else if (filecontent.startsWith('data:')) {
                                     app.imgview.init(filecontent, item.path, item.name);
                                 } else {
@@ -326,8 +338,9 @@ app['files'] = {
                                 }, btnmenu2);
                                 if (sys.dev === true) {
                                     tk.cb('b3', 'Update Package', async function () {
-                                        const menu = tk.c('div', document.body, 'cm');
-                                        tk.img('apps/Files.app/Contents/update.svg', 'icon', menu);
+                                        const dark = ui.darken();
+                                        const menu = tk.c('div', dark, 'cm');
+                                        tk.img('/desk/system/lib/img/icons/warn.svg', 'icon', menu);
                                         tk.p('Install this WebDesk?', 'bold', menu);
                                         tk.p(`This will overwrite WebDesk with it's own files, which could add viruses.`, undefined, menu);
                                         tk.p(`Make sure you have a backup. Official WebDesk updates will overwrite this version.`, undefined, menu);
@@ -355,7 +368,7 @@ app['files'] = {
                                             }
                                             wd.reboot();
                                         }, menu);
-                                        tk.cb('b1', 'Cancel', () => ui.dest(menu), menu);
+                                        tk.cb('b1', 'Cancel', () => ui.dest(dark), menu);
                                     }, btnmenu2);
                                 }
                                 tk.cb('b1', 'Cancel', () => ui.dest(menu2), menu2).style.marginTop = "4px";

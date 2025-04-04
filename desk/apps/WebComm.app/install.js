@@ -70,7 +70,7 @@ app['webcomm'] = {
                 wm.snack(`Type a username that isn't yours.`);
                 app.ach.unlock('So lonely...', 'So lonely, you tried calling yourself.');
             } else {
-                sys.callid = gens(32);
+                sys.callid = await gens(32);
                 sys.socket.emit("call", { token: webid.token, username: inp.value, deskid: sys.deskid, id: `${sys.callid}` });
                 // app.webcomm.webcall.init(inp.value);
             }
@@ -80,7 +80,7 @@ app['webcomm'] = {
                 wm.snack(`Type a username that isn't yours.`);
                 app.ach.unlock('So lonely...', 'So lonely, you tried messaging yourself.');
             } else {
-                await app.webcomm.webchat.init(inp.value, '');
+                await app.webcomm.webchat.init(inp.value, '', 'open');
             }
         }, win.main);
         async function ok() {
@@ -136,10 +136,11 @@ app['webcomm'] = {
     },
     webcall: {
         runs: false,
-        init: async function (name, deskid, answering, id) {
+        init: async function (name, deskid, id) {
             const win = tk.mbw('WebCall', '260px', 'auto', true, undefined, undefined);
             const callStatus = tk.p(`Connecting...`, undefined, win.main);
             let oncall = false;
+            sys.callid = id;
             navigator.mediaDevices.getUserMedia({ audio: true }).then((stream) => {
                 remotePeerId = deskid;
                 const call = sys.peer.call(remotePeerId, stream);
@@ -243,10 +244,18 @@ app['webcomm'] = {
                     }, 'Show message');
                     return;
                 };
+                
                 if (random[name + "notif"]) {
                     ui.dest(random[name + "notif"]);
+                    if (random[name + "count"]) {
+                        random[name + "count"]++;
+                    } else {
+                        random[name + "count"] = 1;
+                    }
                 }
-                const notif = wm.notif(name, message, async function () {
+
+                function go() {
+                    delete random[name + "count"];
                     random[name] = tk.mbw('WebChat', '300px', 'auto', true);
                     random[name].messaging = tk.c('div', random[name].main);
                     random[name].chatting = tk.c('div', random[name].messaging, 'embed nest');
@@ -282,8 +291,23 @@ app['webcomm'] = {
 
                     app.webcomm.add(name);
                     app.webcomm.webchat.init(name, message, multi);
-                }, 'Open');
-                random[name + "notif"] = notif.div;
+                }
+
+                if (multi === "open") {
+                    go();
+                } else {
+                    if (random[name + "count"]) {
+                        const notif = wm.notif(name + ` (${random[name + "count"]})`, message, async function () {
+                            go();
+                        }, 'Open');
+                        random[name + "notif"] = notif.div;
+                    } else {
+                        const notif = wm.notif(name, message, async function () {
+                            go();
+                        }, 'Open');
+                        random[name + "notif"] = notif.div;
+                    }
+                }
             }
         }
     },

@@ -67,9 +67,9 @@ app['about'] = {
                 ui.dest(ok, 200);
             }, ok);
         }, side);
-        const setupon = await fs.read('/system/info/setuptime');
-        const ogver = await fs.read('/system/info/setupver');
-        const color = await set.read('/color');
+        const setupon = await set.read('setuptime');
+        const ogver = await set.read('setupver');
+        const color = await set.read('color');
         tk.p(`WebDesk ${abt.ver}`, 'h2', info);
         tk.p(`<span class="bold">Updated</span> ${abt.lastmod}`, undefined, info);
         if (setupon) {

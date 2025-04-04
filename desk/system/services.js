@@ -111,7 +111,8 @@ var ptp = {
                         const parsedData = JSON.parse(data);
                         console.log(parsedData);
                         if (parsedData.response) {
-                            if (authcallids.includes(parsedData.id)) {
+                            if (sys.callid === parsedData.id) {
+                                ui.dest(random["call" + sys.callid].win);
                                 navigator.mediaDevices.getUserMedia({ audio: true })
                                     .then((stream) => {
                                         call.answer(stream);

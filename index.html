@@ -111,7 +111,7 @@
     let params = new URLSearchParams(window.location.search);
 
     var abt = {
-        lastmod: "Mar 21, 2025",
+        lastmod: "Apr 3, 2025",
         ver: "0.3.2",
     }
 
@@ -152,6 +152,9 @@
         contained: false,
         socket: undefined,
         webdeskbooted: false,
+        protectedwrite: true,
+        animspeed: 120,
+        animspeed2: 200,
         config: {},
     };
 
@@ -231,6 +234,10 @@
     }, 12000);
 
     async function recovery() {
+        const errormessage = fsloaded === false
+            ? "<p>The filesystem couldn't even load, this WebDesk is probably done for.</p>"
+            : "";
+
         document.body.innerHTML = `
         <div id="loading2" class="loading"
         style="z-index: 9999;">
@@ -239,7 +246,8 @@
         top: 50%;
         transform: translate(-50%, -50%); max-width: 80%; max-width: 250px;">
                 <p><strong>WebDesk Net Recovery</strong></p>
-                <p>You need to update, WebDesk took too long, or an error occured.</p>
+                <p>You need to update, WebDesk took too long, or an error occurred.</p>
+                ${errormessage}
                 <button class="tmpb" onclick="fs.del('/system/webdesk');setTimeout(function () {reboot();}, 200);">Reinstall WebDesk (Data is kept)</button><button onclick="reboot();" class="tmpb">Reboot</button>
             </div>
         </div>`;

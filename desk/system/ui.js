@@ -81,13 +81,13 @@ var ui = {
     sw: function (d1, d2) {
         const dr1 = document.getElementById(d1);
         const dr2 = document.getElementById(d2);
-        $(dr1).fadeOut(120, function () { $(dr2).fadeIn(120); });
+        $(dr1).fadeOut(sys.animspeed, function () { $(dr2).fadeIn(sys.animspeed); });
     },
     sw2: function (d1, d2, fadetime) {
         if (fadetime) {
             $(d1).fadeOut(fadetime, function () { $(d2).fadeIn(fadetime); });
         } else {
-            $(d1).fadeOut(120, function () { $(d2).fadeIn(120); });
+            $(d1).fadeOut(sys.animspeed, function () { $(d2).fadeIn(sys.animspeed); });
         }
     },
     hide: function (dr1, anim) {
@@ -97,7 +97,7 @@ var ui = {
             } else if (anim === 0) {
                 $(dr1).hide();
             } else {
-                $(dr1).fadeOut(210);
+                $(dr1).fadeOut(sys.animspeed2);
             }
         }
     },
@@ -106,7 +106,7 @@ var ui = {
             if (anim) {
                 $(dr1).slideUp(anim);
             } else {
-                $(dr1).slideUp(210);
+                $(dr1).slideUp(sys.animspeed2);
             }
         }
     },

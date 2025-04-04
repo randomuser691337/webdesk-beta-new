@@ -117,7 +117,7 @@ app['settings'] = {
                 if (sys.mobui === true) {
                     await set.set('mobile', 'false');
                 } else {
-                    await fs.del('/user/info/mobile');
+                    await set.del('mobile');
                 }
                 wm.notif('Reboot to apply changes', undefined, () => wd.reboot(), 'Reboot', true);
             }, generalPane);
@@ -137,7 +137,6 @@ app['settings'] = {
             const pane = tk.c('div', win);
             if (opt !== "true") {
                 tk.img('/system/lib/img/icons/warn.svg', 'setupi', pane);
-                tk.p(`Developer Mode lets you install third-party apps, and enables dev tools, but removes security protections.`, undefined, pane);
                 tk.p(`Use caution, there's no support for issues relating to Developer Mode. Disabling Developer Mode will erase WebDesk, but will keep your files.`, undefined, pane);
                 tk.cb(`b1`, 'Cancel', () => ui.dest(win), pane);
                 tk.cb(`b1`, 'Enable (reboot)', async function () {
@@ -147,13 +146,13 @@ app['settings'] = {
             } else {
                 tk.img('/system/lib/img/icons/hlcrab.png', 'setupi', pane);
                 tk.p(`Developer Mode enabled`, 'bold', pane);
-                tk.p(`Disabling it will reset WebDesk, but will keep your files, along with your DeskID and name.`, undefined, pane);
+                tk.p(`Disabling it will reset WebDesk and delete Music, but will keep your files, along with your DeskID and name.`, undefined, pane);
                 tk.cb(`b1`, 'Cancel', () => ui.dest(win), pane);
                 tk.cb(`b1`, 'Disable (reboot)', async function () {
                     await fs.delfold('/system/');
                     await fs.delfold('/user/info/');
+                    await fs.delfold('/apps/');
                     await set.set('name', sys.name);
-                    await fs.write('/system/deskid', sys.deskid);
                     await wd.reboot();
                 }, pane);
             }
@@ -167,55 +166,47 @@ app['settings'] = {
             wm.notif('Graphics set to low', `Reboot to apply`, function () {
                 wd.reboot();
             }, 'Reboot', true);
-            await fs.write('/system/info/lowgfx', 'true');
+            await set.set('lowgfx', 'true');
         }, titlegfx2);
         tk.cb('b7', 'Med', async function () {
             wm.notif('Graphics set to medium', `Reboot to apply`, function () {
                 wd.reboot();
             }, 'Reboot', true);
-            await fs.write('/system/info/lowgfx', 'half');
+            await set.set('lowgfx', 'half');
         }, titlegfx2);
         tk.cb('b7', 'High', async function () {
             wm.notif('Graphics set to high (default)', `Reboot to apply`, function () {
                 wd.reboot();
             }, 'Reboot', true);
-            await fs.del('/system/info/lowgfx');
+            await set.del('lowgfx');
         }, titlegfx2);
         tk.cb('b7', 'Epic', async function () {
             wm.notif('Graphics set to epic', `Reboot to apply`, function () {
                 wd.reboot();
             }, 'Reboot', true);
-            await fs.write('/system/info/lowgfx', 'epic');
+            await set.set('lowgfx', 'epic');
         }, titlegfx2);
 
 
         const pgfx = tk.c('div', generalPane, 'list flexthing');
         const tnavgfx = tk.c('div', pgfx, 'tnav');
         const titlegfx = tk.c('div', pgfx, 'title');
-        tnavgfx.innerText = "Graphics ";
-        tk.cb('b7', 'Low', async function () {
-            wm.notif('Graphics set to low', `Reboot to apply`, function () {
-                wd.reboot();
-            }, 'Reboot', true);
-            await set.set('lowgfx', 'true');
+        tnavgfx.innerText = "Effects";
+        tk.cb('b7', 'Off', async function () {
+            ui.cv('anim', '0s');
+            await set.set('anim', 'disabled');
         }, titlegfx);
-        tk.cb('b7', 'Med', async function () {
-            wm.notif('Graphics set to medium', `Reboot to apply`, function () {
-                wd.reboot();
-            }, 'Reboot', true);
-            await set.set('lowgfx', 'half');
+        tk.cb('b7', 'Fast', async function () {
+            ui.cv('anim', '0.15s');
+            await set.set('anim', 'half');
         }, titlegfx);
-        tk.cb('b7', 'High', async function () {
-            wm.notif('Graphics set to high (default)', `Reboot to apply`, function () {
-                wd.reboot();
-            }, 'Reboot', true);
-            await set.set('lowgfx');
+        tk.cb('b7', 'Default', async function () {
+            ui.cv('anim', '0.3s');
+            await set.del('anim');
         }, titlegfx);
-        tk.cb('b7', 'Epic', async function () {
-            wm.notif('Graphics set to epic', `Reboot to apply`, function () {
-                wd.reboot();
-            }, 'Reboot', true);
-            await set.set('lowgfx', 'epic');
+        tk.cb('b7', 'Slow', async function () {
+            ui.cv('anim', '0.45s');
+            await set.set('anim', 'slow');
         }, titlegfx);
 
         const p = tk.c('div', generalPane, 'list flexthing');
@@ -252,7 +243,7 @@ app['settings'] = {
             wd.dark();
         }, modething);
         tk.cb('b1', 'Auto', async function () {
-            fs.write('/user/info/lightdarkpref', 'auto');
+            set.set('lightdarkpref', 'auto');
             const killyourselfapplesheep = await set.read('color');
             ui.crtheme(killyourselfapplesheep);
             sys.autodarkacc = true;
@@ -322,9 +313,9 @@ app['settings'] = {
         }, p4);
         p4.style.marginBottom = '6px';
         tk.cb('b1', 'Reset Colors', async function () {
-            fs.del('/user/info/color');
-            fs.del('/user/info/lightdark');
-            fs.del('/user/info/lightdarkpref');
+            set.del('color');
+            set.del('lightdark');
+            set.del('lightdarkpref');
             const raiseyopawifyouafuckingfaggot = await wd.defaulttheme();
             console.log(raiseyopawifyouafuckingfaggot);
             bg1.value = await ui.rgbtohex(raiseyopawifyouafuckingfaggot);
@@ -433,34 +424,34 @@ app['settings'] = {
         tk.cb('b7', 'No chances', async function () {
             sys.filter = true;
             sys.nc = true;
-            fs.write('/user/info/filter', 'nc');
+            set.set('filter', 'nc');
             wm.notif('No chances mode on!', `Text with filtered items simply won't be shown. WebDesk browser isn't filtered, along with anything that's not text. Already shown text won't be filtered.`, undefined, undefined, true);
         }, p3);
         tk.cb('b7', 'Filter', async function () {
             sys.filter = true;
             sys.nc = false;
-            fs.write('/user/info/filter', 'true');
+            set.set('filter', 'true');
             wm.notif('SFW mode on!', `WebDesk browser isn't filtered, along with anything that's not text. Already shown text won't be filtered.`, undefined, undefined, true);
         }, p3);
         tk.cb('b7', 'Off', function () {
             sys.filter = false;
             sys.nc = false;
-            fs.del('/user/info/filter');
+            set.del('filter');
             wm.snack('SFW mode turned off');
         }, p3);
         tk.p('Transparency/blur effects', undefined, accPane);
         const blurp = tk.p('', undefined, accPane);
         blurp.style = "display: flex; justify-content: space-between; padding: 0px; margin: 0px;";
         const blur1 = tk.cb('b1 b2', 'Disable', function () {
-            fs.write('/user/info/blur', 'false');
+            set.set('blur', 'false');
             ui.cv('ui1', 'var(--ui2)');
             ui.cv('bl1', '0px');
             ui.cv('bl2', '0px');
         }, blurp);
         blur1.style = "flex: 1 1; margin-right: 1px !important;";
         const blur2 = tk.cb('b1 b2', 'Enable', async function () {
-            await fs.del('/user/info/blur');
-            const perf = await fs.read('/system/info/lowgfx');
+            await set.del('blur');
+            const perf = await set.read('lowgfx');
             wd.blurcheck(perf);
             if (ui.light === false) {
                 wd.dark();
@@ -538,9 +529,10 @@ app['settings'] = {
     wallpapers: {
         runs: false,
         init: async function () {
+            let p;
             const ok = tk.mbw('Wallpapers (beta)', '480px', 'auto', true, undefined, undefined);
             let wallpapers = await fs.ls('/system/lib/img/wallpapers/current/');
-            tk.p('Scanning for duplicates...', undefined, ok.main);
+            p = tk.p('Looking for duplicates...', undefined, ok.main);
             for (const wallpaper of wallpapers.items) {
                 if (wallpaper.type === "file") {
                     const defaultWallpaper = await fs.read('/system/lib/img/wallpapers/restore/default');
@@ -608,6 +600,7 @@ app['settings'] = {
                 await renderPage(currentPage);
             }, nav); */
             renderPage(currentPage);
+            ui.dest(p, 0);
         }
     },
 };
