@@ -190,11 +190,14 @@ async function handleData(conn, data) {
                 if (data.filename === "/system/deskid") {
                     el.migstat.innerText = "Creating new DeskID";
                     wd.newid();
+                    conn.send("Ready");
                     return;
                 }
                 ui.sw('quickstartwdsetup', 'quickstartwdgoing');
                 el.migstat.innerText = "Copying: " + data.filename;
                 await fs.write(data.filename, data.file);
+                data.file = null;
+                conn.send("Ready");
             }
         } else if (data.name === "MigrationEnd") {
             if (sys.setupd === false) {
@@ -314,12 +317,26 @@ async function migrationgo(deskid, el) {
                             el.innerText = `Sending ${file}`;
                         }
                         const fileContent = await fs.read(file);
-                        conn.send({
-                            name: 'MigrationFile',
-                            file: fileContent,
-                            filename: file,
+                        await new Promise((readyResolve, readyReject) => {
+                            conn.send({
+                                name: 'MigrationFile',
+                                file: fileContent,
+                                filename: file,
+                            });
+
+                            conn.on('data', (data) => {
+                                if (data === 'Ready') {
+                                    readyResolve();
+                                }
+                            });
+
+                            conn.on('error', (err) => {
+                                console.error('Error during migration:', err);
+                                readyReject(err);
+                            });
                         });
                     }
+
                     conn.send({ name: 'MigrationEnd' });
                     resolve(true);
                 } catch (fileReadError) {

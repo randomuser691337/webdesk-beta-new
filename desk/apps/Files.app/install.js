@@ -264,9 +264,47 @@ app['files'] = {
                                         (await thing).img.style.marginBottom = "4px";
                                     } else if (item.name.endsWith('.zip')) {
                                     } else if (item.name.endsWith('.mp3')) {
-                                        thing = tk.c('audio', menu, 'embed');
-                                        thing.controls = true;
-                                        thing.src = filecontent;
+                                        const audio = tk.c('audio', menu, 'hide');
+                                        thing = tk.c('div', menu);
+                                        thing.style.resize = "none";
+                                        const progressBar = tk.c('input', thing);
+                                        progressBar.type = "range";
+                                        progressBar.min = 0;
+                                        progressBar.max = 100;
+                                        progressBar.value = 0;
+                                        progressBar.style.width = "90% !important";
+
+                                        const playPauseBtn = tk.cb('b4', 'Play', function () {
+                                            if (audio.paused) {
+                                                audio.play();
+                                                playPauseBtn.textContent = "Pause";
+                                            } else {
+                                                audio.pause();
+                                                playPauseBtn.textContent = "Play";
+                                            }
+                                        }, thing);
+
+                                        audio.addEventListener("timeupdate", function () {
+                                            progressBar.value = (audio.currentTime / audio.duration) * 100;
+                                        });
+
+                                        progressBar.addEventListener("input", function () {
+                                            audio.currentTime = (progressBar.value / 100) * audio.duration;
+                                        });
+
+                                        let correct;
+                                        if (item.name.endsWith('.wav')) {
+                                            correct = filecontent.replace(/^data:application\/octet-stream/, 'data:audio/wav');
+                                            audio.src = correct;
+                                        } else if (item.name.endsWith('.mp3')) {
+                                            correct = filecontent.replace(/^data:application\/octet-stream/, 'data:audio/mpeg');
+                                            audio.src = correct;
+                                        } else {
+                                            console.log(`<!> Audio file isn't wav or mp3, giving up`);
+                                            audio.remove();
+                                            thing.innerText = "Music file is corrupted or not supported";
+                                        }
+                                        correct = undefined;
                                         thing.style.marginBottom = "4px";
                                     } else {
                                         thing = tk.c('div', menu, 'embed resizeoff');
@@ -303,7 +341,7 @@ app['files'] = {
                                 if (filecontent.startsWith('data:app') || filecontent.startsWith('data:image')) {
                                     app.imgview.init(filecontent);
                                 } else if (filecontent.startsWith('data:') && (item.path.endsWith('.mp3') || item.path.endsWith('.wav'))) {
-                                    app.imgview.init(filecontent, item.path, item.name);
+                                    app.music.init(item.path, item.name);
                                 } else if (filecontent.startsWith('data:')) {
                                     app.imgview.init(filecontent, item.path, item.name);
                                 } else {
@@ -318,6 +356,10 @@ app['files'] = {
                                 btnmenu.style.marginBottom = "4px";
                                 tk.cb('b3', 'Iris Media Viewer', function () {
                                     app.imgview.init(filecontent, item.path);
+                                    ui.dest(menu2);
+                                }, btnmenu2);
+                                tk.cb('b3', 'Music', function () {
+                                    app.music.init(item.path, item.name);
                                     ui.dest(menu2);
                                 }, btnmenu2);
                                 tk.cb('b3', 'Text Editor', function () {

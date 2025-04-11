@@ -59,8 +59,19 @@ var fs = {
     del: function (path) {
         return this.askwfs('delete', path);
     },
-    erase: function (path) {
-        navigator.serviceWorker.getRegistrations().then(registrations => {
+    erase: async function (path) {
+        try {
+            if (sys.webdeskbooted === true && ui) {
+                const div = ui.darken();
+                const menu = tk.c('div', div, 'cm');
+                tk.p(`Erasing`, 'bold', menu);
+                tk.c('div', menu, 'line-wobble').style.marginTop = "5px";
+                menu.style.width = "120px";
+            }
+        } catch (error) {
+            console.log(error);
+        }
+        await navigator.serviceWorker.getRegistrations().then(registrations => {
             for (let registration of registrations) {
                 registration.unregister();
                 if (registration.active) {

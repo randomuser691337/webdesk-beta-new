@@ -1,7 +1,5 @@
 .tabbar {
-    background-color: var(--ui2);
     padding: 6px;
-    border-bottom: 1px solid var(--ui3);
     box-sizing: border-box;
     text-align: left;
     flex: 0 0 auto;

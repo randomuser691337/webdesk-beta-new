@@ -248,6 +248,33 @@ app['settings'] = {
             ui.crtheme(killyourselfapplesheep);
             sys.autodarkacc = true;
         }, modething);
+        const pgfx3 = tk.c('div', appearPane, 'list flexthing');
+        const tnavgfx3 = tk.c('div', pgfx3, 'tnav');
+        const titlegfx3 = tk.c('div', pgfx3, 'title');
+        tnavgfx3.innerText = "Window style";
+        tk.cb('b7', '1', async function () {
+            while (sys.styleadded.length > 0) {
+                sys.stylesheet.deleteRule(sys.styleadded.pop());
+            }
+            ui.cv('optrad', '0px');
+        }, titlegfx3);
+        tk.cb('b7', '2', async function () {
+            while (sys.styleadded.length > 0) {
+                sys.stylesheet.deleteRule(sys.styleadded.pop());
+            }
+            sys.styleadded.push(sys.stylesheet.insertRule('.tb { border: none !important; background-color: rgba(0, 0, 0, 0) !important; padding-left: 8px !important; padding-right: 8px !important; padding: 6px !important; }', sys.stylesheet.cssRules.length));
+            sys.styleadded.push(sys.stylesheet.insertRule('.content { border-radius: var(--rad2) !important; background-color: var(--ui2) !important; padding: 6px !important; margin-top: 3px !important; }', sys.stylesheet.cssRules.length));
+            sys.styleadded.push(sys.stylesheet.insertRule('.window { padding: 6px !important; }', sys.stylesheet.cssRules.length));
+            ui.cv('optrad', 'var(--rad2)');
+        }, titlegfx3);
+        /* tk.cb('b7', '3', async function () {
+            while (sys.styleadded.length > 0) {
+                sys.stylesheet.deleteRule(sys.styleadded.pop());
+            }
+            sys.styleadded.push(sys.stylesheet.insertRule('.tb { background-color: rgba(0, 0, 0, 0) !important; }', sys.stylesheet.cssRules.length));
+            // sys.styleadded.push(sys.stylesheet.insertRule('.content { padding: 9px !important; }', sys.stylesheet.cssRules.length));
+            // sys.styleadded.push(sys.stylesheet.insertRule('.window { padding: 6px !important; }', sys.stylesheet.cssRules.length));
+        }, titlegfx3); */
         tk.p('Wallpaper', undefined, appearPane);
         const wallp = tk.p('', undefined, appearPane);
         wallp.style = "display: flex; justify-content: space-between; padding: 0px; margin: 0px;";
@@ -478,9 +505,12 @@ app['settings'] = {
             tk.p(`Are you sure?`, 'bold', m1);
             tk.p(`You're about to erase this WebDesk. This can't be undone, everything will be deleted forever.`, undefined, m1);
             if (yeah) {
-                tk.cb('b1 nodont', 'Erase', () => ui.sw2(m1, m2), m1);
+                tk.cb('b1', 'Erase', () => ui.sw2(m1, m2), m1);
             } else {
-                tk.cb('b1 nodont', 'Erase', () => fs.erase('reboot'), m1);
+                tk.cb('b1 nodont', 'Erase', function () {
+                    ui.dest(dark);
+                    fs.erase('reboot');
+                }, m1);
             }
             tk.cb('b1', `Close`, () => ui.dest(dark), m1);
             tk.p(`Enter account password to confirm erase`, 'bold', m2);
@@ -488,13 +518,13 @@ app['settings'] = {
             const inp = tk.c('input', m2, 'i1');
             inp.placeholder = "Password here";
             inp.type = "password";
-            tk.cb('b1', 'Erase', async function () {
+            tk.cb('b1 nodont', 'Erase', async function () {
                 sys.socket.emit("erase", { token: webid.token, pass: inp.value });
             }, m2);
             tk.cb('b1', `Close`, () => ui.dest(dark), m2);
             sys.socket.on("greenlight", async () => {
                 await fs.erase();
-                ui.dest(menu);
+                ui.dest(dark);
             });
         }
     },

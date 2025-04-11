@@ -16,7 +16,7 @@ app['textedit'] = {
         tabs.style.flex = "0 0 auto";
         tabs.appendChild(win.title);
         win.closebtn.style.marginLeft = "2px";
-        const editdiv = tk.c('div', win.main, 'browsertab');
+        const editdiv = tk.c('div', win.main, 'browsertab optrad');
         editdiv.style.display = "block";
         editdiv.style.borderRadius = "0px";
         win.name.innerHTML = "";

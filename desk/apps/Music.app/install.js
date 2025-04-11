@@ -249,6 +249,7 @@ app['music'] = {
                     currentpath = path;
                     await fs.write(path + "/.folder", '.folder');
                     wm.snack(`Playlist ${playlistName} created`);
+                    console.log(mbtn);
                     mbtn.click();
                     ui.dest(div);
                 }, div);

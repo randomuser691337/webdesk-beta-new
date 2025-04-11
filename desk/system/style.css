@@ -7,9 +7,9 @@
     --dimfont: #444;
     --bl1: 10px;
     --bl2: 6px;
-    --rad1: 15px;
+    --rad1: 14px;
     --rad2: 12px;
-    --rad3: 9px;
+    --rad3: 10px;
     --fz1: 15px;
     --fz2: 14px;
     --fz3: 13px;
@@ -22,6 +22,11 @@
     --mangomango: 3px;
     --darkbg: 0.15;
     --anim: 0.3s;
+    --optrad: 0px;
+}
+
+.optrad {
+    border-radius: var(--optrad);
 }
 
 .background {
@@ -535,7 +540,7 @@ p {
 
 .b1 {
     background-color: rgba(var(--acc), 0.45);
-    border-radius: var(--rad2);
+    border-radius: var(--rad3);
     font-size: var(--fz1);
     padding: 5px 8px;
     margin: 1px;
@@ -758,7 +763,7 @@ p {
 
 .i1 {
     padding: 5px;
-    border-radius: var(--rad2);
+    border-radius: var(--rad3);
     border: 2px solid rgba(var(--accent), 0.5);
     background-color: rgba(var(--acc), 0.4);
     font-size: var(--fz1);
@@ -847,7 +852,7 @@ p {
     padding: 5px 8px;
     background-color: var(--ui2);
     border: 1px solid var(--bc);
-    border-radius: var(--rad2);
+    border-radius: var(--rad3);
     width: 100%;
     box-sizing: border-box;
     margin-bottom: 2px;

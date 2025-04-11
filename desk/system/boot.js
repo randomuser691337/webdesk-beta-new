@@ -72,7 +72,7 @@ async function startsockets() {
                 } else {
                     sys.name = thing.username;
                     sd = thing.username;
-                    await fs.write('/user/info/name', thing.username);
+                    await set.set('name', thing.username);
                     webid.token = await fs.read('/user/info/token');
                     webid.priv = thing.priv;
                     webid.userid = thing.userid;
