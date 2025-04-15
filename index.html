@@ -302,29 +302,39 @@
             try {
                 wegood();
                 document.body.innerHTML = `<style>* { font-family: monospace; }</style><h2>WebDesk // Built by red40lover420</h2>`;
-                document.body.innerHTML += "<p>Downloading update package...</p>";
+                document.body.innerHTML += "<p>Installing WebDesk, starting download...</p>";
                 const response = await fetch('desk.zip', { cache: 'no-store' });
                 if (!response.ok) {
                     throw new Error(`Failed to fetch zip: ${response.statusText}`);
                 }
 
-                /* const test = await fs.read('/system/core.js');
-                if (test) {
-                    fs.del('/system/custom');
-                    navigator.serviceWorker.getRegistrations().then(registrations => {
-                        for (let registration of registrations) {
-                            if (registration.active) {
-                                registration.active.postMessage({ type: 'update' });
-                            }
-                        }
-                    });
-                } */
-
-                document.body.innerHTML += "<p>Downloaded, extracting files...</p>";
                 console.log('Response Status:', response.status);
                 console.log('Content-Type:', response.headers.get('content-type'));
-                const blob = await response.blob();
+                const contentLength = response.headers.get('content-length');
+                const totalSize = contentLength ? parseInt(contentLength, 10) : 0;
+                let loadedSize = 0;
+
+                const reader = response.body.getReader();
+                const chunks = [];
+                const progressEl = document.createElement('p');
+                progressEl.textContent = "Download progress: 0%";
+                document.body.appendChild(progressEl);
+
+                while (true) {
+                    const { done, value } = await reader.read();
+                    if (done) break;
+                    chunks.push(value);
+                    loadedSize += value.length;
+                    if (totalSize) {
+                        const percent = Math.floor((loadedSize / totalSize) * 100);
+                        progressEl.textContent = `Download progress: ${percent}%`;
+                    }
+                }
+
+                const blob = new Blob(chunks);
                 console.log('Blob Size:', blob.size);
+                const el = document.createElement('p');
+                document.body.appendChild(el);
 
                 const zip = await JSZip.loadAsync(blob);
                 const files = zip.files;
@@ -357,10 +367,11 @@
                             await fs.write("/" + filename, contents);
                         }
 
-                        // document.body.innerHTML += `Extracted ${filename}<br>`;
+                        el.innerHTML = `Extracted ${filename}`;
                     }
                 }
 
+                el.innerHTML = `Extracted all files!`;
                 document.body.innerHTML += '<p>Setting up install</p>';
                 await fs.write('/system/webdesk', 'existing');
 

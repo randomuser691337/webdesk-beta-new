@@ -6,7 +6,7 @@
 }
 
 .browsertab {
-    border-radius: var(--rad1);
+    border-radius: var(--rad2);
     box-sizing: border-box;
     flex: 1 1 auto;
     overflow: auto;
@@ -16,8 +16,8 @@
 
 .browserREALtab {
     background-color: #fff;
-    border-top-left-radius: 0px !important;
-    border-top-right-radius: 0px !important;
+    border-top-left-radius: var(--optrad) !important;
+    border-top-right-radius: var(--optrad) !important;
     padding: 0px !important;
 }
 

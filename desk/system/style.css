@@ -499,6 +499,11 @@ p {
     font-family: 'FontM', Arial;
 }
 
+.h3 {
+    font-size: 18px;
+    font-family: 'FontM', Arial;
+}
+
 .b2 {
     width: 100%;
     box-sizing: border-box;
@@ -673,6 +678,7 @@ p {
     transition: all 0.01s ease-in-out;
     margin: 0px;
     padding: 0px;
+    font-family: 'FontM', Arial !important;
 }
 
 .linkbtn:active {

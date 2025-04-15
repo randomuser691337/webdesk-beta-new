@@ -221,16 +221,7 @@ async function bootstage2(uid2, eepysleepy, migcheck, sd, installed, lebronjames
                 wegood();
                 return;
             }
-            const deskid = await fs.read('/system/deskid');
-            if (deskid) {
-                if (deskid.length === 8) {
-                    await wd.newid();
-                    window.location.reload();
-                }
-            } else {
-                await wd.newid();
-                window.location.reload();
-            }
+        
             const [
                 darkpref, lightdark, color, font, dev, mob, city, clocksec, apprepo, filtering, notifsound, silent, perf
             ] = await Promise.all([
@@ -276,7 +267,7 @@ async function bootstage2(uid2, eepysleepy, migcheck, sd, installed, lebronjames
                 wd.wetter();
             }
 
-            await ptp.go(deskid);
+            await ptp.go(gen(7));
 
             if (!lebronjames) {
                 const [
@@ -453,7 +444,7 @@ async function bootstage2(uid2, eepysleepy, migcheck, sd, installed, lebronjames
             console.log('<i> Boot stage 3: Load apps');
             await initapps();
             console.log('<i> Boot stage 4: Load desktop, check for updates');
-            await wd.desktop(sys.name, deskid, 'wait');
+            await wd.desktop(sys.name, undefined, 'wait');
             await wd.setbg(false);
             ui.dest(tk.g('loading', 220));
         } else if (migcheck === "down") {

@@ -246,19 +246,20 @@ var wd = {
         ui.dest(tk.g('setuparea'));
         ui.cv('menubarheight', '38px');
         let screenWidth;
-        function startmenu() {
+        async function startmenu() {
             if (el.sm == undefined) {
                 resetall();
                 el.sm = all;
                 all.classList = "tbmenu";
                 elementWidth = el.sm.getBoundingClientRect().width;
                 el.sm.style.left = `${(screenWidth - elementWidth) / 2}px`;
-                tk.p(`Hello, ${sys.name}!`, 'h2', el.sm);
-                const thing = tk.p(`Your DeskID is `, undefined, el.sm);
-                tk.cb('linkbtn', sys.deskid, function () {
-                    ui.copy(`${window.location.origin}/?id=${sys.deskid}`);
-                    wm.snack('Copied DeskID quicklink. Send it to your friends!');
-                }, thing);
+                const p = tk.p(`${sys.name} `, 'h3', el.sm);
+                tk.cb('linkbtn h3', 'Manage', function () {
+                    app.settings.init('usercfg');
+                    ui.hide(el.sm, 0);
+                }, p);
+                const thing = tk.p(``, undefined, el.sm);
+                const kys = tk.p('', undefined, el.sm);
                 const ok = tk.c('div', el.sm, 'embed nest brick-layout');
                 for (let key in app) {
                     if (app.hasOwnProperty(key)) {
@@ -284,6 +285,15 @@ var wd = {
                     }
                 }
                 wd.reorg(ok);
+                const response = await fetch(`https://weather.meower.xyz/json?city=${sys.city}&units=${sys.unit}`);
+                const info = await response.json();
+                let unitsym;
+                if (info.sys.country !== "US") {
+                    unitsym = "°C";
+                } else {
+                    unitsym = "°F";
+                }
+                kys.innerText = `${Math.ceil(info.main.temp)}${unitsym}, ${info.weather[0].description}`;
             } else {
                 ui.hide(el.sm, 140);
                 el.sm = undefined;
@@ -470,22 +480,22 @@ var wd = {
             tk.img('/system/lib/img/icons/apps.svg', 'dockicon dockalt', el.startbutton, false, 'noretry');
             const tooltip = tk.c('div', document.body, 'tooltipd');
             tooltip.textContent = 'App Menu';
-    
+
             function updateTooltipPosition() {
                 const { x, width } = el.startbutton.getBoundingClientRect();
                 tooltip.style.left = `${x + width / 2 - tooltip.offsetWidth / 2}px`;
                 setTimeout(updateTooltipPosition, 200);
             }
-    
+
             window.addEventListener("resize", updateTooltipPosition);
-    
+
             if (el.taskbar) {
                 new ResizeObserver(updateTooltipPosition).observe(el.taskbar);
             }
-    
+
             updateTooltipPosition();
-            const showTooltip = () => {tooltip.classList.add('visible');};
-            const hideTooltip = () => {tooltip.classList.remove('visible');};
+            const showTooltip = () => { tooltip.classList.add('visible'); };
+            const hideTooltip = () => { tooltip.classList.remove('visible'); };
             el.startbutton.addEventListener('mouseenter', showTooltip);
             el.startbutton.addEventListener('mouseleave', hideTooltip);
             el.tr = tk.c('div', lefttb);
@@ -555,10 +565,10 @@ var wd = {
         }
     },
     finishsetup: async function (name) {
-        ui.masschange('name', name); 
-        await set.set('name', name); 
-        await set.set('setuptime', Date.now()); 
-        await set.set('setupver', abt.ver); 
+        ui.masschange('name', name);
+        await set.set('name', name);
+        await set.set('setuptime', Date.now());
+        await set.set('setupver', abt.ver);
         await wd.reboot();
     },
     reboot: function () {
@@ -596,7 +606,7 @@ var wd = {
             ui.cv('ui1', 'var(--ui2)');
         } else {
             ui.cv('ui1', 'rgb(255, 255, 255, 0.7)');
-        }   
+        }
         ui.cv('ui2', '#ffffff');
         ui.cv('ui3', '#efefef');
         ui.cv('bc', 'rgb(220, 220, 220, 0.6)');
@@ -1064,7 +1074,7 @@ var wd = {
             ui.cv('bl2', '12px');
             ui.cv('mangomango', '4px');
         }
-        
+
         if (access === "false") {
             ui.cv('ui1', 'var(--ui2)');
             ui.cv('bl1', '0px');

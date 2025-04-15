@@ -1,7 +1,7 @@
 app['settings'] = {
     runs: true,
     name: 'Settings',
-    init: async function () {
+    init: async function (type) {
         const main = tk.mbw('Settings', '310px', 'auto', true, undefined, undefined, '/apps/Settings.app/Contents/icon.svg');
         const generalPane = tk.c('div', main.main, 'hide');
         const appearPane = tk.c('div', main.main, 'hide');
@@ -490,6 +490,9 @@ app['settings'] = {
         tk.cb('b1', 'Back', () => ui.sw2(accPane, mainPane), accPane);
         // App pane
         tk.cb('b1', 'Back', () => ui.sw2(appPane, mainPane), appPane);
+        if (type === "usercfg") {
+            ui.sw2(mainPane, userPane);
+        }
     },
     eraseassist: {
         runs: false,
