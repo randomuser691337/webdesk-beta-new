@@ -1,6 +1,6 @@
 app['music'] = {
     runs: true,
-    name: 'Music',
+    name: 'Music (beta)',
     init: async function (path, name) {
         const win = tk.mbw('Music', '320px', '240px', true, undefined, undefined, '/apps/Music.app/Contents/icon.svg');
         win.main.style.display = "flex";
@@ -231,7 +231,7 @@ app['music'] = {
                 showm(mainm);
 
             }, div);
-            tk.cb('b4', 'New playlist', function () {
+            tk.cb('b4 hide', 'New playlist', function () {
                 const div = tk.c('div', musicm, 'cm');
                 tk.p('Create a new playlist', undefined, div);
                 const input = tk.c('input', div, 'i1');

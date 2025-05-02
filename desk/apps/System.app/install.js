@@ -45,7 +45,7 @@ app['system'] = {
             await fs.del('/system/migval');
             ui.hide(tk.g('death'), 200);
             const main = tk.c('div', tk.g('setuparea'), 'setupbox');
-            // HAHAHAHAHA FUNNY NUMBER!!!!
+            // HAHAHAHAHA FUNNY NUMBER!!!! (or what was)
             main.style.height = "425px";
             // create setup menubar
             const bar = tk.c('div', main, 'setupbar');
@@ -106,6 +106,9 @@ app['system'] = {
                 tk.img('/system/lib/img/setup/first.svg', 'setupi', first);
                 function defaultsetup() {
                     tk.p('Welcome to WebDesk', 'h2', first);
+                    if (params.get('oobe') === "true") {
+                        tk.p('oobe=true is in the URL bar, which is starting Setup.', 'warn', first);
+                    }
                     /* tk.cb('b1', `EchoDesk`, function () {
                         const echotemp = tk.c('div', main, 'setb hide');
                         tk.img('/system/lib/img/setup/quick.png', 'setupi', echotemp);

@@ -43,6 +43,11 @@ app['settings'] = {
                                 if (sys.dev === true) {
                                     console.log(entry);
                                 }
+
+                                if (entry.appid === "System app") {
+                                    continue;
+                                }
+
                                 const notif = tk.c('div', shitStain, 'notif2');
                                 tk.p(entry.name, 'bold', notif);
                                 tk.ps(`${entry.dev} - Ver ${entry.ver}`, undefined, notif);
@@ -96,9 +101,9 @@ app['settings'] = {
             tk.img('/system/lib/img/icons/warn.svg', 'setupi', menu);
             tk.p(`Are you sure?`, 'bold', menu);
             tk.p(`Deep Clean will reinstall WebDesk, clean out cache from old versions, and will reset your settings.`, undefined, menu);
-            tk.cb('b1 nodont', 'Erase', async function () {
-                await fs.delfold('/system/webdesk');
-                wm.snack('Deep clean done');
+            tk.cb('b1 nodont', 'Deep Clean', async function () {
+                await fs.delfold('/system/');
+                await wd.reboot();
                 ui.dest(dark);
             }, menu);
             tk.cb('b1', `Close`, () => ui.dest(dark), menu);
@@ -195,17 +200,25 @@ app['settings'] = {
         tk.cb('b7', 'Off', async function () {
             ui.cv('anim', '0s');
             await set.set('anim', 'disabled');
+            sys.animspeed = 0;
+            sys.animspeed2 = 0;
         }, titlegfx);
         tk.cb('b7', 'Fast', async function () {
             ui.cv('anim', '0.15s');
             await set.set('anim', 'half');
+            sys.animspeed = 60;
+            sys.animspeed2 = 100;
         }, titlegfx);
         tk.cb('b7', 'Default', async function () {
             ui.cv('anim', '0.3s');
             await set.del('anim');
+            sys.animspeed = 120;
+            sys.animspeed2 = 200;
         }, titlegfx);
         tk.cb('b7', 'Slow', async function () {
             ui.cv('anim', '0.45s');
+            sys.animspeed = 175;
+            sys.animspeed2 = 300;
             await set.set('anim', 'slow');
         }, titlegfx);
 
@@ -253,19 +266,10 @@ app['settings'] = {
         const titlegfx3 = tk.c('div', pgfx3, 'title');
         tnavgfx3.innerText = "Window style";
         tk.cb('b7', '1', async function () {
-            while (sys.styleadded.length > 0) {
-                sys.stylesheet.deleteRule(sys.styleadded.pop());
-            }
-            ui.cv('optrad', '0px');
+            app.settings.winopt('1');
         }, titlegfx3);
         tk.cb('b7', '2', async function () {
-            while (sys.styleadded.length > 0) {
-                sys.stylesheet.deleteRule(sys.styleadded.pop());
-            }
-            sys.styleadded.push(sys.stylesheet.insertRule('.tb { border: none !important; background-color: rgba(0, 0, 0, 0) !important; padding-left: 8px !important; padding-right: 8px !important; padding: 6px !important; }', sys.stylesheet.cssRules.length));
-            sys.styleadded.push(sys.stylesheet.insertRule('.content { border-radius: var(--rad2) !important; background-color: var(--ui2) !important; padding: 6px !important; margin-top: 3px !important; }', sys.stylesheet.cssRules.length));
-            sys.styleadded.push(sys.stylesheet.insertRule('.window { padding: 6px !important; }', sys.stylesheet.cssRules.length));
-            ui.cv('optrad', 'var(--rad2)');
+            app.settings.winopt('2');
         }, titlegfx3);
         /* tk.cb('b7', '3', async function () {
             while (sys.styleadded.length > 0) {
@@ -494,6 +498,24 @@ app['settings'] = {
             ui.sw2(mainPane, userPane);
         }
     },
+    winopt: async function (opt) {
+        if (opt === "1") {
+            while (sys.styleadded.length > 0) {
+                sys.stylesheet.deleteRule(sys.styleadded.pop());
+            }
+            ui.cv('optrad', '0px');
+            set.del('winopt');
+        } else if (opt === "2") {
+            while (sys.styleadded.length > 0) {
+                sys.stylesheet.deleteRule(sys.styleadded.pop());
+            }
+            sys.styleadded.push(sys.stylesheet.insertRule('.tb { border: none !important; background-color: rgba(0, 0, 0, 0) !important; padding-left: 8px !important; padding-right: 8px !important; padding: 6px !important; }', sys.stylesheet.cssRules.length));
+            sys.styleadded.push(sys.stylesheet.insertRule('.content { border-radius: var(--rad2) !important; background-color: var(--ui2) !important; padding: 6px !important; margin-top: 3px !important; }', sys.stylesheet.cssRules.length));
+            sys.styleadded.push(sys.stylesheet.insertRule('.window { padding: 6px !important; }', sys.stylesheet.cssRules.length));
+            ui.cv('optrad', 'var(--rad2)');
+            set.set('winopt', '2');
+        }
+    },
     eraseassist: {
         runs: false,
         init: async function () {
@@ -572,7 +594,7 @@ app['settings'] = {
                     const currentWallpaper = await fs.read(wallpaper.path);
                     const speedy = Math.floor(defaultWallpaper.length * 0.2);
 
-                    if (defaultWallpaper.slice(0, speedy) === currentWallpaper.slice(0, speedy)) {
+                    if (defaultWallpaper.slice(0, speedy) === currentWallpaper.slice(0, speedy) && wallpaper.path !== '/system/lib/img/wallpapers/current/wall') {
                         await fs.del(wallpaper.path);
                         wallpapers = await fs.ls('/system/lib/img/wallpapers/current/');
                     }

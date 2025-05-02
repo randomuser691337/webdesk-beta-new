@@ -358,7 +358,7 @@ var fs2 = {
                                 items.set(parts[0], { path: path + parts[0] + '/', name: parts[0], type: 'folder' });
                             }
                         } else {
-                            items.set(relativePath, { path: key, name: relativePath, type: 'file' });
+                            items.set(relativePath, { path: key, name: relativePath, type: 'file', folder: path });
                         }
                     }
                 });

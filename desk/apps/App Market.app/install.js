@@ -127,13 +127,15 @@ app['appmark'] = {
         await loadapps();
     },
     checkforup: async function () {
+        console.log('<i> Checking for app updates...');
         const contents = await fs.ls('/apps/');
         for (const item of contents.items) {
-            if (item.path.endsWith('.app')) {
-                const skibidihawk = await fs.ls(item.path + "/");
+            if (item.path.endsWith('.app/')) {
+                const skibidihawk = await fs.ls(item.path);
+                let manifestfound = false;
                 for (const item3 of skibidihawk.items) {
-                    console.log(item3);
                     if (item3.type === "file" && item3.name === "manifest.json") {
+                        manifestfound = true;
                         const fuck = await fs.read(item3.path);
                         const ok = JSON.parse(fuck);
                         if (ok.dev === "Browser" && ok.ver === 1) {
@@ -141,7 +143,9 @@ app['appmark'] = {
                         } else {
                             const ok2 = await fetch(sys.appurl + "/update/" + ok.appid);
                             const upd = await ok2.json();
+                            console.log(upd, ok2);
                             if (upd.ver !== ok.ver) {
+                                console.log(`<i> App out of date: ${ok.ver} -> ${upd.ver}`);
                                 app.appmark.create(upd.path, upd, true);
                             }
                         }
@@ -149,5 +153,5 @@ app['appmark'] = {
                 }
             }
         }
-    }
+    }    
 }

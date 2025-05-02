@@ -118,7 +118,7 @@ async function startsockets() {
                     const notif = wm.notif(msg.username, msg.contents, async function () {
                         random[msg.username] = tk.mbw('WebChat', '300px', 'auto', true);
                         random[msg.username].messaging = tk.c('div', random[msg.username].main);
-                        random[msg.username].chatting = tk.c('div', random[msg.username].messaging, 'embed nest');
+                        random[msg.username].chatting = tk.c('div', random[msg.username].messaging, 'embed nest message-container');
                         random[msg.username].chatting.style.overflow = "auto";
                         random[msg.username].chatting.style.height = "320px";
                         tk.ps(`Talking with ${msg.username}`, 'smtxt', random[msg.username].chatting);
@@ -127,7 +127,10 @@ async function startsockets() {
                             tk.ps(`Some filters can detect things YOU send, as they monitor your typing.`, 'smtxt', random[msg.username].chatting);
                         }
 
-                        random[msg.username].input = tk.c('input', random[msg.username].messaging, 'i1');
+                        random[msg.username].containchatdiv = tk.c('div', random[msg.username].messaging);
+                        random[msg.username].containchatdiv.style.display = "flex";
+
+                        random[msg.username].input = tk.c('input', random[msg.username].containchatdiv, 'i1 tnav');
                         random[msg.username].input.placeholder = "Message " + msg.username;
 
                         function send() {
@@ -142,7 +145,9 @@ async function startsockets() {
                             }
                         }
 
-                        tk.cb('b1', 'Send', () => send(), random[msg.username].messaging);
+                        random[msg.username].containchatdiv.style.marginTop = "5px";
+
+                        tk.cb('b1 title resist', 'Send', () => send(), random[msg.username].containchatdiv);
                         ui.key(random[msg.username].input, "Enter", () => send());
 
                         random[msg.username].closebtn.addEventListener('mousedown', function () {
@@ -208,7 +213,7 @@ async function bootstage2(uid2, eepysleepy, migcheck, sd, installed, lebronjames
         }
 
         console.log('<i> Boot stage 2: Load variables, make decisions');
-        if ((sd || sd2) && !migcheck) {
+        if ((sd || sd2) && !migcheck && params.get('oobe') !== "true") {
             const uid = params.get('deskid');
             if (uid) {
                 sys.migrid = uid;
@@ -221,9 +226,9 @@ async function bootstage2(uid2, eepysleepy, migcheck, sd, installed, lebronjames
                 wegood();
                 return;
             }
-        
+
             const [
-                darkpref, lightdark, color, font, dev, mob, city, clocksec, apprepo, filtering, notifsound, silent, perf
+                darkpref, lightdark, color, font, dev, mob, city, clocksec, apprepo, filtering, notifsound, silent, perf, winopt2
             ] = await Promise.all([
                 set.read('lightdarkpref'),
                 set.read('lightdark'),
@@ -238,6 +243,7 @@ async function bootstage2(uid2, eepysleepy, migcheck, sd, installed, lebronjames
                 set.read('notifsrc'),
                 set.read('silent'),
                 set.read('lowgfx'),
+                set.read('winopt')
             ]);
 
             await wd.blurcheck(perf);
@@ -400,7 +406,12 @@ async function bootstage2(uid2, eepysleepy, migcheck, sd, installed, lebronjames
                         useri.placeholder = 'Username';
                         passi.placeholder = 'Password';
                         passi.type = 'password';
-                        tk.cb('b1', 'Create/log in', async function () {
+                        tk.cb('b1 nodontdoit', 'Not Now', async function () {
+                            ui.dest(dark);
+                            webid.priv = -1;
+                            wm.notif(`You're logged out`, `You can still use WebDesk, but you can't use online services.`);
+                        }, menu);
+                        tk.cb('b1', 'Create/Log In', async function () {
                             if (useri.value.length > 16) {
                                 wm.snack(`Set a name under 16 characters`, 3200);
                                 return;
@@ -443,6 +454,9 @@ async function bootstage2(uid2, eepysleepy, migcheck, sd, installed, lebronjames
             }
             console.log('<i> Boot stage 3: Load apps');
             await initapps();
+            if (winopt2 === "2") {
+                app.settings.winopt('2');
+            }
             console.log('<i> Boot stage 4: Load desktop, check for updates');
             await wd.desktop(sys.name, undefined, 'wait');
             await wd.setbg(false);

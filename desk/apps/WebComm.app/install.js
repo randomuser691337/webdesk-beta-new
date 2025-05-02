@@ -237,12 +237,12 @@ app['webcomm'] = {
             if (random[name]) {
                 if (multi === true) {
                     message.forEach((message) => {
-                        const msg = tk.c('div', random[name].chatting, 'flist othersent');
+                        const msg = tk.c('div', random[name].chatting, 'msg othersent');
                         msg.style.marginBottom = "3px";
                         msg.innerText = ui.filter(message);
                     });
                 } else {
-                    const msg = tk.c('div', random[name].chatting, 'flist othersent');
+                    const msg = tk.c('div', random[name].chatting, 'msg othersent');
                     msg.style.marginBottom = "3px";
                     msg.innerText = ui.filter(message);
                 }
@@ -269,15 +269,18 @@ app['webcomm'] = {
                     delete random[name + "count"];
                     random[name] = tk.mbw('WebChat', '300px', 'auto', true);
                     random[name].messaging = tk.c('div', random[name].main);
-                    random[name].chatting = tk.c('div', random[name].messaging, 'embed nest');
+                    random[name].chatting = tk.c('div', random[name].messaging, 'embed nest message-container');
                     random[name].chatting.style.overflow = "auto";
-                    random[name].chatting.style.height = "320px";
+                    random[name].chatting.style.height = "350px";
                     tk.ps(`Talking with ${name}`, 'smtxt', random[name].chatting);
                     if (sys.filter === true) {
                         tk.ps(`Some filters can detect things YOU send, as they monitor your typing.`, 'smtxt', random[name].chatting);
                     }
 
-                    random[name].input = tk.c('input', random[name].messaging, 'i1');
+                    random[name].containchatdiv = tk.c('div', random[name].messaging);
+                    random[name].containchatdiv.style.display = "flex";
+
+                    random[name].input = tk.c('input', random[name].containchatdiv, 'i1 tnav');
                     random[name].input.placeholder = "Message " + name;
 
                     function send() {
@@ -292,7 +295,9 @@ app['webcomm'] = {
                         }
                     }
 
-                    tk.cb('b1', 'Send', () => send(), random[name].messaging);
+                    random[name].containchatdiv.style.marginTop = "5px";
+
+                    tk.cb('b1 title resist', 'Send', () => send(), random[name].containchatdiv);
 
                     ui.key(random[name].input, "Enter", () => send());
 
