@@ -108,6 +108,13 @@ var wm = {
                     $animatedDiv.hide();
                     $animatedDiv.removeClass("windowanim");
                 });
+                setTimeout(async function () {
+                    const $btn = $(el.taskbar);
+                    $btn.addClass("tbanim");
+                    setTimeout(() => {
+                        $btn.removeClass("tbanim");
+                    }, 500);
+                }, sys.animspeed);
             } else {
                 wm.show(wid, btn);
             }
