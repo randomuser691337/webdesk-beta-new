@@ -446,7 +446,10 @@ var wd = {
             }, el.wn);
         }
         function desktopgo() {
-            el.taskbar = tk.c('div', document.body, 'taskbar');
+            el.taskbar = tk.c('div', document.body, 'taskbar startanim');
+            setTimeout(() => {
+                el.taskbar.classList.remove('startanim');
+            }, 1000);
             function tbresize() {
                 screenWidth = window.innerWidth;
                 elementWidth = el.taskbar.offsetWidth;

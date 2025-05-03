@@ -570,10 +570,12 @@ var tk = {
             };
 
             button.addEventListener("mousemove", (e) => {
-                const rect = e.target.getBoundingClientRect();
-                const x = e.clientX - rect.left;
-                const y = e.clientY - rect.top;
-                e.target.style.background = `radial-gradient(circle at ${x}px ${y}px , rgba(var(--accent), 0.63),rgba(var(--accent), 0.53))`;
+                if (e.target === button) {
+                    const rect = e.target.getBoundingClientRect();
+                    const x = e.clientX - rect.left;
+                    const y = e.clientY - rect.top;
+                    e.target.style.background = `radial-gradient(circle at ${x}px ${y}px , rgba(var(--accent), 0.63),rgba(var(--accent), 0.53))`;
+                }
             });
         }
 
@@ -648,8 +650,8 @@ var tk = {
         }
 
         updateTooltipPosition();
-        const showTooltip = () => {tooltip.classList.add('visible');};
-        const hideTooltip = () => {tooltip.classList.remove('visible');};
+        const showTooltip = () => { tooltip.classList.add('visible'); };
+        const hideTooltip = () => { tooltip.classList.remove('visible'); };
         tbn.addEventListener('mouseenter', showTooltip);
         tbn.addEventListener('mouseleave', hideTooltip);
 
@@ -743,27 +745,27 @@ var tk = {
                 zIndex: 9999,
                 cursor: 'ew-resize'
             };
-    
+
             const resizeBars = [
                 { side: 'top', cursor: 'ns-resize', style: { top: '-1px', left: 0, right: 0, height: '7px' } },
                 { side: 'bottom', cursor: 'ns-resize', style: { bottom: '-1px', left: 0, right: 0, height: '7px' } },
                 { side: 'left', cursor: 'ew-resize', style: { top: 0, bottom: 0, left: '-1px', width: '7px' } },
                 { side: 'right', cursor: 'ew-resize', style: { top: 0, bottom: 0, right: '-1px', width: '7px' } }
             ];
-    
+
             resizeBars.forEach(bar => {
                 const resizeBar = document.createElement('div');
                 Object.assign(resizeBar.style, resizeBarStyles, bar.style);
                 resizeBar.style.cursor = bar.cursor;
                 windowDiv.appendChild(resizeBar);
-    
+
                 resizeBar.addEventListener('mousedown', function (e) {
                     e.preventDefault();
                     const startX = e.clientX;
                     const startY = e.clientY;
                     const startWidth = parseInt(document.defaultView.getComputedStyle(windowDiv).width, 10);
                     const startHeight = parseInt(document.defaultView.getComputedStyle(windowDiv).height, 10);
-    
+
                     function doDrag(e) {
                         if (bar.side === 'right') {
                             windowDiv.style.width = (startWidth + e.clientX - startX) + 'px';
@@ -783,12 +785,12 @@ var tk = {
                             }
                         }
                     }
-    
+
                     function stopDrag() {
                         document.documentElement.removeEventListener('mousemove', doDrag, false);
                         document.documentElement.removeEventListener('mouseup', stopDrag, false);
                     }
-    
+
                     document.documentElement.addEventListener('mousemove', doDrag, false);
                     document.documentElement.addEventListener('mouseup', stopDrag, false);
                 }, false);

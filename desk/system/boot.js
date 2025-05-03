@@ -10,7 +10,7 @@ async function startsockets() {
 
             if (devsocket === "true") {
                 sys.socket = io('wss://webdeskbeta.meower.xyz/');
-                wm.notif('Using beta socket server', 'This is for testing purposes only.');
+                wm.notif('Using beta socket server', 'This is for testing purposes only and might not even be online.');
             } else {
                 sys.socket = io("wss://webdesk.meower.xyz/");
             }
