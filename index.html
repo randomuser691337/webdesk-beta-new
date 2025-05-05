@@ -111,7 +111,7 @@
     let params = new URLSearchParams(window.location.search);
 
     var abt = {
-        lastmod: "Apr 16, 2025",
+        lastmod: "May 5, 2025",
         ver: "0.3.2",
     }
 
@@ -381,25 +381,15 @@
                 document.body.innerHTML += '<p>Setting up install</p>';
                 await fs.write('/system/webdesk', 'existing');
 
+                if (navigator.serviceWorker) {
+                    navigator.serviceWorker.controller.postMessage({ type: 'update' });
+                }
+
                 const skibidi = await fetch('/target.json');
                 const fucker = await skibidi.text();
                 const json = await JSON.parse(fucker);
                 fs.write('/system/info/currentver', json['0'].target);
                 fs.write('/system/info/currentveredit', json['0'].lastmod);
-
-                /* await fetch('/go/fs.js').then(response => {
-                    if (!response.ok) {
-                        throw new Error('Network response was not ok');
-                    }
-                    localStorage.setItem("fs", response.text());
-                });
-
-                await fetch('/go/wfs.js').then(response => {
-                    if (!response.ok) {
-                        throw new Error('Network response was not ok');
-                    }
-                    localStorage.setItem("wfs", response.text());
-                }); */
 
                 const rebooton = params.get('reboot');
 

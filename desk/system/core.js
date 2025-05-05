@@ -128,6 +128,36 @@ document.addEventListener('keydown', async function (event) {
         event.preventDefault();
         app.lockscreen.init();
     }
+    if (altKey && event.key.toLowerCase() === 'x') {
+        // Spotlight (Beta)
+        event.preventDefault();
+        const menu = tk.c('div', document.body, 'cm');
+        tk.p('Spotlight', 'bold', menu);
+        const input = tk.c('input', menu, 'i1');
+        input.placeholder = 'Search...';
+        input.focus();
+        const files = await fs.getall();
+        const resultsContainer = tk.c('div', menu, 'embed');
+        resultsContainer.style = `overflow: auto; flex-grow: 1; max-height: 200px; resize: none !important;`;
+        input.addEventListener('input', async function () {
+            setTimeout(function () {
+                resultsContainer.innerHTML = "";
+                const searchTerm = input.value.toLowerCase();
+                const results = files.filter(file => file.toLowerCase().includes(searchTerm));
+                resultsContainer.innerHTML = '';
+                results.forEach(result => {
+                    const resultItem = tk.c('button', resultsContainer, 'flist width');
+                    resultItem.innerText = result;
+                    resultItem.addEventListener('click', async function () {
+                        const filecontent = await fs.read(result);
+                        const item = [{path: result, name: result.split('/').slice(0, -1).join('/') }];
+                        app.files.openfile(filecontent, item);
+                        ui.dest(menu);
+                    });
+                });
+            }, 500);
+        });
+    }
     if (altKey && event.key.toLowerCase() === 'r' && focused.window !== undefined) {
         event.preventDefault();
         ui.center(focused.window);

@@ -237,7 +237,43 @@ app['files'] = {
                         return;
                     }
 
-                    const fileItem = tk.cb('flist width left', "📄 " + item.name, async function () {
+                    const fileItem = tk.cb('flist width left', "📄 " + item.name, undefined, items);
+
+                    if (item.name === ".folder") {
+                        fileItem.style.display = "none";
+                    }
+
+                    fileItem.addEventListener('dragstart', e => {
+                        e.dataTransfer.setData('text/plain', item.path);
+                    });
+
+                    fileItem.addEventListener('dragend', e => {
+                        setTimeout(function () {
+                            console.log(el.dropped)
+                            if (el.dropped === true) {
+                                ui.slidehide(fileItem, 100);
+                                ui.dest(fileItem);
+                            }
+                        }, 100);
+                    });
+                    fileItem.draggable = true;
+                    let isLongPress = false;
+                    let timer;
+
+                    async function openmenu(event) {
+                        const menu2 = tk.c('div', document.body, 'rightclick');
+                        const date = await fs.date(item.path);
+                        tk.p(`<span class="bold">Created</span> ${wd.timec(date.created)}`, undefined, menu2);
+                        tk.p(`<span class="bold">Edited</span> ${wd.timec(date.edit)}`, undefined, menu2);
+                        tk.p(`<span class="bold">Read</span> ${wd.timec(date.read)}`, undefined, menu2);
+                        if (!event) {
+                            ui.rightclick(menu2, undefined, fileItem);
+                        } else {
+                            ui.rightclick(menu2, event, fileItem);
+                        }
+                    }
+
+                    async function openmenuv2() {
                         try {
                             if (app.files.prohib(item.path) === true) {
                                 wm.snack('Enable Developer Mode to modify system files.', 6000);
@@ -344,15 +380,7 @@ app['files'] = {
                             btnmenu.style.marginBottom = "4px";
 
                             tk.cb('b3', 'Open', async function () {
-                                if (filecontent.startsWith('data:app') || filecontent.startsWith('data:image')) {
-                                    app.imgview.init(filecontent);
-                                } else if (filecontent.startsWith('data:') && (item.path.endsWith('.mp3') || item.path.endsWith('.wav'))) {
-                                    app.music.init(item.path, item.name);
-                                } else if (filecontent.startsWith('data:')) {
-                                    app.imgview.init(filecontent, item.path, item.name);
-                                } else {
-                                    app.textedit.init(filecontent, item.path);
-                                }
+                                app.files.openfile(filecontent, item);
                                 ui.dest(menu);
                             }, btnmenu);
                             tk.cb('b3', 'Open with', function () {
@@ -484,40 +512,6 @@ app['files'] = {
                                 app.textedit.init(cont, item.path);
                             });
                         }
-                    }, items);
-
-                    if (item.name === ".folder") {
-                        fileItem.style.display = "none";
-                    }
-
-                    fileItem.addEventListener('dragstart', e => {
-                        e.dataTransfer.setData('text/plain', item.path);
-                    });
-
-                    fileItem.addEventListener('dragend', e => {
-                        setTimeout(function () {
-                            console.log(el.dropped)
-                            if (el.dropped === true) {
-                                ui.slidehide(fileItem, 100);
-                                ui.dest(fileItem);
-                            }
-                        }, 100);
-                    });
-                    fileItem.draggable = true;
-                    let isLongPress = false;
-                    let timer;
-
-                    async function openmenu(event) {
-                        const menu2 = tk.c('div', document.body, 'rightclick');
-                        const date = await fs.date(item.path);
-                        tk.p(`<span class="bold">Created</span> ${wd.timec(date.created)}`, undefined, menu2);
-                        tk.p(`<span class="bold">Edited</span> ${wd.timec(date.edit)}`, undefined, menu2);
-                        tk.p(`<span class="bold">Read</span> ${wd.timec(date.read)}`, undefined, menu2);
-                        if (!event) {
-                            ui.rightclick(menu2, undefined, fileItem);
-                        } else {
-                            ui.rightclick(menu2, event, fileItem);
-                        }
                     }
 
                     let startX, startY, isScrolling;
@@ -533,7 +527,7 @@ app['files'] = {
                         timer = setTimeout(() => {
                             if (!isScrolling) {
                                 isLongPress = true;
-                                openmenu();
+                                openmenuv2();
                             }
                         }, 400);
                     });
@@ -551,8 +545,25 @@ app['files'] = {
                     fileItem.addEventListener('touchend', () => {
                         clearTimeout(timer);
                         if (!isLongPress && !isScrolling) {
-                            fileItem.click();
+                            const event = new MouseEvent('dblclick', {
+                                bubbles: true,
+                                cancelable: true,
+                                view: window
+                            });
+                            fileItem.dispatchEvent(event);
                         }
+                    });
+
+                    // add double click event listener to element
+                    fileItem.addEventListener('dblclick', async function () {
+                        if (app.files.prohib(item.path) === true) {
+                            wm.snack('Enable Developer Mode to modify this file.', 3000);
+                            return;
+                        }
+
+                        const filecontent = await fs.read(item.path);
+                        app.files.openfile(filecontent, item);
+                        ui.dest(menu);
                     });
 
                     fileItem.addEventListener('touchcancel', () => clearTimeout(timer));
@@ -560,7 +571,7 @@ app['files'] = {
                     if (sys.mob === false) {
                         fileItem.addEventListener('contextmenu', e => {
                             e.preventDefault();
-                            openmenu(e);
+                            openmenuv2(e);
                         });
                     }
                 }
@@ -671,5 +682,16 @@ app['files'] = {
 
             navto('/user/files/');
         });
+    },
+    openfile: function (filecontent, item) {
+        if (filecontent.startsWith('data:app') || filecontent.startsWith('data:image')) {
+            app.imgview.init(filecontent);
+        } else if (filecontent.startsWith('data:') && (item.path.endsWith('.mp3') || item.path.endsWith('.wav'))) {
+            app.music.init(item.path, item.name);
+        } else if (filecontent.startsWith('data:')) {
+            app.imgview.init(filecontent, item.path, item.name);
+        } else {
+            app.textedit.init(filecontent, item.path);
+        }
     }
 };
