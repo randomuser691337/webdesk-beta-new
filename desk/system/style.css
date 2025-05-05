@@ -504,12 +504,23 @@ p {
     font-family: 'FontM', Arial;
 }
 
+.emojicon {
+    font-size: 16px !important;
+    border-radius: 7px;
+    padding: 1px 2px;
+}
+
 .b2 {
     width: 100%;
     box-sizing: border-box;
     margin-left: 0px !important;
     margin-right: 0px !important;
     margin-bottom: 2px !important;
+}
+
+.settingsb2 {
+    padding: 6px !important;
+    text-align: left !important;
 }
 
 .nodont {

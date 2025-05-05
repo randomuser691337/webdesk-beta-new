@@ -22,13 +22,15 @@ app['settings'] = {
             const title = tk.c('div', userl, 'title');
             tnav.style.marginLeft = "4px";
             tnav.innerText = ui.filter(sys.name);
-            tk.cb('b3', 'Manage user/info', () => ui.sw2(mainPane, userPane), title);
-            tk.cb('b1 b2 lt', 'General', () => ui.sw2(mainPane, generalPane), mainPane);
+            tk.cb('b3', 'Manage data/user', () => ui.sw2(mainPane, userPane), title)
+            const genbtn = tk.cb('b1 b2 settingsb2', ``, () => ui.sw2(mainPane, generalPane), mainPane);
+            tk.emojicon(genbtn, '⚙️', '#4a4a4a', 'General');
         } else {
             tk.p(`Some options are disabled, because you're in Guest mode.`, undefined, mainPane);
         }
-        tk.cb('b1 b2 lt', 'Accessibility', () => ui.sw2(mainPane, accPane), mainPane);
-        tk.cb('b1 b2 lt', 'Manage apps', async function () {
+        const accbtn = tk.cb('b1 b2 settingsb2', ``, () => ui.sw2(mainPane, accPane), mainPane);
+        tk.emojicon(accbtn, '🦽', '#4a4aee', 'Accessibility');
+        const appbtn = tk.cb('b1 b2 settingsb2', '', async function () {
             ui.sw2(mainPane, appPane);
             shitStain.innerHTML = "";
             const contents = await fs.ls('/apps/');
@@ -88,14 +90,16 @@ app['settings'] = {
                 }
             }
         }, mainPane);
-        tk.cb('b1 b2 lt', 'Personalize', () => ui.sw2(mainPane, appearPane), mainPane);
+        tk.emojicon(appbtn, '📦', '#4aee4a', 'Manage apps');
+        const perbtn = tk.cb('b1 b2 settingsb2', 'Personalize', () => ui.sw2(mainPane, appearPane), mainPane);
+        tk.emojicon(perbtn, '🎨', '#cc4a4a', 'Personalize');
         // General pane
         tk.p('General', undefined, generalPane);
         tk.cb('b1 b2 red lt', 'Reinstall WebDesk (keep data)', async function () {
             await fs.del('/system/webdesk');
             wd.reboot();
         }, generalPane);
-        tk.cb('b1 b2 lt', 'Deep Clean (keep data)', async function () {
+        tk.cb('b1 b2 settingsb2', 'Deep Clean (keep data)', async function () {
             const dark = ui.darken();
             const menu = tk.c('div', dark, 'cm');
             tk.img('/system/lib/img/icons/warn.svg', 'setupi', menu);
@@ -118,7 +122,7 @@ app['settings'] = {
             }
         }, generalPane); */
         if (sys.mob === true) {
-            tk.cb('b1 b2 lt', 'Toggle mobile UI', async function () {
+            tk.cb('b1 b2 settingsb2', 'Toggle mobile UI', async function () {
                 if (sys.mobui === true) {
                     await set.set('mobile', 'false');
                 } else {
@@ -128,11 +132,11 @@ app['settings'] = {
             }, generalPane);
         }
         if (window.navigator.standalone === true) {
-            tk.cb('b1 b2 lt', 'Recalibrate App Bar', function () {
+            tk.cb('b1 b2 settingsb2', 'Recalibrate App Bar', function () {
                 wd.tbcal();
             }, generalPane);
         }
-        tk.cb('b1 b2 lt', 'Enter Recovery Mode', function () {
+        tk.cb('b1 b2 settingsb2', 'Enter Recovery Mode', function () {
             fs.write('/system/migval', 'rec');
             wd.reboot();
         }, generalPane);
@@ -372,7 +376,7 @@ app['settings'] = {
                 }
             });
         }, userPane); */
-        tk.cb('b1 b2 lt', 'Change Username', function () {
+        tk.cb('b1 b2 settingsb2', 'Change Username', function () {
             const ok = tk.mbw('Change Username', '300px', 'auto', true, undefined, undefined);
             const inp = tk.c('input', ok.main, 'i1');
             inp.placeholder = "New name here";
@@ -391,7 +395,7 @@ app['settings'] = {
                 wm.close(ok.win);
             });
         }, userPane);
-        tk.cb('b1 b2 lt', 'Change Password', function () {
+        tk.cb('b1 b2 settingsb2', 'Change Password', function () {
             const ok = tk.mbw('Change Username', '300px', 'auto', true, undefined, undefined);
             tk.p(`Changing your password will log you out of all WebDesks, except for this one.`, undefined, ok.main);
             tk.p(`This WebDesk will reboot after password change.`, undefined, ok.main);
@@ -414,10 +418,10 @@ app['settings'] = {
                 await wd.reboot();
             });
         }, userPane);
-        tk.cb('b1 b2 lt', 'Location', function () {
+        tk.cb('b1 b2 settingsb2', 'Location', function () {
             app.settings.locset.init();
         }, userPane);
-        tk.cb('b1 b2 lt', 'Log out', function () {
+        tk.cb('b1 b2 settingsb2', 'Log out', function () {
             const dark = ui.darken();
             const menu = tk.c('div', dark, 'cm');
             tk.img('/system/lib/img/icons/warn.svg', 'setupi', menu);
@@ -548,7 +552,7 @@ app['settings'] = {
             }, m2);
             tk.cb('b1', `Close`, () => ui.dest(dark), m2);
             sys.socket.on("greenlight", async () => {
-                await fs.erase();
+                await fs.erase('reboot');
                 ui.dest(dark);
             });
         }

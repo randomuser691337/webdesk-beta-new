@@ -464,6 +464,9 @@ var tk = {
         const bar = tk.c('div', el, 'line-wobble');
         return bar;
     },
+    emojicon: function (element, emote, color, text) {
+        element.innerHTML = `<span class="emojicon" style="background-color: ${color}">${emote}</span> ${text}`
+    },
     c: function (type, ele, classn) {
         const ok = document.createElement(type);
         if (ele) {

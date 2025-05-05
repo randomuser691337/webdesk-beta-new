@@ -84,6 +84,11 @@ app['files'] = {
                 const input = tk.c('input', menu, 'i1');
                 input.placeholder = "Name your thing, hit a button";
                 tk.cb('b3 b2', 'New text file', function () {
+                    const prohibcheck = app.files.prohib(tempPath);
+                    if (prohibcheck === true) {
+                        wm.snack('Enable Developer Mode to make things here.');
+                        return;
+                    }
                     if (input.value) {
                         fs.write(tempPath + input.value, ' ');
                         navto(currentPath);
@@ -130,8 +135,9 @@ app['files'] = {
             for (const item of contents.items) {
                 if (item.type === "folder") {
                     let folder;
-                    if (item.path.includes('.app')) {
-                        folder = tk.cb('flist width', "App: " + item.name, function () {
+                    console.log(item);
+                    if (item.path.endsWith('.app/')) {
+                        folder = tk.cb('flist width left', "📦 " + item.name, function () {
                             const menu = tk.c('div', document.body, 'cm');
                             if (sys.dev === true) {
                                 if (item.path.startsWith('/apps/')) {
@@ -179,7 +185,7 @@ app['files'] = {
                             }
                         }, items);
                     } else {
-                        folder = tk.cb('flist width', "Folder: " + item.name, () => navto(item.path), items);
+                        folder = tk.cb('flist width left', "📁 " + item.name, () => navto(item.path), items);
                     }
 
                     let isLongPress = false;
@@ -231,7 +237,7 @@ app['files'] = {
                         return;
                     }
 
-                    const fileItem = tk.cb('flist width', "File: " + item.name, async function () {
+                    const fileItem = tk.cb('flist width left', "📄 " + item.name, async function () {
                         try {
                             if (app.files.prohib(item.path) === true) {
                                 wm.snack('Enable Developer Mode to modify system files.', 6000);
@@ -472,7 +478,7 @@ app['files'] = {
                             ui.dest(skibidi);
                         } catch (error) {
                             console.log('<!> ' + error);
-                            const fileItem = tk.cb('flist width warn', "File (One or more failed to load)" + item.name, async function () {
+                            const fileItem = tk.cb('flist width left warn', "File (One or more failed to load)" + item.name, async function () {
                                 wm.snack('Trying to load in TextEdit...');
                                 const cont = await fs.read(item.path);
                                 app.textedit.init(cont, item.path);
@@ -605,12 +611,12 @@ app['files'] = {
                 const thing = await fs.ls(path);
                 thing.items.forEach(function (thing) {
                     if (thing.type === "folder") {
-                        const target = tk.cb('flist width', "Folder: " + thing.name, () => navto(thing.path), items);
+                        const target = tk.cb('flist width left', "📁 " + thing.name, () => navto(thing.path), items);
                     } else {
                         if (thing.name == "") {
                             return;
                         }
-                        const target = tk.cb('flist width', "File: " + thing.name, async function () {
+                        const target = tk.cb('flist width left', "📄 " + thing.name, async function () {
                             if (type !== "new") {
                                 const menu = tk.c('div', document.body, 'cm');
                                 tk.p(thing.path, 'bold', menu);

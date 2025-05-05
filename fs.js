@@ -60,10 +60,11 @@ var fs = {
         return this.askwfs('delete', path);
     },
     erase: async function (path) {
+        let menu;
         try {
             if (sys.webdeskbooted === true && ui) {
                 const div = ui.darken();
-                const menu = tk.c('div', div, 'cm');
+                menu = tk.c('div', div, 'cm');
                 tk.p(`Erasing`, 'bold', menu);
                 tk.c('div', menu, 'line-wobble').style.marginTop = "5px";
                 menu.style.width = "120px";
@@ -79,7 +80,12 @@ var fs = {
                 }
             }
         });
-        return this.askwfs('erase', path);
+        const go = await this.askwfs('erase', path);
+        if (go === "Hey wtf") {
+            menu.innerHTML = `<p class="bold">Erase was blocked!</p><p>Try reloading and erasing again.</p>`;
+        } else if (go === "true") {
+            wd.reboot();
+        }
     },
     ls: function (path) {
         return this.askwfs('ls', path);

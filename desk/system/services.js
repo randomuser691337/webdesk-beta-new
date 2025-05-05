@@ -201,8 +201,9 @@ async function handleData(conn, data) {
             }
         } else if (data.name === "MigrationEnd") {
             if (sys.setupd === false) {
+                set.set('migrated', 'true');
                 setTimeout(function () {
-                    ui.sw('quickstartwdgoing', 'setupdone');
+                    wd.reboot();
                 }, 600);
             }
         } else if (data.name === "EchoGive") {

@@ -216,19 +216,21 @@ async function bootstage2(uid2, eepysleepy, migcheck, sd, installed, lebronjames
         if ((sd || sd2) && !migcheck && params.get('oobe') !== "true") {
             const uid = params.get('deskid');
             if (uid) {
-                sys.migrid = uid;
+                await wd.setbg(undefined, '/system/lib/img/wallpapers/restore/recovery.png');
+                await initapps();
                 const id = gen(7);
                 await ptp.go(id);
                 ui.crtheme('#010101', true);
                 wd.dark('nosave');
+                await fs.del('/system/migval');
                 app.system.migrate.init('skibidi');
-                ui.hide(tk.g('death'), 140);
+                ui.dest(tk.g('loading', 220));
                 wegood();
                 return;
             }
 
             const [
-                darkpref, lightdark, color, font, dev, mob, city, clocksec, apprepo, filtering, notifsound, silent, perf, winopt2
+                darkpref, lightdark, color, font, dev, mob, city, clocksec, apprepo, filtering, notifsound, silent, perf, winopt2, migrated
             ] = await Promise.all([
                 set.read('lightdarkpref'),
                 set.read('lightdark'),
@@ -243,7 +245,8 @@ async function bootstage2(uid2, eepysleepy, migcheck, sd, installed, lebronjames
                 set.read('notifsrc'),
                 set.read('silent'),
                 set.read('lowgfx'),
-                set.read('winopt')
+                set.read('winopt'),
+                set.read('migrated')
             ]);
 
             await wd.blurcheck(perf);
@@ -460,6 +463,15 @@ async function bootstage2(uid2, eepysleepy, migcheck, sd, installed, lebronjames
             console.log('<i> Boot stage 4: Load desktop, check for updates');
             await wd.desktop(sys.name, undefined, 'wait');
             await wd.setbg(false);
+            if (migrated === "true") {
+                set.del('migrated');
+                const div = tk.c('div', document.body, 'cm');
+                tk.img('/system/lib/img/setup/check.svg', 'setupi', div);
+                tk.p('Migration complete!', 'bold', div);
+                tk.p(`This WebDesk is an exact clone of the one you copied from.`, undefined, div);
+                tk.p(`If you're not going to use it, wipe the other WebDesk.`, undefined, div);
+                tk.cb('b1', 'Got it', () => ui.dest(div), div);
+            }
             ui.dest(tk.g('loading', 220));
         } else if (migcheck === "down") {
             await wd.setbg(undefined, '/system/lib/img/wallpapers/restore/recovery.png');
@@ -525,7 +537,10 @@ async function bootstage2(uid2, eepysleepy, migcheck, sd, installed, lebronjames
             }
         } catch (error) {
             console.log(error);
-            wm.notif('Error starting WebDesk Online Services.', 'You might need to update.');
+            wm.notif('Error starting WebDesk Online Services.', 'You might need to update WebDesk.', async function () {
+                await fs.del('/system/webdesk');
+                await wd.reboot();
+            }, 'Force Update');
         }
 
         const dropZone = document.body;

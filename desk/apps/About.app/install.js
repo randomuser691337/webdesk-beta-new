@@ -1,5 +1,5 @@
 app['about'] = {
-    runs: true,
+    runs: false,
     name: 'About',
     init: async function () {
         const win = tk.mbw('About', undefined, 'auto', true, undefined, undefined, '/system/lib/img/noround.png', true);
