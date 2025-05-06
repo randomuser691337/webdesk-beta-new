@@ -567,7 +567,7 @@ var tk = {
             ele.appendChild(button);
         }
 
-        if ((classn.includes('b1') || classn.includes('b3')) && (sys.lowgfx === false && !classn.includes('nodont'))) {
+        /* if ((classn.includes('b1') || classn.includes('b3')) && (sys.lowgfx === false && !classn.includes('nodont'))) {
             button.onmouseleave = (e) => {
                 e.target.style.background = "rgba(var(--accent), 0.4)";
             };
@@ -580,7 +580,7 @@ var tk = {
                     e.target.style.background = `radial-gradient(circle at ${x}px ${y}px , rgba(var(--accent), 0.63),rgba(var(--accent), 0.53))`;
                 }
             });
-        }
+        } */
 
         return button;
     },

@@ -171,25 +171,25 @@ app['settings'] = {
         const tnavgfx2 = tk.c('div', pgfx2, 'tnav');
         const titlegfx2 = tk.c('div', pgfx2, 'title');
         tnavgfx2.innerText = "Graphics ";
-        tk.cb('b7', 'Low', async function () {
+        tk.cb('b4', 'Low', async function () {
             wm.notif('Graphics set to low', `Reboot to apply`, function () {
                 wd.reboot();
             }, 'Reboot', true);
             await set.set('lowgfx', 'true');
         }, titlegfx2);
-        tk.cb('b7', 'Med', async function () {
+        tk.cb('b4', 'Med', async function () {
             wm.notif('Graphics set to medium', `Reboot to apply`, function () {
                 wd.reboot();
             }, 'Reboot', true);
             await set.set('lowgfx', 'half');
         }, titlegfx2);
-        tk.cb('b7', 'High', async function () {
+        tk.cb('b4', 'High', async function () {
             wm.notif('Graphics set to high (default)', `Reboot to apply`, function () {
                 wd.reboot();
             }, 'Reboot', true);
             await set.del('lowgfx');
         }, titlegfx2);
-        tk.cb('b7', 'Epic', async function () {
+        tk.cb('b4', 'Epic', async function () {
             wm.notif('Graphics set to epic', `Reboot to apply`, function () {
                 wd.reboot();
             }, 'Reboot', true);
@@ -201,25 +201,25 @@ app['settings'] = {
         const tnavgfx = tk.c('div', pgfx, 'tnav');
         const titlegfx = tk.c('div', pgfx, 'title');
         tnavgfx.innerText = "Effects";
-        tk.cb('b7', 'Off', async function () {
+        tk.cb('b4', 'Off', async function () {
             ui.cv('anim', '0s');
             await set.set('anim', 'disabled');
             sys.animspeed = 0;
             sys.animspeed2 = 0;
         }, titlegfx);
-        tk.cb('b7', 'Fast', async function () {
+        tk.cb('b4', 'Fast', async function () {
             ui.cv('anim', '0.15s');
             await set.set('anim', 'half');
             sys.animspeed = 60;
             sys.animspeed2 = 100;
         }, titlegfx);
-        tk.cb('b7', 'Default', async function () {
+        tk.cb('b4', 'Default', async function () {
             ui.cv('anim', '0.3s');
             await set.del('anim');
             sys.animspeed = 120;
             sys.animspeed2 = 200;
         }, titlegfx);
-        tk.cb('b7', 'Slow', async function () {
+        tk.cb('b4', 'Slow', async function () {
             ui.cv('anim', '0.45s');
             sys.animspeed = 175;
             sys.animspeed2 = 300;
@@ -230,11 +230,11 @@ app['settings'] = {
         const tnav = tk.c('div', p, 'tnav');
         const title = tk.c('div', p, 'title');
         tnav.innerText = "Clock seconds ";
-        tk.cb('b7', 'On', async function () {
+        tk.cb('b4', 'On', async function () {
             sys.seconds = true;
             await set.set('clocksec', 'true');
         }, title);
-        tk.cb('b7', 'Off', async function () {
+        tk.cb('b4', 'Off', async function () {
             sys.seconds = false;
             await set.set('clocksec', 'false');
         }, title);
@@ -269,13 +269,13 @@ app['settings'] = {
         const tnavgfx3 = tk.c('div', pgfx3, 'tnav');
         const titlegfx3 = tk.c('div', pgfx3, 'title');
         tnavgfx3.innerText = "Window style";
-        tk.cb('b7', '1', async function () {
+        tk.cb('b4', '1', async function () {
             app.settings.winopt('1');
         }, titlegfx3);
-        tk.cb('b7', '2', async function () {
+        tk.cb('b4', '2', async function () {
             app.settings.winopt('2');
         }, titlegfx3);
-        /* tk.cb('b7', '3', async function () {
+        /* tk.cb('b4', '3', async function () {
             while (sys.styleadded.length > 0) {
                 sys.stylesheet.deleteRule(sys.styleadded.pop());
             }
@@ -315,19 +315,19 @@ app['settings'] = {
         const p4 = tk.c('div', appearPane, 'list');
         const ok4 = tk.c('span', p4);
         ok4.innerText = "Notifications ";
-        tk.cb('b7', '1', async function () {
+        tk.cb('b4', '1', async function () {
             wd.notifsrc('/system/lib/other/notif1.wav', true);
         }, p4);
-        tk.cb('b7', '2', async function () {
+        tk.cb('b4', '2', async function () {
             wd.notifsrc('/system/lib/other/notif2.wav', true);
         }, p4);
-        tk.cb('b7', '3', async function () {
+        tk.cb('b4', '3', async function () {
             wd.notifsrc('/system/lib/other/notif3.wav', true);
         }, p4);
-        tk.cb('b7', '4', async function () {
+        tk.cb('b4', '4', async function () {
             wd.notifsrc('/system/lib/other/notif4.wav', true);
         }, p4);
-        tk.cb('b7', 'More', async function () {
+        tk.cb('b4', 'More', async function () {
             const menu = tk.c('div', document.body, 'cm');
             tk.p('Custom notification sound', 'bold', menu);
             const the = tk.c('input', menu, 'i1');
@@ -440,15 +440,15 @@ app['settings'] = {
         const p2 = tk.c('div', accPane, 'list');
         const ok2 = tk.c('span', p2);
         ok2.innerText = "Font size ";
-        tk.cb('b7', 'Big', async function () {
+        tk.cb('b4', 'Big', async function () {
             wd.bgft();
             set.set('font', 'big');
         }, p2);
-        tk.cb('b7', 'Normal', function () {
+        tk.cb('b4', 'Normal', function () {
             wd.meft();
             set.set('font', 'normal');
         }, p2);
-        tk.cb('b7', 'Small', function () {
+        tk.cb('b4', 'Small', function () {
             wd.smft();
             set.set('font', 'small');
         }, p2);
@@ -456,19 +456,19 @@ app['settings'] = {
         const p3 = tk.c('div', accPane, 'list');
         const ok3 = tk.c('span', p3);
         ok3.innerHTML = `SFW mode (Filters text before it's seen to help stop things like <a href="https://www.gaggle.net/" target="_blank">this</a>) `;
-        tk.cb('b7', 'No chances', async function () {
+        tk.cb('b4', 'No chances', async function () {
             sys.filter = true;
             sys.nc = true;
             set.set('filter', 'nc');
             wm.notif('No chances mode on!', `Text with filtered items simply won't be shown. WebDesk browser isn't filtered, along with anything that's not text. Already shown text won't be filtered.`, undefined, undefined, true);
         }, p3);
-        tk.cb('b7', 'Filter', async function () {
+        tk.cb('b4', 'Filter', async function () {
             sys.filter = true;
             sys.nc = false;
             set.set('filter', 'true');
             wm.notif('SFW mode on!', `WebDesk browser isn't filtered, along with anything that's not text. Already shown text won't be filtered.`, undefined, undefined, true);
         }, p3);
-        tk.cb('b7', 'Off', function () {
+        tk.cb('b4', 'Off', function () {
             sys.filter = false;
             sys.nc = false;
             set.del('filter');

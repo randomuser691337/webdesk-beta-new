@@ -203,15 +203,15 @@ To use WebDesk, or copy data, hit "Continue".`, undefined, true), first);
                 ok2.innerText = "Font size";
                 ok2.style.marginLeft = "4px";
                 p.style.marginBottom = "3px";
-                tk.cb('b7', 'Big', async function () {
+                tk.cb('b4', 'Big', async function () {
                     wd.bgft();
                     fs.write('/user/info/font', 'big');
                 }, p2);
-                tk.cb('b7', 'Normal', function () {
+                tk.cb('b4', 'Normal', function () {
                     wd.meft();
                     fs.write('/user/info/font', 'normal');
                 }, p2);
-                tk.cb('b7', 'Small', function () {
+                tk.cb('b4', 'Small', function () {
                     wd.smft();
                     fs.write('/user/info/font', 'small');
                 }, p2);

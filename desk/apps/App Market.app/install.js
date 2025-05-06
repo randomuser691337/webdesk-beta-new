@@ -63,9 +63,11 @@ app['appmark'] = {
         if (sys.dev === true) {
             tk.cb('b1', 'Sideload', function () {
                 const menu = tk.c('div', document.body, 'cm');
+                const id = gen(12);
                 let path2 = undefined;
                 tk.p('Sideload', 'bold', menu);
                 tk.p('Only sideload things you made.', undefined, menu);
+                tk.p(`This app's ID is ${id}`, undefined, menu);
                 const name = tk.c('input', menu, 'i1');
                 name.placeholder = "App name";
                 const dev = tk.c('input', menu, 'i1');
@@ -80,11 +82,16 @@ app['appmark'] = {
                 }, menu);
                 tk.cb('b1', `Install`, async function () {
                     if (name.value !== "" && dev.value !== "" && path2 !== undefined) {
-                        const newen = { name: name.value, ver: 1.0, installedon: Date.now(), dev: dev.value, appid: gen(12), exec: path2 };
-                        const apps = await fs.read('/system/apps.json');
-                        const jsondata = JSON.parse(apps);
-                        jsondata.push(newen);
-                        fs.write('/system/apps.json', jsondata);
+                        const appdata = `app['${id}'] = {
+                            runs: true,
+                            name: '${name.value}',
+                            init: async function () {
+                                ${await fs.read(path2)}
+                            }
+                        }`;
+                        fs.write(`/apps/${id}.app/install.js`, appdata);
+                        const newen = { name: name.value, ver: 1.0, installedon: Date.now(), dev: dev.value, appid: id, system: false, lastpath: `/apps/${id}.app/`, };
+                        await fs.write(`/apps/${id}.app/manifest.json`, newen);
                         ui.dest(menu);
                         wm.snack('Installed ' + name.value);
                     } else {

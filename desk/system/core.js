@@ -150,12 +150,21 @@ document.addEventListener('keydown', async function (event) {
                     resultItem.innerText = result;
                     resultItem.addEventListener('click', async function () {
                         const filecontent = await fs.read(result);
-                        const item = [{path: result, name: result.split('/').slice(0, -1).join('/') }];
+                        const item = [{ path: result, name: result.split('/').slice(0, -1).join('/') }];
                         app.files.openfile(filecontent, item);
                         ui.dest(menu);
                     });
                 });
             }, 500);
+        });
+
+        input.addEventListener('keydown', function (event) {
+            if (event.key === 'Enter') {
+                const firstbutton = resultsContainer.querySelector('button');
+                if (firstbutton) {
+                    firstbutton.click();
+                }
+            }
         });
     }
     if (altKey && event.key.toLowerCase() === 'r' && focused.window !== undefined) {
@@ -641,7 +650,7 @@ var wd = {
             ui.cv('ui1', 'rgb(255, 255, 255, 0.7)');
         }
         ui.cv('ui2', '#ffffff');
-        ui.cv('ui3', '#efefef');
+        ui.cv('ui3', '#eee');
         ui.cv('bc', 'rgb(220, 220, 220, 0.6)');
         ui.cv('font', '#000');
         ui.cv('dimfont', '#444');

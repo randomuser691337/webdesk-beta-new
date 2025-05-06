@@ -114,7 +114,7 @@ var wm = {
                     setTimeout(() => {
                         $btn.removeClass("tbanim");
                     }, 500);
-                }, sys.animspeed);
+                }, sys.animspeed - 40);
             } else {
                 wm.show(wid, btn);
             }
